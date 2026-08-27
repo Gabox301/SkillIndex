@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Astro 7.2.8 (static SSG) + Tailwind 4.3.3, TypeScript 7.0.2, Bun 1.4.0, Node >=22.12, @astrojs/sitemap 3.7.3
+  Architecture: Monorepo — Astro site (src/pages, src/content.config.ts) + skillscout CLI (packages/skillscout: lib.ts, skills-map.ts 200+ techs, installer.ts) scanning package.json/Gradle/.NET configs against curated registry (skills-registry/index.json)
+  Testing: Node built-in test runner (node --test) with 8 suites + tmp-dir helpers, oxlint 1.80.0, oxfmt 0.65.0, tsc strict, astro build
+  Style: Fendo hardening (exact pin, no ^/~, .npmrc save-exact+ignore-scripts+minimum-release-age), destructured node:assert/strict, log/write helpers from colors.mjs, frozen lockfile
+  Persistence: hybrid (OpenSpec files + Engram) — artifact_store.mode=both
+  Conventions: AGENTS.md (fendo rules, testing helpers from tests/helpers.ts, output helpers), .npmrc hardening, bun.lock committed
+
+strict_tdd: true
+
+testing:
+  runner:
+    command: "cargo test --lib -- --test-threads=1 && cargo test --test cli_pr4 --test parity_pr5 && node --test 'tests/*.test.ts'"
+    framework: "cargo test + node:test (dual oracle)"
+    cwd: "packages/skillscout"
+  layers:
+    unit: { available: true, tool: "cargo test --lib (172) + node:test parity" }
+    integration: { available: true, tool: "cargo test --test cli_pr4/parity_pr5 (assert_cmd/httpmock/tempfile) + node oracle" }
+    e2e: { available: true, tool: "cargo build --release (<5MB) + astro build + tsc + binary --help/--dry-run" }
+  coverage:
+    available: false
+    command: "—"
+  quality:
+    linter: { available: true, command: "oxlint / oxlint --fix" }
+    type_checker: { available: true, command: "tsc --project tsconfig.build.json && bunx tsc --project packages/skillscout/tsconfig.build.json" }
+    formatter: { available: true, command: "oxfmt --write . / oxfmt --check . && cargo fmt --check" }
+    clippy: { available: true, command: "cargo clippy -- -D warnings" }
+    rustfmt: { available: true, command: "cargo fmt --check" }
+    audit: { available: true, command: "cargo audit || cargo deny check advisories || echo 'audit skipped: install cargo-audit'" }
+    cargo_test: { available: true, command: "cargo test --lib && cargo test --test cli_pr4 --test parity_pr5" }
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Reference fendo hardening when touching dependencies
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Cover CLI flags (--yes, --dry-run, --help, --clear-cache, --agent) and detection edge cases
+  design:
+    - Include sequence diagrams for detection→collect→install flows
+    - Document architecture decisions with rationale (e.g., curated registry vs live upstream)
+    - Respect existing lib.ts scanning patterns (SCAN_SKIP_DIRS, workspace resolution)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session (<800 lines review budget)
+    - Co-locate tests with implementation (node:test in packages/skillscout/tests/)
+  apply:
+    guidelines:
+      - Follow existing code patterns (AGENTS.md: use log/write from colors.mjs, destructured asserts)
+      - Respect fendo hardening: exact pins, frozen lockfile, no ^/~, no exotic subdeps
+      - Use helpers from tests/helpers.ts (useTmpDir, writePackageJson, writeJson, writeFile, addWorkspace)
+      - Rust: use tempfile + assert_cmd + httpmock for parity; cargo fmt + clippy -D warnings clean; SKILLSCOUT_USE_RUST=0 fallback
+    tdd: true
+    test_command: "cargo test --lib -- --test-threads=1 && cargo test --test cli_pr4 --test parity_pr5 && node --test 'tests/*.test.ts'"
+  verify:
+    test_command: "cargo test --lib -- --test-threads=1 && cargo test --test cli_pr4 --test parity_pr5 && node --test 'tests/*.test.ts'"
+    build_command: "cargo test --lib && cargo test --test cli_pr4 --test parity_pr5 && cargo clippy -- -D warnings && cargo fmt --check && (cargo audit 2>&1 || cargo deny check 2>&1 || echo 'audit skipped: cargo-audit not installed') && cargo build --release && bunx tsc --project packages/skillscout/tsconfig.build.json && npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+    - Ensure skills-registry/index.json hashes verified before archiving
