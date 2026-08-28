@@ -27,11 +27,13 @@ skills-lock.json
 
 # Rust build
 target/
-packages/skillscout/target/
+packages/skillindex/target/
 
 # SDD working directory (local registry, not shared)
 .atl/
 .vscode
+openspec
+sdd
 
 # Landing is separate repo
 Landing/

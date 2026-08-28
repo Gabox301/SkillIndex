@@ -1,0 +1,46 @@
+[package]
+name = "skillindex"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto"
+license = "MIT"
+homepage = "https://skillindex.netlify.app"
+repository = "https://github.com/Gabox301/SkillIndex"
+keywords = ["cli", "ai", "skills", "agent"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+
+[[bin]]
+name = "skillindex"
+path = "src/main.rs"
+
+[lib]
+name = "skillscout"
+path = "src/lib.rs"
+
+[dependencies]
+chrono = "0.4"
+clap = { version = "4.5.32", features = ["derive"] }
+crossterm = "0.28.1"
+indicatif = "0.17.8"
+reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls", "json"] }
+sha2 = "0.10.9"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.143"
+dirs = "5.0.1"
+walkdir = "2.5.0"
+thiserror = "2.0.12"
+tokio = { version = "1.43.0", features = ["full"] }
+
+[dev-dependencies]
+tempfile = "3.15.0"
+assert_cmd = "2.0.17"
+httpmock = "0.7"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
