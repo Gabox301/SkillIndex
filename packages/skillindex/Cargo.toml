@@ -9,7 +9,7 @@ homepage = "https://skillindex.netlify.app"
 repository = "https://github.com/Gabox301/SkillIndex"
 keywords = ["cli", "ai", "skills", "agent"]
 categories = ["command-line-utilities"]
-readme = "README.md"
+readme = "../../README.md"
 
 [[bin]]
 name = "skillindex"
