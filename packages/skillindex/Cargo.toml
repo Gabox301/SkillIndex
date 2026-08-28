@@ -10,6 +10,7 @@ repository = "https://github.com/Gabox301/SkillIndex"
 keywords = ["cli", "ai", "skills", "agent"]
 categories = ["command-line-utilities"]
 readme = "../../README.md"
+exclude = ["skills-registry/*", "node_modules/*", "dist/*", ".env", "pnpm-lock.yaml", "bun.lock"]
 
 [[bin]]
 name = "skillindex"
