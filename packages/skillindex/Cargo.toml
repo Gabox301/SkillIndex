@@ -1,6 +1,6 @@
 [package]
 name = "skillindex"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 rust-version = "1.85"
 description = "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto"
@@ -9,7 +9,7 @@ homepage = "https://skillindex.netlify.app"
 repository = "https://github.com/Gabox301/SkillIndex"
 keywords = ["cli", "ai", "skills", "agent"]
 categories = ["command-line-utilities"]
-readme = "../../README.md"
+readme = "README.md"
 exclude = ["skills-registry/*", "node_modules/*", "dist/*", ".env", "pnpm-lock.yaml", "bun.lock"]
 
 [[bin]]

@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
