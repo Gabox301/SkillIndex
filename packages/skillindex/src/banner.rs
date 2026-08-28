@@ -1,9 +1,12 @@
 use crate::ui::{bold, cyan, dim, is_tty, use_color, write};
 
 const LOGO_LINES: &[&str] = &[
-    "┌─┐┬ ┬┌┬┐┌─┐┌─┐┬┌─┬┬  ┬  ┌─┐",
-    "├─┤│ │ │ │ │└─┐├┴┐││  │  └─┐",
-    "┴ ┴└─┘ ┴ └─┘└─┘┴ ┴┴┴─┘┴─┘└─┘",
+    " ███████╗██╗  ██╗██╗██╗     ██╗     ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗",
+    " ██╔════╝██║ ██╔╝██║██║     ██║     ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝",
+    " ███████╗█████╔╝ ██║██║     ██║     ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ ",
+    " ╚════██║██╔═██╗ ██║██║     ██║     ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ",
+    " ███████║██║  ██╗██║███████╗███████╗██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗",
+    " ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝",
 ];
 
 fn rgb(gray_value: u8, text: &str) -> String {
@@ -106,7 +109,7 @@ mod tests {
     #[test]
     fn render_animated_logo_first_frame_is_dim() {
         let lines = render_animated_logo(0, 2.5);
-        assert_eq!(lines.len(), 3);
+        assert_eq!(lines.len(), 6);
         // first frame should be mostly dark (gray 63) — check contains ansi
         assert!(lines[0].contains("\x1b[38;2;"));
     }
@@ -129,15 +132,15 @@ mod tests {
         assert!(s.contains("v0.3.6"));
         assert!(s.contains("Instala automáticamente"));
         // should contain logo chars
-        assert!(s.contains("┌─┐"));
+        assert!(s.contains("█████"));
     }
 
     #[test]
     fn static_banner_line_count() {
         let s = format_banner_static("1.0.0");
-        // 1 blank + 3 logo + 1 subtitle + 1 blank = 6 lines (with \n)
+        // 1 blank + 6 logo + 1 subtitle + 1 blank = 9 lines (with \n)
         let lines: Vec<&str> = s.split('\n').collect();
-        assert!(lines.len() >= 6);
+        assert!(lines.len() >= 9);
     }
 
     #[tokio::test]
