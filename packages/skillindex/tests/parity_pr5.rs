@@ -922,7 +922,10 @@ fn parity_cli_dry_run_no_prompt() {
         .unwrap();
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("--dry-run: nothing was installed"));
+    assert!(
+        stdout.contains("--dry-run: no se instaló nada")
+            || stdout.contains("--dry-run: nothing was installed")
+    );
 }
 
 #[test]
@@ -1069,7 +1072,10 @@ async fn parity_installer_rate_limit_iso() {
     let client = reqwest::Client::new();
     let result = install_skill_with_client("owner/repo/rate-skill", &[], &opts, &client).await;
     assert!(!result.success);
-    assert!(result.output.contains("GitHub rate limit exceeded"));
+    assert!(
+        result.output.contains("Límite de tasa de GitHub excedido")
+            || result.output.contains("GitHub rate limit exceeded")
+    );
     assert!(result.output.contains("1970-01-01T00:16:39.000Z"));
     mock.assert();
     match prev {

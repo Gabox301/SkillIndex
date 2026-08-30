@@ -128,7 +128,10 @@ fn dry_run_does_not_prompt() {
         .unwrap();
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("--dry-run: nothing was installed"));
+    assert!(
+        stdout.contains("--dry-run: no se instaló nada")
+            || stdout.contains("--dry-run: nothing was installed")
+    );
 }
 
 // ── 4.4 Claude cleanup is tested in unit tests already ─────────
@@ -146,7 +149,10 @@ fn main_shows_no_tech_when_empty() {
         String::from_utf8_lossy(&output.stderr)
     );
     assert!(
-        combined.contains("No supported technologies detected") || combined.contains("Scanning"),
+        combined.contains("No se detectaron tecnologías compatibles")
+            || combined.contains("No supported technologies detected")
+            || combined.contains("Analizando")
+            || combined.contains("Scanning"),
         "expected no-tech message, got {combined}"
     );
 }

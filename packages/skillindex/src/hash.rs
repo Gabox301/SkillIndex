@@ -6,7 +6,8 @@ use std::path::Path;
 pub fn sha256_buffer(buf: &[u8]) -> String {
     let mut hasher = Sha256::new();
     hasher.update(buf);
-    format!("{:x}", hasher.finalize())
+    let result = hasher.finalize();
+    result.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 /// Compute SHA-256 hex lowercase of a file's contents — mirrors `sha256File` in installer.ts
