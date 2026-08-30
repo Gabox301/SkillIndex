@@ -12,7 +12,7 @@ fn main() {
 
     let ts_path = Path::new(&manifest_dir).join("skills-map.ts");
     let rs_path = Path::new(&out_dir).join("skills_map.rs");
-    let json_path = Path::new(&manifest_dir).join("skills_map.json");
+    let json_out_path = Path::new(&out_dir).join("skills_map.json");
 
     // Try to generate via Node; fallback to placeholder if Node unavailable
     let json_content = generate_json_via_node(&ts_path).unwrap_or_else(|| {
@@ -21,8 +21,13 @@ fn main() {
             .to_string()
     });
 
-    // Write JSON for Astro shim
-    let _ = fs::write(&json_path, &json_content);
+    // NOTE: skills_map.json in manifest_dir is a committed source artifact.
+    // It must NOT be written by build.rs — Cargo forbids modifying source
+    // during `cargo publish --verify` (only OUT_DIR is allowed). To refresh
+    // the committed file, run `cargo run -- build` or the Node sync script
+    // (`npm run sync:skills` / `scripts/sync-skills.mjs`) explicitly.
+    // Here we emit only to OUT_DIR for embedding via include! / SKILLS_MAP_JSON.
+    let _ = fs::write(&json_out_path, &json_content);
 
     // Write Rust file embedding the JSON
     let rs_content = format!(
