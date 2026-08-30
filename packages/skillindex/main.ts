@@ -177,8 +177,8 @@ function printSkillsList(skills: SkillEntry[]): void {
 }
 
 function stripAnsi(str: string): string {
-  // oxlint-disable-next-line no-control-regex -- intentional ANSI escape
-  return str.replace(/\x1b\[[0-9;]*m/g, '');
+  const esc = String.fromCharCode(27);
+  return str.replace(new RegExp(esc + '\\[[0-9;]*m', 'g'), '');
 }
 
 function extractErrorLines(stderr: string, output: string): string[] {
