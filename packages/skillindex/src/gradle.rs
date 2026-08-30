@@ -301,9 +301,11 @@ mod tests {
         // Must contain 5 root entries even if files don't exist
         assert_eq!(paths.len(), 5);
         assert!(paths.iter().any(|p| p.ends_with("build.gradle.kts")));
-        assert!(paths
-            .iter()
-            .any(|p| p.ends_with("gradle/libs.versions.toml")));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("gradle/libs.versions.toml"))
+        );
     }
 
     #[test]
@@ -312,9 +314,11 @@ mod tests {
         fs::create_dir_all(dir.path().join("composeApp")).unwrap();
         fs::write(dir.path().join("composeApp/build.gradle.kts"), "").unwrap();
         let paths = gradle_layout_candidate_paths(dir.path());
-        assert!(paths
-            .iter()
-            .any(|p| p.ends_with("composeApp/build.gradle.kts")));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("composeApp/build.gradle.kts"))
+        );
     }
 
     #[test]
@@ -326,12 +330,16 @@ mod tests {
         fs::write(dir.path().join("node_modules/build.gradle.kts"), "").unwrap();
         let paths = gradle_layout_candidate_paths(dir.path());
         // Should not contain hidden or node_modules entries
-        assert!(!paths
-            .iter()
-            .any(|p| p.to_string_lossy().contains(".hidden")));
-        assert!(!paths
-            .iter()
-            .any(|p| p.to_string_lossy().contains("node_modules")));
+        assert!(
+            !paths
+                .iter()
+                .any(|p| p.to_string_lossy().contains(".hidden"))
+        );
+        assert!(
+            !paths
+                .iter()
+                .any(|p| p.to_string_lossy().contains("node_modules"))
+        );
     }
 
     #[test]
@@ -343,12 +351,16 @@ mod tests {
             r#"include(":feature:login")"#,
         );
         let paths = gradle_layout_candidate_paths(dir.path());
-        assert!(paths
-            .iter()
-            .any(|p| p.ends_with("feature/login/build.gradle.kts")));
-        assert!(paths
-            .iter()
-            .any(|p| p.ends_with("feature/login/build.gradle")));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("feature/login/build.gradle.kts"))
+        );
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("feature/login/build.gradle"))
+        );
     }
 
     #[test]

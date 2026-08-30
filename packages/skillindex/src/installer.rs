@@ -8,9 +8,9 @@ use crate::hash::{
     bundle_hash, is_disallowed_skill_file, normalize_registry_rel_path, sha256_buffer,
 };
 use crate::registry::{
-    agent_folder_for, get_registry_dir, get_registry_raw_base_urls, load_registry,
-    load_registry_from_dir, parse_skill_path, security_check_for_entry, verify_registry_entry,
-    InstallSecurityCheck, RegistryEntry,
+    InstallSecurityCheck, RegistryEntry, agent_folder_for, get_registry_dir,
+    get_registry_raw_base_urls, load_registry, load_registry_from_dir, parse_skill_path,
+    security_check_for_entry, verify_registry_entry,
 };
 
 // ── Public structs ─────────────────────────────────────────────────
@@ -62,15 +62,15 @@ pub struct SkillEntry {
 // ── Helpers ────────────────────────────────────────────────────────
 
 fn get_github_token() -> Option<String> {
-    if let Ok(v) = env::var("GITHUB_TOKEN") {
-        if !v.trim().is_empty() {
-            return Some(v);
-        }
+    if let Ok(v) = env::var("GITHUB_TOKEN")
+        && !v.trim().is_empty()
+    {
+        return Some(v);
     }
-    if let Ok(v) = env::var("GH_TOKEN") {
-        if !v.trim().is_empty() {
-            return Some(v);
-        }
+    if let Ok(v) = env::var("GH_TOKEN")
+        && !v.trim().is_empty()
+    {
+        return Some(v);
     }
     None
 }
@@ -96,12 +96,12 @@ pub fn github_download_headers(url: &str) -> reqwest::header::HeaderMap {
         reqwest::header::USER_AGENT,
         reqwest::header::HeaderValue::from_static("skillindex"),
     );
-    if let Some(token) = get_github_token() {
-        if is_githubusercontent_url(url) {
-            let bearer = format!("Bearer {token}");
-            if let Ok(v) = reqwest::header::HeaderValue::from_str(&bearer) {
-                headers.insert(reqwest::header::AUTHORIZATION, v);
-            }
+    if let Some(token) = get_github_token()
+        && is_githubusercontent_url(url)
+    {
+        let bearer = format!("Bearer {token}");
+        if let Ok(v) = reqwest::header::HeaderValue::from_str(&bearer) {
+            headers.insert(reqwest::header::AUTHORIZATION, v);
         }
     }
     headers
@@ -812,9 +812,11 @@ mod tests {
         let client = reqwest::Client::new();
         let result = install_skill_with_client("owner/repo/hello-skill", &[], &opts, &client).await;
         assert!(result.success, "failed: {}", result.output);
-        assert!(project_dir
-            .join(".agents/skills/hello-skill/SKILL.md")
-            .exists());
+        assert!(
+            project_dir
+                .join(".agents/skills/hello-skill/SKILL.md")
+                .exists()
+        );
         let lock: serde_json::Value = serde_json::from_str(
             &fs::read_to_string(project_dir.join("skills-lock.json")).unwrap(),
         )
@@ -870,9 +872,11 @@ mod tests {
         let result =
             install_skill_with_client("owner/repo/archive-skill", &[], &opts, &client).await;
         assert!(!result.success);
-        assert!(result
-            .output
-            .contains("se rechazó la descarga del archivo de skill no permitido"));
+        assert!(
+            result
+                .output
+                .contains("se rechazó la descarga del archivo de skill no permitido")
+        );
         match prev_cache {
             Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
             None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
@@ -1024,20 +1028,24 @@ mod tests {
             "install failed: {} stderr {}",
             result.output, result.stderr
         );
-        assert!(project_dir
-            .join(".agents/skills/net-skill/SKILL.md")
-            .exists());
+        assert!(
+            project_dir
+                .join(".agents/skills/net-skill/SKILL.md")
+                .exists()
+        );
         assert_eq!(
             fs::read_to_string(project_dir.join(".agents/skills/net-skill/SKILL.md")).unwrap(),
             content
         );
         mock.assert();
         // cache should now contain bundle
-        assert!(cache_root
-            .join(entry.bundle_hash)
-            .join(skill_name)
-            .join("SKILL.md")
-            .exists());
+        assert!(
+            cache_root
+                .join(entry.bundle_hash)
+                .join(skill_name)
+                .join("SKILL.md")
+                .exists()
+        );
 
         match prev_cache {
             Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },

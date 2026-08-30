@@ -92,10 +92,10 @@ fn read_package_json(dir: &Path) -> Option<Value> {
 
 fn read_deno_json(dir: &Path) -> Option<Value> {
     for name in ["deno.json", "deno.jsonc"] {
-        if let Ok(data) = fs::read_to_string(dir.join(name)) {
-            if let Ok(v) = serde_json::from_str::<Value>(&data) {
-                return Some(v);
-            }
+        if let Ok(data) = fs::read_to_string(dir.join(name))
+            && let Ok(v) = serde_json::from_str::<Value>(&data)
+        {
+            return Some(v);
         }
     }
     None
@@ -120,23 +120,23 @@ fn get_deno_import_names(deno: Option<&Value>) -> Vec<String> {
     };
     let mut out = Vec::new();
     for val in imports.values() {
-        if let Some(s) = val.as_str() {
-            if s.starts_with("npm:") || s.starts_with("jsr:") {
-                let bare = s.replacen("npm:", "", 1).replacen("jsr:", "", 1);
-                let name = if bare.starts_with('@') {
-                    let parts: Vec<&str> = bare.split('/').collect();
-                    if parts.len() >= 2 {
-                        let scope = parts[0];
-                        let name_part = parts[1].split('@').next().unwrap_or(parts[1]);
-                        format!("{scope}/{name_part}")
-                    } else {
-                        bare.split('@').next().unwrap_or(&bare).to_string()
-                    }
+        if let Some(s) = val.as_str()
+            && (s.starts_with("npm:") || s.starts_with("jsr:"))
+        {
+            let bare = s.replacen("npm:", "", 1).replacen("jsr:", "", 1);
+            let name = if bare.starts_with('@') {
+                let parts: Vec<&str> = bare.split('/').collect();
+                if parts.len() >= 2 {
+                    let scope = parts[0];
+                    let name_part = parts[1].split('@').next().unwrap_or(parts[1]);
+                    format!("{scope}/{name_part}")
                 } else {
                     bare.split('@').next().unwrap_or(&bare).to_string()
-                };
-                out.push(name);
-            }
+                }
+            } else {
+                bare.split('@').next().unwrap_or(&bare).to_string()
+            };
+            out.push(name);
         }
     }
     out
@@ -265,165 +265,158 @@ fn detect_technologies_in_dir(
         let mut found = false;
 
         // packages
-        if !found {
-            if let Some(pkgs) = detect
+        if !found
+            && let Some(pkgs) = detect
                 .and_then(|d| d.get("packages"))
                 .and_then(|x| x.as_array())
-            {
-                for p in pkgs {
-                    if let Some(s) = p.as_str() {
-                        if all_deps_set.contains(s) {
-                            found = true;
-                            break;
-                        }
-                    }
+        {
+            for p in pkgs {
+                if let Some(s) = p.as_str()
+                    && all_deps_set.contains(s)
+                {
+                    found = true;
+                    break;
                 }
             }
         }
 
         // packagePatterns - simple literal contains check (covers ^@clerk/ etc)
-        if !found {
-            if let Some(patterns) = detect
+        if !found
+            && let Some(patterns) = detect
                 .and_then(|d| d.get("packagePatterns"))
                 .and_then(|x| x.as_array())
-            {
-                'outer: for pat_val in patterns {
-                    let source = pat_val
-                        .get("__regexp")
-                        .and_then(|x| x.as_str())
-                        .unwrap_or("");
-                    if source.is_empty() {
-                        continue;
-                    }
-                    let literal = source
-                        .trim_start_matches('^')
-                        .replace("\\/", "/")
-                        .replace(".*", "")
-                        .replace("(", "")
-                        .replace(")", "")
-                        .replace("|", "")
-                        .replace("\\", "");
-                    for dep in &all_deps_array {
-                        if dep.contains(&literal) || dep.starts_with(&literal) {
-                            found = true;
-                            break 'outer;
-                        }
+        {
+            'outer: for pat_val in patterns {
+                let source = pat_val
+                    .get("__regexp")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("");
+                if source.is_empty() {
+                    continue;
+                }
+                let literal = source
+                    .trim_start_matches('^')
+                    .replace("\\/", "/")
+                    .replace(".*", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .replace("|", "")
+                    .replace("\\", "");
+                for dep in &all_deps_array {
+                    if dep.contains(&literal) || dep.starts_with(&literal) {
+                        found = true;
+                        break 'outer;
                     }
                 }
             }
         }
 
         // configFiles
-        if !found {
-            if let Some(files) = detect
+        if !found
+            && let Some(files) = detect
                 .and_then(|d| d.get("configFiles"))
                 .and_then(|x| x.as_array())
-            {
-                for f in files {
-                    if let Some(s) = f.as_str() {
-                        if dir.join(s).exists() {
-                            found = true;
-                            break;
-                        }
-                    }
+        {
+            for f in files {
+                if let Some(s) = f.as_str()
+                    && dir.join(s).exists()
+                {
+                    found = true;
+                    break;
                 }
             }
         }
 
         // fileExtensions
-        if !found {
-            if let Some(exts) = detect
+        if !found
+            && let Some(exts) = detect
                 .and_then(|d| d.get("fileExtensions"))
                 .and_then(|x| x.as_array())
-            {
-                let ext_strs: Vec<String> = exts
-                    .iter()
-                    .filter_map(|x| x.as_str().map(|s| s.to_string()))
-                    .collect();
-                if has_file_with_extension(dir, &ext_strs, 4) {
-                    found = true;
-                }
+        {
+            let ext_strs: Vec<String> = exts
+                .iter()
+                .filter_map(|x| x.as_str().map(|s| s.to_string()))
+                .collect();
+            if has_file_with_extension(dir, &ext_strs, 4) {
+                found = true;
             }
         }
 
         // gems
-        if !found {
-            if let Some(gems) = detect
+        if !found
+            && let Some(gems) = detect
                 .and_then(|d| d.get("gems"))
                 .and_then(|x| x.as_array())
-            {
-                if gems_cache.is_none() {
-                    gems_cache = Some(read_gemfile(dir));
-                }
-                let gem_names = gems_cache.as_ref().unwrap();
-                for g in gems {
-                    if let Some(s) = g.as_str() {
-                        if gem_names.contains(&s.to_string()) {
-                            found = true;
-                            break;
-                        }
-                    }
+        {
+            if gems_cache.is_none() {
+                gems_cache = Some(read_gemfile(dir));
+            }
+            let gem_names = gems_cache.as_ref().unwrap();
+            for g in gems {
+                if let Some(s) = g.as_str()
+                    && gem_names.contains(&s.to_string())
+                {
+                    found = true;
+                    break;
                 }
             }
         }
 
         // configFileContent
-        if !found {
-            if let Some(cfg) = detect.and_then(|d| d.get("configFileContent")) {
-                let blocks: Vec<&Value> = if cfg.is_array() {
-                    cfg.as_array().unwrap().iter().collect()
+        if !found && let Some(cfg) = detect.and_then(|d| d.get("configFileContent")) {
+            let blocks: Vec<&Value> = if cfg.is_array() {
+                cfg.as_array().unwrap().iter().collect()
+            } else {
+                vec![cfg]
+            };
+            for block in blocks {
+                let patterns: Vec<String> = block
+                    .get("patterns")
+                    .and_then(|x| x.as_array())
+                    .map(|arr| {
+                        arr.iter()
+                            .filter_map(|x| x.as_str().map(|s| s.to_string()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                if patterns.is_empty() {
+                    continue;
+                }
+                let paths: Vec<PathBuf> = if block
+                    .get("scanGradleLayout")
+                    .and_then(|x| x.as_bool())
+                    .unwrap_or(false)
+                {
+                    crate::gradle::gradle_layout_candidate_paths(dir)
+                } else if block
+                    .get("scanDotNetLayout")
+                    .and_then(|x| x.as_bool())
+                    .unwrap_or(false)
+                {
+                    crate::dotnet::dotnet_layout_candidate_paths(dir)
                 } else {
-                    vec![cfg]
-                };
-                for block in blocks {
-                    let patterns: Vec<String> = block
-                        .get("patterns")
+                    block
+                        .get("files")
                         .and_then(|x| x.as_array())
                         .map(|arr| {
                             arr.iter()
-                                .filter_map(|x| x.as_str().map(|s| s.to_string()))
+                                .filter_map(|x| x.as_str())
+                                .map(|s| dir.join(s))
                                 .collect()
                         })
-                        .unwrap_or_default();
-                    if patterns.is_empty() {
-                        continue;
-                    }
-                    let paths: Vec<PathBuf> = if block
-                        .get("scanGradleLayout")
-                        .and_then(|x| x.as_bool())
-                        .unwrap_or(false)
-                    {
-                        crate::gradle::gradle_layout_candidate_paths(dir)
-                    } else if block
-                        .get("scanDotNetLayout")
-                        .and_then(|x| x.as_bool())
-                        .unwrap_or(false)
-                    {
-                        crate::dotnet::dotnet_layout_candidate_paths(dir)
-                    } else {
-                        block
-                            .get("files")
-                            .and_then(|x| x.as_array())
-                            .map(|arr| {
-                                arr.iter()
-                                    .filter_map(|x| x.as_str())
-                                    .map(|s| dir.join(s))
-                                    .collect()
-                            })
-                            .unwrap_or_default()
-                    };
+                        .unwrap_or_default()
+                };
 
-                    for path in &paths {
-                        if let Ok(content) = fs::read_to_string(path) {
-                            if patterns.iter().any(|p| content.contains(p)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    if found {
+                for path in &paths {
+                    if let Ok(content) = fs::read_to_string(path)
+                        && patterns.iter().any(|p| content.contains(p))
+                    {
+                        found = true;
                         break;
                     }
+                }
+                if found {
+                    break;
                 }
             }
         }
@@ -543,10 +536,10 @@ pub fn collect_skills(
         if let Some(existing) = skill_map.get_mut(&skill) {
             if !existing.sources.contains(&source) {
                 existing.sources.push(source.clone());
-                if let Some(entry) = skills.iter_mut().find(|e| e.skill == skill) {
-                    if !entry.sources.contains(&source) {
-                        entry.sources.push(source.clone());
-                    }
+                if let Some(entry) = skills.iter_mut().find(|e| e.skill == skill)
+                    && !entry.sources.contains(&source)
+                {
+                    entry.sources.push(source.clone());
                 }
             }
         } else {
@@ -576,12 +569,12 @@ pub fn collect_skills(
         let combo_val = get_combos_array()
             .into_iter()
             .find(|c| c.get("name").and_then(|x| x.as_str()) == Some(&combo.name));
-        if let Some(c) = combo_val {
-            if let Some(arr) = c.get("skills").and_then(|x| x.as_array()) {
-                for s in arr {
-                    if let Some(skill_str) = s.as_str() {
-                        add_skill(skill_str.to_string(), combo.name.clone());
-                    }
+        if let Some(c) = combo_val
+            && let Some(arr) = c.get("skills").and_then(|x| x.as_array())
+        {
+            for s in arr {
+                if let Some(skill_str) = s.as_str() {
+                    add_skill(skill_str.to_string(), combo.name.clone());
                 }
             }
         }
@@ -645,23 +638,21 @@ fn get_agent_folder_map() -> Vec<(String, String)> {
 
 pub fn get_installed_skill_names(project_dir: &Path) -> HashSet<String> {
     let lock_path = project_dir.join("skills-lock.json");
-    if let Ok(data) = fs::read_to_string(&lock_path) {
-        if let Ok(v) = serde_json::from_str::<Value>(&data) {
-            if let Some(obj) = v.get("skills").and_then(|x| x.as_object()) {
-                return obj.keys().cloned().collect();
-            }
-        }
+    if let Ok(data) = fs::read_to_string(&lock_path)
+        && let Ok(v) = serde_json::from_str::<Value>(&data)
+        && let Some(obj) = v.get("skills").and_then(|x| x.as_object())
+    {
+        return obj.keys().cloned().collect();
     }
     let agents_skills = project_dir.join(".agents").join("skills");
     if let Ok(entries) = fs::read_dir(&agents_skills) {
         let mut set = HashSet::new();
         for entry in entries.flatten() {
-            if let Ok(ft) = entry.file_type() {
-                if ft.is_dir() {
-                    if let Some(name) = entry.file_name().to_str() {
-                        set.insert(name.to_string());
-                    }
-                }
+            if let Ok(ft) = entry.file_type()
+                && ft.is_dir()
+                && let Some(name) = entry.file_name().to_str()
+            {
+                set.insert(name.to_string());
             }
         }
         if !set.is_empty() {

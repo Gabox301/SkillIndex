@@ -104,8 +104,28 @@ fn read_package_json_workspaces(project_dir: &Path) -> Option<Vec<String>> {
         if !out.is_empty() {
             return Some(out);
         }
-    } else if let Some(obj) = ws.as_object() {
-        if let Some(arr) = obj.get("packages").and_then(|x| x.as_array()) {
+    } else if let Some(obj) = ws.as_object()
+        && let Some(arr) = obj.get("packages").and_then(|x| x.as_array())
+    {
+        let mut out = Vec::new();
+        for item in arr {
+            if let Some(s) = item.as_str() {
+                out.push(s.to_string());
+            }
+        }
+        if !out.is_empty() {
+            return Some(out);
+        }
+    }
+    None
+}
+
+fn read_deno_json_workspaces(project_dir: &Path) -> Option<Vec<String>> {
+    for name in ["deno.json", "deno.jsonc"] {
+        if let Ok(data) = fs::read_to_string(project_dir.join(name))
+            && let Ok(v) = serde_json::from_str::<serde_json::Value>(&data)
+            && let Some(arr) = v.get("workspace").and_then(|x| x.as_array())
+        {
             let mut out = Vec::new();
             for item in arr {
                 if let Some(s) = item.as_str() {
@@ -120,25 +140,41 @@ fn read_package_json_workspaces(project_dir: &Path) -> Option<Vec<String>> {
     None
 }
 
-fn read_deno_json_workspaces(project_dir: &Path) -> Option<Vec<String>> {
-    for name in ["deno.json", "deno.jsonc"] {
-        if let Ok(data) = fs::read_to_string(project_dir.join(name)) {
-            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&data) {
-                if let Some(arr) = v.get("workspace").and_then(|x| x.as_array()) {
-                    let mut out = Vec::new();
-                    for item in arr {
-                        if let Some(s) = item.as_str() {
-                            out.push(s.to_string());
-                        }
-                    }
-                    if !out.is_empty() {
-                        return Some(out);
-                    }
-                }
-            }
+/// Resolve workspaces with precedence: `pnpm-workspace.yaml` > `package.json` > `deno.json`
+/// Mirrors `resolveWorkspaces` in lib.ts
+pub fn resolve_workspaces(project_dir: &Path) -> Vec<PathBuf> {
+    // 1. pnpm-workspace.yaml
+    let pnpm_path = project_dir.join("pnpm-workspace.yaml");
+    if pnpm_path.exists() && let Ok(content) = fs::read_to_string(&pnpm_path) {
+        let patterns = parse_pnpm_workspace_yaml(&content);
+        if !patterns.is_empty() {
+            return expand_workspace_patterns(project_dir, &patterns)
+                .into_iter()
+                .filter(|p| {
+                    // filter resolve(d) !== resolve(root)
+                    p.canonicalize().ok() != project_dir.canonicalize().ok()
+                })
+                .collect();
         }
     }
-    None
+
+    // 2. package.json workspaces
+    if let Some(patterns) = read_package_json_workspaces(project_dir) {
+        return expand_workspace_patterns(project_dir, &patterns)
+            .into_iter()
+            .filter(|p| p.canonicalize().ok() != project_dir.canonicalize().ok())
+            .collect();
+    }
+
+    // 3. deno.json workspace
+    if let Some(patterns) = read_deno_json_workspaces(project_dir) {
+        return expand_workspace_patterns(project_dir, &patterns)
+            .into_iter()
+            .filter(|p| p.canonicalize().ok() != project_dir.canonicalize().ok())
+            .collect();
+    }
+
+    Vec::new()
 }
 
 #[cfg(test)]
@@ -376,43 +412,4 @@ mod tests {
         let result = resolve_workspaces(dir.path());
         assert_eq!(result.len(), 1);
     }
-}
-
-/// Resolve workspaces with precedence: `pnpm-workspace.yaml` > `package.json` > `deno.json`
-/// Mirrors `resolveWorkspaces` in lib.ts
-pub fn resolve_workspaces(project_dir: &Path) -> Vec<PathBuf> {
-    // 1. pnpm-workspace.yaml
-    let pnpm_path = project_dir.join("pnpm-workspace.yaml");
-    if pnpm_path.exists() {
-        if let Ok(content) = fs::read_to_string(&pnpm_path) {
-            let patterns = parse_pnpm_workspace_yaml(&content);
-            if !patterns.is_empty() {
-                return expand_workspace_patterns(project_dir, &patterns)
-                    .into_iter()
-                    .filter(|p| {
-                        // filter resolve(d) !== resolve(root)
-                        p.canonicalize().ok() != project_dir.canonicalize().ok()
-                    })
-                    .collect();
-            }
-        }
-    }
-
-    // 2. package.json workspaces
-    if let Some(patterns) = read_package_json_workspaces(project_dir) {
-        return expand_workspace_patterns(project_dir, &patterns)
-            .into_iter()
-            .filter(|p| p.canonicalize().ok() != project_dir.canonicalize().ok())
-            .collect();
-    }
-
-    // 3. deno.json workspace
-    if let Some(patterns) = read_deno_json_workspaces(project_dir) {
-        return expand_workspace_patterns(project_dir, &patterns)
-            .into_iter()
-            .filter(|p| p.canonicalize().ok() != project_dir.canonicalize().ok())
-            .collect();
-    }
-
-    Vec::new()
 }

@@ -5,10 +5,10 @@ use std::path::PathBuf;
 /// Returns the SkillIndex cache directory:
 /// `SKILLINDEX_CACHE_DIR` || `~/.cache/skillindex/skills-registry`
 pub fn get_skillindex_cache_dir() -> PathBuf {
-    if let Ok(v) = env::var("SKILLINDEX_CACHE_DIR") {
-        if !v.trim().is_empty() {
-            return PathBuf::from(v);
-        }
+    if let Ok(v) = env::var("SKILLINDEX_CACHE_DIR")
+        && !v.trim().is_empty()
+    {
+        return PathBuf::from(v);
     }
     let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
     home.join(".cache")

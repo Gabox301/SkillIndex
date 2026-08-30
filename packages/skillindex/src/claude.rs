@@ -30,7 +30,7 @@ pub fn cleanup_claude_md(project_dir: &Path) -> CleanupResult {
             return CleanupResult {
                 cleaned: false,
                 deleted: false,
-            }
+            };
         }
     };
 
@@ -180,8 +180,8 @@ mod tests {
             format!("# CLAUDE.md\nHello\n{SECTION_START}\nskill content\n{SECTION_END}\nWorld\n");
         fs::write(&path, content).unwrap();
         let r = cleanup_claude_md(dir.path());
-        assert_eq!(r.cleaned, true);
-        assert_eq!(r.deleted, false);
+        assert!(r.cleaned);
+        assert!(!r.deleted);
         let remaining = fs::read_to_string(&path).unwrap();
         assert!(remaining.contains("Hello"));
         assert!(remaining.contains("World"));
@@ -196,8 +196,8 @@ mod tests {
         let content = format!("# CLAUDE.md\n{SECTION_START}\nfoo\n{SECTION_END}\n");
         fs::write(&path, content).unwrap();
         let r = cleanup_claude_md(dir.path());
-        assert_eq!(r.cleaned, true);
-        assert_eq!(r.deleted, true);
+        assert!(r.cleaned);
+        assert!(r.deleted);
         assert!(!path.exists());
     }
 
@@ -208,7 +208,7 @@ mod tests {
         let content = format!("{SECTION_START}\nfoo\n{SECTION_END}\n");
         fs::write(&path, content).unwrap();
         let r = cleanup_claude_md(dir.path());
-        assert_eq!(r.deleted, true);
+        assert!(r.deleted);
         assert!(!path.exists());
     }
 
@@ -235,8 +235,8 @@ mod tests {
         let path = dir.path().join("CLAUDE.md");
         fs::write(&path, "# CLAUDE.md\nSome content\n").unwrap();
         let r = cleanup_claude_md(dir.path());
-        assert_eq!(r.cleaned, false);
-        assert_eq!(r.deleted, false);
+        assert!(!r.cleaned);
+        assert!(!r.deleted);
         // file unchanged
         assert!(path.exists());
     }

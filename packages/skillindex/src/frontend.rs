@@ -82,10 +82,10 @@ pub fn has_web_frontend_files_walk(project_dir: &Path, max_depth: usize) -> bool
             if name.ends_with(".blade.php") {
                 return true;
             }
-            if let Some(dot) = name.rfind('.') {
-                if WEB_FRONTEND_EXTENSIONS.contains(&name[dot..]) {
-                    return true;
-                }
+            if let Some(dot) = name.rfind('.')
+                && WEB_FRONTEND_EXTENSIONS.contains(&name[dot..])
+            {
+                return true;
             }
         }
     }

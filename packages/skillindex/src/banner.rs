@@ -44,7 +44,8 @@ fn is_no_color() -> bool {
 /// Mirrors `printBanner` in ui.ts (grayscale wave 28ms, totalFrames = ceil((cols+rows*2+10)/speed)).
 pub async fn print_banner(version: &str) {
     let ver = format!("v{version}");
-    let subtitle = format!("Instala automáticamente las mejores skills de IA para tu proyecto · {ver}");
+    let subtitle =
+        format!("Instala automáticamente las mejores skills de IA para tu proyecto · {ver}");
 
     if !is_tty() || is_no_color() || !use_color() {
         println!();
@@ -91,7 +92,8 @@ pub async fn print_banner(version: &str) {
 /// Synchronous version for tests (no animation, no async)
 pub fn format_banner_static(version: &str) -> String {
     let ver = format!("v{version}");
-    let subtitle = format!("Instala automáticamente las mejores skills de IA para tu proyecto · {ver}");
+    let subtitle =
+        format!("Instala automáticamente las mejores skills de IA para tu proyecto · {ver}");
     let mut out = String::new();
     out.push('\n');
     for line in LOGO_LINES {

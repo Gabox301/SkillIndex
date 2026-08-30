@@ -13,11 +13,11 @@ use skillindex::detect::{
     collect_skills, detect_agents, detect_technologies, get_installed_skill_names,
 };
 use skillindex::display::{
-    format_skill_label, print_detected, print_security_checks, print_skills_list, DisplayCombo,
-    DisplayTechnology,
+    DisplayCombo, DisplayTechnology, format_skill_label, print_detected, print_security_checks,
+    print_skills_list,
 };
-use skillindex::installer::{install_all, InstallOptions, SkillEntry};
-use skillindex::prompt::{multi_select, MultiSelectOptions, Shortcut};
+use skillindex::installer::{InstallOptions, SkillEntry, install_all};
+use skillindex::prompt::{MultiSelectOptions, Shortcut, multi_select};
 use skillindex::registry::{load_registry, security_check_for_entry};
 use skillindex::ui::{bold, cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
 
@@ -54,7 +54,10 @@ fn security_warning_for_skill(skill: &str) -> Option<String> {
     }
     let d = detail.join(" ");
     if d.is_empty() {
-        Some("La revisión de sincronización encontró observaciones que deberías revisar.".to_string())
+        Some(
+            "La revisión de sincronización encontró observaciones que deberías revisar."
+                .to_string(),
+        )
     } else {
         Some(d)
     }
@@ -327,7 +330,9 @@ async fn main() {
 
     if detect_result.detected.is_empty() && !detect_result.is_frontend {
         log(&yellow("   ⚠ No se detectaron tecnologías compatibles."));
-        log(&dim("   Asegúrate de ejecutar esto en el directorio de un proyecto."));
+        log(&dim(
+            "   Asegúrate de ejecutar esto en el directorio de un proyecto.",
+        ));
         log("");
         std::process::exit(0);
     }
@@ -373,7 +378,9 @@ async fn main() {
 
     if skills.is_empty() {
         log(&yellow("   Aún no hay skills disponibles para tu stack."));
-        log(&dim("   Consulta https://skillindex.netlify.app para las últimas novedades."));
+        log(&dim(
+            "   Consulta https://skillindex.netlify.app para las últimas novedades.",
+        ));
         log("");
         std::process::exit(0);
     }

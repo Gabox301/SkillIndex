@@ -188,7 +188,9 @@ pub fn format_detected(
     if is_frontend && detected.is_empty() {
         out.push_str(&format!(
             "{}\n",
-            cyan("   ◆ ") + &bold("Frontend web detectado ") + &dim("(a partir de archivos del proyecto)")
+            cyan("   ◆ ")
+                + &bold("Frontend web detectado ")
+                + &dim("(a partir de archivos del proyecto)")
         ));
         out.push('\n');
     }
@@ -342,7 +344,10 @@ pub fn format_security_checks(checks: &[InstallSecurityCheck]) -> String {
 
     let mut out = String::new();
     out.push('\n');
-    out.push_str(&format!("{}\n", cyan("   ◆ ") + &bold("Verificaciones de seguridad")));
+    out.push_str(&format!(
+        "{}\n",
+        cyan("   ◆ ") + &bold("Verificaciones de seguridad")
+    ));
     out.push('\n');
     out.push_str(&format!(
         "{}\n",

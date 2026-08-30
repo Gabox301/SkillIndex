@@ -67,17 +67,17 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
     if items.is_empty() {
         return Ok(Vec::new());
     }
-    if let Some(ref sel) = opts.initial_selected {
-        if sel.len() != items.len() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                format!(
-                    "initialSelected length ({}) must match items length ({})",
-                    sel.len(),
-                    items.len()
-                ),
-            ));
-        }
+    if let Some(ref sel) = opts.initial_selected
+        && sel.len() != items.len()
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!(
+                "initialSelected length ({}) must match items length ({})",
+                sel.len(),
+                items.len()
+            ),
+        ));
     }
 
     if !io::stdin().is_terminal() {
@@ -130,17 +130,15 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         let mut is_first_group = true;
 
         for i in 0..items.len() {
-            if show_groups {
-                if let Some(ref gf) = opts.group_fn {
-                    let group = gf(&items[i]);
-                    if last_group.as_ref() != Some(&group) {
-                        if !is_first_group {
-                            writeln!(stdout)?;
-                        }
-                        is_first_group = false;
-                        last_group = Some(group.clone());
-                        writeln!(stdout, "   {}", bold(&yellow(&group)))?;
+            if show_groups && let Some(ref gf) = opts.group_fn {
+                let group = gf(&items[i]);
+                if last_group.as_ref() != Some(&group) {
+                    if !is_first_group {
+                        writeln!(stdout)?;
                     }
+                    is_first_group = false;
+                    last_group = Some(group.clone());
+                    writeln!(stdout, "   {}", bold(&yellow(&group)))?;
                 }
             }
             let pointer = if i == cursor {

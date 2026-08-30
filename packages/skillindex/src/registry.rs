@@ -92,10 +92,10 @@ pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String
             return vec![trimmed];
         }
     }
-    if let Ok(v) = env::var("SKILLINDEX_REGISTRY_BASE_URL") {
-        if !v.trim().is_empty() {
-            return vec![v.trim_end_matches('/').to_string()];
-        }
+    if let Ok(v) = env::var("SKILLINDEX_REGISTRY_BASE_URL")
+        && !v.trim().is_empty()
+    {
+        return vec![v.trim_end_matches('/').to_string()];
     }
     let version = get_package_version();
     let base = "https://raw.githubusercontent.com/Gabox301/SkillIndex";
@@ -142,17 +142,17 @@ pub fn get_registry_dir() -> PathBuf {
         }
     }
     // exe dir
-    if let Ok(exe) = env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            let c = dir.join("skills-registry");
-            if c.join("index.json").exists() {
-                return c;
-            }
-            if let Some(parent) = dir.parent() {
-                let c2 = parent.join("skills-registry");
-                if c2.join("index.json").exists() {
-                    return c2;
-                }
+    if let Ok(exe) = env::current_exe()
+        && let Some(dir) = exe.parent()
+    {
+        let c = dir.join("skills-registry");
+        if c.join("index.json").exists() {
+            return c;
+        }
+        if let Some(parent) = dir.parent() {
+            let c2 = parent.join("skills-registry");
+            if c2.join("index.json").exists() {
+                return c2;
             }
         }
     }

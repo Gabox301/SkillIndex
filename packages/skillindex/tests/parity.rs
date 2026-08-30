@@ -2,10 +2,10 @@ use assert_cmd::Command;
 use clap::Parser;
 use skillindex::args::Args;
 use skillindex::cache::get_cache_registry_dir;
-use skillindex::detect::{detect_technologies, DetectResult};
+use skillindex::detect::{DetectResult, detect_technologies};
 use skillindex::display::{
-    format_detected, format_security_checks, format_skill_label, truncate_visible, visible_pad,
-    wrap_text, DisplayCombo, DisplayTechnology,
+    DisplayCombo, DisplayTechnology, format_detected, format_security_checks, format_skill_label,
+    truncate_visible, visible_pad, wrap_text,
 };
 use skillindex::dotnet::dotnet_layout_candidate_paths;
 use skillindex::frontend::has_web_frontend_files;
@@ -17,7 +17,7 @@ use skillindex::installer::{
     copy_dir, encode_raw_path, ensure_symlink_to, rel_path_from_to, update_skills_lock,
 };
 use skillindex::registry::{
-    agent_folder_for, get_registry_raw_base_urls, parse_skill_path, Registry,
+    Registry, agent_folder_for, get_registry_raw_base_urls, parse_skill_path,
 };
 use skillindex::workspace::resolve_workspaces;
 use std::fs;
@@ -87,10 +87,8 @@ fn parity_hash_bundle_sorted() {
     assert_eq!(bundle1, bundle2);
     // sorted join check
     let sorted = {
-        let mut v = vec![
-            ("a.md".to_string(), sha256_buffer(b"a")),
-            ("b.md".to_string(), sha256_buffer(b"b")),
-        ];
+        let mut v = [("a.md".to_string(), sha256_buffer(b"a")),
+            ("b.md".to_string(), sha256_buffer(b"b"))];
         v.sort_by(|a, b| a.0.cmp(&b.0));
         v.iter()
             .map(|(k, h)| format!("{k}:{h}"))
@@ -382,9 +380,11 @@ fn parity_gradle_layout_includes_subdir() {
     fs::create_dir_all(dir.path().join("composeApp")).unwrap();
     fs::write(dir.path().join("composeApp/build.gradle.kts"), "").unwrap();
     let paths = gradle_layout_candidate_paths(dir.path());
-    assert!(paths
-        .iter()
-        .any(|p| p.ends_with("composeApp/build.gradle.kts")));
+    assert!(
+        paths
+            .iter()
+            .any(|p| p.ends_with("composeApp/build.gradle.kts"))
+    );
 }
 
 #[test]
@@ -396,9 +396,11 @@ fn parity_gradle_layout_settings_kts() {
         r#"include(":feature:login")"#,
     );
     let paths = gradle_layout_candidate_paths(dir.path());
-    assert!(paths
-        .iter()
-        .any(|p| p.ends_with("feature/login/build.gradle.kts")));
+    assert!(
+        paths
+            .iter()
+            .any(|p| p.ends_with("feature/login/build.gradle.kts"))
+    );
 }
 
 // ── dotnet parity (depth 2, SCAN_SKIP, csproj) ────────────────────
@@ -452,9 +454,11 @@ fn parity_dotnet_case_insensitive() {
     let dir = tempdir().unwrap();
     write_file(dir.path(), "App.CSPROJ", "<Project>");
     let paths = dotnet_layout_candidate_paths(dir.path());
-    assert!(paths
-        .iter()
-        .any(|p| p.file_name().unwrap().to_string_lossy() == "App.CSPROJ"));
+    assert!(
+        paths
+            .iter()
+            .any(|p| p.file_name().unwrap().to_string_lossy() == "App.CSPROJ")
+    );
 }
 
 #[test]
@@ -472,9 +476,11 @@ fn parity_dotnet_skips_dot_dirs() {
     let dir = tempdir().unwrap();
     write_file(dir.path(), ".hidden/App.csproj", "<Project>");
     let paths = dotnet_layout_candidate_paths(dir.path());
-    assert!(!paths
-        .iter()
-        .any(|p| p.to_string_lossy().contains(".hidden")));
+    assert!(
+        !paths
+            .iter()
+            .any(|p| p.to_string_lossy().contains(".hidden"))
+    );
 }
 
 // ── frontend parity (depth 3, extensions, skip) ──────────────────
@@ -778,9 +784,10 @@ fn parity_registry_base_urls_default() {
     let urls = get_registry_raw_base_urls(None);
     // When no env, should return 2 URLs with version and main
     // If env is set from prior tests, we tolerate either, but at least contains main
-    assert!(urls
-        .iter()
-        .any(|u| u.contains("main/packages/skillindex/skills-registry")));
+    assert!(
+        urls.iter()
+            .any(|u| u.contains("main/packages/skillindex/skills-registry"))
+    );
 }
 
 #[test]
@@ -963,17 +970,32 @@ fn parity_fallback_rust_help_available() {
     cmd.arg("--help").assert().success();
 }
 
-// SKILLINDEX_USE_RUST=0 fallback — ensure Node index.mjs still works via node
+// SKILLINDEX_USE_RUST=0 fallback — ensure Node index.ts (or shim index.mjs) still works via node
 #[test]
 fn parity_fallback_node_via_env() {
-    // Spawn node index.mjs --help with SKILLINDEX_USE_RUST=0, should succeed via Node fallback
+    // Spawn node index.ts --help with SKILLINDEX_USE_RUST=0, should succeed via Node fallback (fallback to index.mjs shim if needed)
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let index = manifest_dir.join("index.mjs");
+    let index_ts = manifest_dir.join("index.ts");
+    let index_mjs = manifest_dir.join("index.mjs");
+    let index = if index_ts.exists() {
+        index_ts
+    } else {
+        index_mjs
+    };
     if !index.exists() {
         return;
     }
-    let output = std::process::Command::new("node")
-        .arg(index)
+    let is_ts = index.extension().and_then(|e| e.to_str()) == Some("ts");
+    let mut cmd = if is_ts {
+        let mut c = std::process::Command::new("bun");
+        c.arg(index.clone());
+        c
+    } else {
+        let mut c = std::process::Command::new("node");
+        c.arg(index.clone());
+        c
+    };
+    let output = cmd
         .arg("--help")
         .env("SKILLINDEX_USE_RUST", "0")
         .output()
@@ -999,7 +1021,7 @@ fn parity_fallback_node_via_env() {
 async fn parity_installer_rate_limit_iso() {
     use httpmock::MockServer;
     use skillindex::hash::sha256_buffer;
-    use skillindex::installer::{install_skill_with_client, InstallOptions};
+    use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;
 
@@ -1067,7 +1089,6 @@ async fn parity_installer_rate_limit_iso() {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
-        ..Default::default()
     };
     let client = reqwest::Client::new();
     let result = install_skill_with_client("owner/repo/rate-skill", &[], &opts, &client).await;
@@ -1088,7 +1109,7 @@ async fn parity_installer_rate_limit_iso() {
 async fn parity_installer_httpmock_network_ok() {
     use httpmock::MockServer;
     use skillindex::hash::sha256_buffer;
-    use skillindex::installer::{install_skill_with_client, InstallOptions};
+    use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;
 
@@ -1152,7 +1173,6 @@ async fn parity_installer_httpmock_network_ok() {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
-        ..Default::default()
     };
     let client = reqwest::Client::new();
     let result =
@@ -1162,9 +1182,11 @@ async fn parity_installer_httpmock_network_ok() {
         "install failed: {} {}",
         result.output, result.stderr
     );
-    assert!(project_dir
-        .join(".agents/skills/net-skill-parity/SKILL.md")
-        .exists());
+    assert!(
+        project_dir
+            .join(".agents/skills/net-skill-parity/SKILL.md")
+            .exists()
+    );
     mock.assert();
     match prev {
         Some(v) => unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", v) },
@@ -1188,7 +1210,7 @@ fn parity_extra_detect_variants() {
         write_file(dir.path(), "package.json", pkg);
         let DetectResult { detected, .. } = detect_technologies(dir.path());
         assert!(
-            detected.iter().any(|t| &t.id == id),
+            detected.iter().any(|t| t.id == id),
             "missing {id} for {pkg}"
         );
     }
@@ -1242,9 +1264,11 @@ fn parity_extra_dotnet_filters() {
     write_file(dir.path(), "bin/Ignore.csproj", "<Project>");
     let paths = dotnet_layout_candidate_paths(dir.path());
     assert!(paths.iter().any(|p| p.ends_with("App.csproj")));
-    assert!(!paths
-        .iter()
-        .any(|p| p.to_string_lossy().contains("bin/Ignore")));
+    assert!(
+        !paths
+            .iter()
+            .any(|p| p.to_string_lossy().contains("bin/Ignore"))
+    );
 }
 
 #[test]
@@ -1271,10 +1295,8 @@ fn parity_hash_bundle_two_files_references() {
         ("SKILL.md".to_string(), h1.clone()),
         ("references/notes.md".to_string(), h2.clone()),
     ]);
-    let mut sorted = vec![
-        ("SKILL.md".to_string(), h1),
-        ("references/notes.md".to_string(), h2),
-    ];
+    let mut sorted = [("SKILL.md".to_string(), h1),
+        ("references/notes.md".to_string(), h2)];
     sorted.sort_by(|a, b| a.0.cmp(&b.0));
     let expected = sha256_buffer(
         sorted

@@ -157,12 +157,16 @@ mod tests {
         write_file(dir.path(), "App.CSPROJ", r#"<Project>"#);
         write_file(dir.path(), "Solution.SLN", "");
         let paths = dotnet_layout_candidate_paths(dir.path());
-        assert!(paths
-            .iter()
-            .any(|p| p.file_name().unwrap().to_string_lossy() == "App.CSPROJ"));
-        assert!(paths
-            .iter()
-            .any(|p| p.file_name().unwrap().to_string_lossy() == "Solution.SLN"));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.file_name().unwrap().to_string_lossy() == "App.CSPROJ")
+        );
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.file_name().unwrap().to_string_lossy() == "Solution.SLN")
+        );
     }
 
     #[test]
@@ -186,9 +190,11 @@ mod tests {
         let dir = tempdir().unwrap();
         write_file(dir.path(), ".hidden/App.csproj", r#"<Project>"#);
         let paths = dotnet_layout_candidate_paths(dir.path());
-        assert!(!paths
-            .iter()
-            .any(|p| p.to_string_lossy().contains(".hidden")));
+        assert!(
+            !paths
+                .iter()
+                .any(|p| p.to_string_lossy().contains(".hidden"))
+        );
     }
 
     #[test]

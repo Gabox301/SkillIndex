@@ -14,9 +14,9 @@ fn main() {
     let rs_path = Path::new(&out_dir).join("skills_map.rs");
     let json_out_path = Path::new(&out_dir).join("skills_map.json");
 
-    // Try to generate via Node; fallback to placeholder if Node unavailable
+    // Try to generate via Bun; fallback to placeholder if Bun unavailable
     let json_content = generate_json_via_node(&ts_path).unwrap_or_else(|| {
-        // Minimal placeholder — real generation happens when Node is available
+        // Minimal placeholder — real generation happens when Bun is available
         r#"{"skills":[],"combos":[],"frontend_packages":[],"web_frontend_extensions":[]}"#
             .to_string()
     });
@@ -25,7 +25,7 @@ fn main() {
     // It must NOT be written by build.rs — Cargo forbids modifying source
     // during `cargo publish --verify` (only OUT_DIR is allowed). To refresh
     // the committed file, run `cargo run -- build` or the Node sync script
-    // (`npm run sync:skills` / `scripts/sync-skills.mjs`) explicitly.
+    // (`npm run sync:skills` / `scripts/sync-skills.ts`) explicitly.
     // Here we emit only to OUT_DIR for embedding via include! / SKILLS_MAP_JSON.
     let _ = fs::write(&json_out_path, &json_content);
 
@@ -47,11 +47,11 @@ pub fn skills_map_json() -> &'static str {{
 }
 
 fn generate_json_via_node(ts_path: &Path) -> Option<String> {
-    // Use Node to import the TS file and serialize to JSON
-    // We create a temporary ESM script that strips types and extracts maps
+    // Use Bun to import the TS file and serialize to JSON
+    // We create a temporary ESM script and extract maps
     let manifest_dir = ts_path.parent()?.to_str()?;
 
-    // Inline Node script: import skills-map.ts via --experimental-strip-types
+    // Inline Bun script: import skills-map.ts directly
     let script = r##"
 import { SKILLS_MAP, COMBO_SKILLS_MAP, FRONTEND_PACKAGES, WEB_FRONTEND_EXTENSIONS, FRONTEND_BONUS_SKILLS, AGENT_FOLDER_MAP } from "./skills-map.ts";
 import fs from "node:fs";
@@ -72,9 +72,7 @@ const json = JSON.stringify(out, (k, v) => {
 process.stdout.write(json);
 "##.to_string();
 
-    let output = Command::new("node")
-        .arg("--experimental-strip-types")
-        .arg("--disable-warning=ExperimentalWarning")
+    let output = Command::new("bun")
         .arg("-e")
         .arg(script)
         .current_dir(manifest_dir)
