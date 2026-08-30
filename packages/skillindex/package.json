@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
@@ -39,7 +39,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "validate:registry": "bun run scripts/validate-registry.ts",
-    "prepublishOnly": "bun run validate:registry",
+    "prepublishOnly": "bun run build && bun run validate:registry",
     "release": "bun run scripts/release.ts",
     "sync:skills": "bun run scripts/sync-skills.ts",
     "fendo:check": "bun run scripts/fendo.ts"
