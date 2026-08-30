@@ -5,7 +5,8 @@
 //
 // Meant to be run by maintainers only — never by end users.
 
-import { spawnSync } from "node:child_process";
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   createWriteStream,
   existsSync,
@@ -16,63 +17,152 @@ import {
   rmSync,
   statSync,
   writeFileSync,
-} from "node:fs";
-import { createHash } from "node:crypto";
-import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
-import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
-import { fileURLToPath } from "node:url";
-import { pipeline } from "node:stream/promises";
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, relative, resolve } from 'node:path';
+import { stdin, stdout } from 'node:process';
+import { createInterface } from 'node:readline/promises';
+import { pipeline } from 'node:stream/promises';
+import { fileURLToPath } from 'node:url';
+import { bold, cyan, dim, green, log, red, yellow } from '../colors.ts';
+import { parseSkillPath } from '../lib.ts';
+import { COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP } from '../skills-map.ts';
 
-import { SKILLS_MAP, COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS } from "../skills-map.ts";
-import { parseSkillPath } from "../lib.ts";
-import { bold, cyan, dim, green, log, red, yellow } from "../colors.ts";
+try {
+  process.loadEnvFile();
+} catch {
+  // No .env file present — optional for --help / --dry-run
+}
 
-process.loadEnvFile();
+// ── Types ──────────────────────────────────────────────────────
+
+interface SyncFlags {
+  dryRun: boolean;
+  force: boolean;
+  noReview: boolean;
+  retryFailed: boolean;
+  only: string | null;
+  verbose: boolean;
+}
+
+interface ReviewResult {
+  status: 'approved' | 'flagged' | 'rejected';
+  flags: string[];
+  summary: string;
+}
+
+interface ManifestReview {
+  status: string;
+  flags: string[];
+  summary: string;
+  model: string;
+  promptVersion: string;
+  reviewedAt: string;
+}
+
+interface ManifestEntry {
+  source: string;
+  skillPath: string;
+  commitSha: string;
+  files: string[];
+  sha256: Record<string, string>;
+  bundleHash: string;
+  review: ManifestReview;
+  securityCheck: {
+    status: string;
+    findings: string[];
+    summary: string;
+    checkedAt: string;
+  };
+}
+
+interface Manifest {
+  version: number;
+  generatedAt: string;
+  reviewer: { model: string; promptVersion: string };
+  skills: Record<string, ManifestEntry>;
+}
+
+interface ReportTotals {
+  repos: number;
+  skills: number;
+  approved: number;
+  flagged: number;
+  rejected: number;
+  unchanged: number;
+  missing: number;
+}
+
+interface Report {
+  generatedAt: string;
+  totals: ReportTotals;
+  rejected: Array<{ skill: string; flags: string[]; summary: string }>;
+  flagged: Array<{ skill: string; flags: string[]; summary: string; accepted?: boolean }>;
+  missing: string[];
+  errors: Array<{ skill: string; reason: string }>;
+}
+
+interface SkillRef {
+  full: string;
+  skillName: string;
+}
+
+interface SkillToWrite {
+  repo: string;
+  full: string;
+  skillName: string;
+  sha: string;
+  relFiles: Array<{ rel: string; abs: string; buf: Buffer }>;
+  shaMap: Record<string, string>;
+  bundleHash: string;
+  review: ReviewResult;
+  textFilesForReview: Array<{ rel: string; content: string }>;
+}
+
+interface GithubTreeEntry {
+  type: string;
+  path: string;
+  sha?: string;
+}
 
 // ── Config ───────────────────────────────────────────────────
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PKG_ROOT = resolve(__dirname, "..");
-const REGISTRY_DIR = join(PKG_ROOT, "skills-registry");
-const MANIFEST_PATH = join(REGISTRY_DIR, "index.json");
-const REPORT_PATH = join(__dirname, "sync-skills.report.json");
-
-const REVIEW_MODEL = process.env.SKILLINDEX_REVIEW_MODEL || "gpt-5.4";
-const REVIEW_PROMPT_VERSION = "1.0.0";
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
-
-const SKIP_NAMES = new Set();
+const __dirname: string = dirname(fileURLToPath(import.meta.url));
+const PKG_ROOT: string = resolve(__dirname, '..');
+const REGISTRY_DIR: string = join(PKG_ROOT, 'skills-registry');
+const MANIFEST_PATH: string = join(REGISTRY_DIR, 'index.json');
+const REPORT_PATH: string = join(__dirname, 'sync-skills.report.json');
+const REVIEW_MODEL: string = process.env.SKILLINDEX_REVIEW_MODEL || 'gpt-5.4';
+const REVIEW_PROMPT_VERSION = '1.0.0';
+const GITHUB_TOKEN: string = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
+const SKIP_NAMES = new Set<string>();
 
 // ── CLI args ─────────────────────────────────────────────────
 
-const args = process.argv.slice(2);
-const FLAGS = {
-  dryRun: args.includes("--dry-run"),
-  force: args.includes("--force"),
-  noReview: args.includes("--no-review"),
-  retryFailed: args.includes("--retry-failed"),
+const args: string[] = process.argv.slice(2);
+const FLAGS: SyncFlags = {
+  dryRun: args.includes('--dry-run'),
+  force: args.includes('--force'),
+  noReview: args.includes('--no-review'),
+  retryFailed: args.includes('--retry-failed'),
   only: (() => {
-    const i = args.indexOf("--only");
+    const i = args.indexOf('--only');
     return i !== -1 ? args[i + 1] : null;
   })(),
-  verbose: args.includes("-v") || args.includes("--verbose"),
+  verbose: args.includes('-v') || args.includes('--verbose'),
 };
 
 if (FLAGS.only && FLAGS.retryFailed) {
-  log(red("✘ --only and --retry-failed cannot be used together"));
+  log(red('✘ --only and --retry-failed cannot be used together'));
   process.exit(1);
 }
 
-if (args.includes("-h") || args.includes("--help")) {
+if (args.includes('-h') || args.includes('--help')) {
   log(`
-  ${bold("sync-skills")} — Download, audit, and persist skills locally
-
-  ${bold("Usage:")}
-    node scripts/sync-skills.mjs [flags]
-
-  ${bold("Flags:")}
+  ${bold('sync-skills')} — Download, audit, and persist skills locally
+  ${bold('Usage:')}
+    node scripts/sync-skills.ts [flags]
+  ${bold('Flags:')}
     --dry-run       Fetch and review, don't write files
     --force         Accept skills flagged by the auditor
     --no-review     Skip the OpenAI review (dev only)
@@ -86,36 +176,34 @@ if (args.includes("-h") || args.includes("--help")) {
 
 // ── Skill collection ─────────────────────────────────────────
 
-function collectAllSkillPaths() {
-  const out = new Set();
+function collectAllSkillPaths(): string[] {
+  const out = new Set<string>();
   for (const tech of SKILLS_MAP) for (const s of tech.skills) out.add(s);
   for (const c of COMBO_SKILLS_MAP) for (const s of c.skills) out.add(s);
   for (const s of FRONTEND_BONUS_SKILLS) out.add(s);
   return [...out];
 }
 
-function getSkillName(skillPath) {
+function getSkillName(skillPath: string): string {
   try {
     const { skillName } = parseSkillPath(skillPath);
     if (skillName) return skillName;
   } catch {
     // Reports may be edited manually; fall back to the final path segment.
   }
-  return skillPath.split("/").filter(Boolean).at(-1) || skillPath;
+  return skillPath.split('/').filter(Boolean).at(-1) || skillPath;
 }
 
-function collectRetryFailedSkillNames() {
+function collectRetryFailedSkillNames(): Set<string> {
   if (!existsSync(REPORT_PATH)) {
     throw new Error(`retry report not found: ${REPORT_PATH}`);
   }
-
-  const report = JSON.parse(readFileSync(REPORT_PATH, "utf-8"));
-  const retry = new Set();
-  const add = (entry) => {
-    const skill = typeof entry === "string" ? entry : entry?.skill;
-    if (skill) retry.add(getSkillName(skill));
+  const report = JSON.parse(readFileSync(REPORT_PATH, 'utf-8')) as Report;
+  const retry = new Set<string>();
+  const add = (entry: unknown) => {
+    const skill = typeof entry === 'string' ? entry : (entry as { skill?: string })?.skill;
+    if (typeof skill === 'string' && skill) retry.add(getSkillName(skill));
   };
-
   for (const entry of report.flagged || []) {
     if (entry?.accepted) continue;
     add(entry);
@@ -123,37 +211,36 @@ function collectRetryFailedSkillNames() {
   for (const entry of report.rejected || []) add(entry);
   for (const entry of report.missing || []) add(entry);
   for (const entry of report.errors || []) add(entry);
-
   return retry;
 }
 
-function groupSkillsByRepo(skills, retryFailed = null) {
-  const byRepo = new Map();
+function groupSkillsByRepo(skills: string[], retryFailed: Set<string> | null = null): Map<string, SkillRef[]> {
+  const byRepo = new Map<string, SkillRef[]>();
   for (const full of skills) {
     const { repo, skillName } = parseSkillPath(full);
     if (!skillName || SKIP_NAMES.has(skillName)) continue;
     if (FLAGS.only && skillName !== FLAGS.only) continue;
     if (retryFailed && !retryFailed.has(skillName)) continue;
     if (!byRepo.has(repo)) byRepo.set(repo, []);
-    byRepo.get(repo).push({ full, skillName });
+    byRepo.get(repo)!.push({ full, skillName });
   }
   return byRepo;
 }
 
 // ── GitHub helpers ───────────────────────────────────────────
 
-async function ghFetch(url) {
-  const headers = {
-    "User-Agent": "skillindex-sync",
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
+async function ghFetch(url: string): Promise<Response> {
+  const headers: Record<string, string> = {
+    'User-Agent': 'skillindex-sync',
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
   };
-  if (GITHUB_TOKEN) headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+  if (GITHUB_TOKEN) headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
   const res = await fetch(url, { headers });
   if (!res.ok) {
-    const resetAt = Number(res.headers.get("x-ratelimit-reset") || 0) * 1000;
-    const resetSuffix = resetAt ? ` (resets ${new Date(resetAt).toISOString()})` : "";
-    if (res.status === 403 && res.headers.get("x-ratelimit-remaining") === "0") {
+    const resetAt = Number(res.headers.get('x-ratelimit-reset') || 0) * 1000;
+    const resetSuffix = resetAt ? ` (resets ${new Date(resetAt).toISOString()})` : '';
+    if (res.status === 403 && res.headers.get('x-ratelimit-remaining') === '0') {
       throw new Error(
         `GitHub 403 rate limit exceeded${resetSuffix} for ${url}. Set GITHUB_TOKEN or GH_TOKEN to increase the limit.`,
       );
@@ -163,22 +250,17 @@ async function ghFetch(url) {
   return res;
 }
 
-function resolveRepoHead(repo) {
-  const result = spawnSync(
-    "git",
-    ["ls-remote", "--symref", `https://github.com/${repo}.git`, "HEAD"],
-    {
-      encoding: "utf-8",
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
+function resolveRepoHead(repo: string): { defaultBranch: string; sha: string } {
+  const result = spawnSync('git', ['ls-remote', '--symref', `https://github.com/${repo}.git`, 'HEAD'], {
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
   if (result.status !== 0) {
-    throw new Error(`git ls-remote failed for ${repo}: ${result.stderr.trim() || "unknown error"}`);
+    throw new Error(`git ls-remote failed for ${repo}: ${(result.stderr as string).trim() || 'unknown error'}`);
   }
-
-  let defaultBranch = "main";
-  let sha = "";
-  for (const line of result.stdout.split("\n")) {
+  let defaultBranch = 'main';
+  let sha = '';
+  for (const line of (result.stdout as string).split('\n')) {
     const symref = line.match(/^ref:\s+refs\/heads\/(.+)\s+HEAD$/);
     if (symref) {
       defaultBranch = symref[1];
@@ -187,15 +269,13 @@ function resolveRepoHead(repo) {
     const head = line.match(/^([0-9a-f]{40})\s+HEAD$/i);
     if (head) sha = head[1];
   }
-
   if (!sha) {
     throw new Error(`could not resolve HEAD for ${repo}`);
   }
-
   return { defaultBranch, sha };
 }
 
-async function resolveRepoInfo(repo) {
+async function resolveRepoInfo(repo: string): Promise<{ sizeKB: number }> {
   const res = await ghFetch(`https://api.github.com/repos/${repo}`);
   const body = await res.json();
   return {
@@ -208,10 +288,10 @@ const HEAVY_REPO_KB = 50_000;
 // Hard timeout for tarball downloads. Some repos have slow codeload CDNs.
 const TARBALL_TIMEOUT_MS = 180_000;
 
-async function downloadTarball(repo, sha, destFile) {
+async function downloadTarball(repo: string, sha: string, destFile: string): Promise<void> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${sha}`;
-  const headers = { "User-Agent": "skillindex-sync" };
-  if (GITHUB_TOKEN) headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+  const headers: Record<string, string> = { 'User-Agent': 'skillindex-sync' };
+  if (GITHUB_TOKEN) headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), TARBALL_TIMEOUT_MS);
   try {
@@ -225,7 +305,7 @@ async function downloadTarball(repo, sha, destFile) {
   }
 }
 
-async function fetchRepoTree(repo, sha) {
+async function fetchRepoTree(repo: string, sha: string): Promise<GithubTreeEntry[]> {
   const res = await ghFetch(`https://api.github.com/repos/${repo}/git/trees/${sha}?recursive=1`);
   const body = await res.json();
   if (body.truncated) {
@@ -234,40 +314,35 @@ async function fetchRepoTree(repo, sha) {
   return body.tree || [];
 }
 
-function findSkillDirsInTree(tree, skillName) {
+function findSkillDirsInTree(tree: GithubTreeEntry[], skillName: string): string[] {
   // Returns array of { dir } where dir/SKILL.md exists in the tree.
-  const skillPaths = tree
-    .filter((t) => t.type === "blob" && /(^|\/)SKILL\.md$/i.test(t.path))
-    .map((t) => t.path);
-
+  const skillPaths = tree.filter((t) => t.type === 'blob' && /(^|\/)SKILL\.md$/i.test(t.path)).map((t) => t.path);
   const candidates = [];
   for (const p of skillPaths) {
-    const parts = p.split("/");
+    const parts = p.split('/');
     parts.pop();
     const parent = parts[parts.length - 1];
     if (parent === skillName) {
-      candidates.push(parts.join("/"));
+      candidates.push(parts.join('/'));
       continue;
     }
     // Fallback: <skillName>/skills/SKILL.md
-    if (parent === "skills" && parts[parts.length - 2] === skillName) {
-      candidates.push(parts.join("/"));
+    if (parent === 'skills' && parts[parts.length - 2] === skillName) {
+      candidates.push(parts.join('/'));
     }
   }
-
   // Fallback for single-SKILL-at-root repos.
-  if (candidates.length === 0 && skillPaths.includes("SKILL.md")) {
-    candidates.push("");
+  if (candidates.length === 0 && skillPaths.includes('SKILL.md')) {
+    candidates.push('');
   }
-
   candidates.sort((a, b) => a.length - b.length);
   return candidates;
 }
 
-async function downloadRawFile(repo, sha, repoPath, destFile) {
+async function downloadRawFile(repo: string, sha: string, repoPath: string, destFile: string): Promise<void> {
   const url = `https://raw.githubusercontent.com/${repo}/${sha}/${repoPath}`;
-  const headers = { "User-Agent": "skillindex-sync" };
-  if (GITHUB_TOKEN) headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+  const headers: Record<string, string> = { 'User-Agent': 'skillindex-sync' };
+  if (GITHUB_TOKEN) headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), TARBALL_TIMEOUT_MS);
   try {
@@ -285,23 +360,26 @@ async function downloadRawFile(repo, sha, repoPath, destFile) {
   }
 }
 
-async function materializeSkillsFromTree(repo, sha, skillNames, destRoot) {
+async function materializeSkillsFromTree(
+  repo: string,
+  sha: string,
+  skillNames: string[],
+  destRoot: string,
+): Promise<Map<string, string>> {
   const tree = await fetchRepoTree(repo, sha);
-  const found = new Map(); // skillName → relative dir within destRoot
+  const found = new Map<string, string>(); // skillName → relative dir within destRoot
   for (const skillName of skillNames) {
     const dirs = findSkillDirsInTree(tree, skillName);
     if (dirs.length === 0) continue;
     const pick = dirs[0];
     const blobs = tree.filter(
-      (t) =>
-        t.type === "blob" &&
-        (pick === "" ? true : t.path.startsWith(`${pick}/`) || t.path === pick),
+      (t) => t.type === 'blob' && (pick === '' ? true : t.path.startsWith(`${pick}/`) || t.path === pick),
     );
     // When pick === "" (repo root), only grab the single SKILL.md to avoid
     // pulling in unrelated repo content.
-    const filtered = pick === "" ? blobs.filter((t) => t.path === "SKILL.md") : blobs;
+    const filtered = pick === '' ? blobs.filter((t) => t.path === 'SKILL.md') : blobs;
     for (const blob of filtered) {
-      const rel = pick === "" ? blob.path : blob.path.slice(pick.length + 1);
+      const rel = pick === '' ? blob.path : blob.path.slice(pick.length + 1);
       if (shouldSkipSkillFile(rel)) continue;
       const dest = join(destRoot, skillName, rel);
       await downloadRawFile(repo, sha, blob.path, dest);
@@ -311,9 +389,9 @@ async function materializeSkillsFromTree(repo, sha, skillNames, destRoot) {
   return found;
 }
 
-function extractTarball(tarFile, destDir) {
-  const r = spawnSync("tar", ["-xzf", tarFile, "-C", destDir], {
-    stdio: FLAGS.verbose ? "inherit" : "pipe",
+function extractTarball(tarFile: string, destDir: string): string {
+  const r = spawnSync('tar', ['-xzf', tarFile, '-C', destDir], {
+    stdio: FLAGS.verbose ? 'inherit' : 'pipe',
   });
   if (r.status !== 0) {
     throw new Error(`tar extract failed (status ${r.status})`);
@@ -324,94 +402,89 @@ function extractTarball(tarFile, destDir) {
   return join(destDir, root);
 }
 
-function runGit(args, label) {
-  const result = spawnSync("git", args, {
-    encoding: "utf-8",
-    stdio: ["ignore", "pipe", "pipe"],
+function runGit(args: string[], label: string): string {
+  const result = spawnSync('git', args, {
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
   if (result.status !== 0) {
-    throw new Error(`${label} failed: ${result.stderr.trim() || "unknown error"}`);
+    throw new Error(`${label} failed: ${(result.stderr as string).trim() || 'unknown error'}`);
   }
-  return result.stdout;
+  return result.stdout as string;
 }
 
-function materializeSkillsFromSparseClone(repo, branch, skillNames, destRoot) {
-  const repoDir = join(destRoot, "repo");
+function materializeSkillsFromSparseClone(
+  repo: string,
+  branch: string,
+  skillNames: string[],
+  destRoot: string,
+): Map<string, string> {
+  const repoDir = join(destRoot, 'repo');
   runGit(
     [
-      "clone",
-      "--depth",
-      "1",
-      "--filter=blob:none",
-      "--sparse",
-      "--branch",
+      'clone',
+      '--depth',
+      '1',
+      '--filter=blob:none',
+      '--sparse',
+      '--branch',
       branch,
       `https://github.com/${repo}.git`,
       repoDir,
     ],
     `git clone ${repo}`,
   );
-
-  const paths = runGit(
-    ["-C", repoDir, "ls-tree", "-r", "--name-only", "HEAD"],
-    `git ls-tree ${repo}`,
-  )
-    .split("\n")
+  const paths = runGit(['-C', repoDir, 'ls-tree', '-r', '--name-only', 'HEAD'], `git ls-tree ${repo}`)
+    .split('\n')
     .filter(Boolean);
-  const tree = paths.map((path) => ({ type: "blob", path }));
-  const found = new Map();
-  const sparsePatterns = new Set();
-
+  const tree = paths.map((path) => ({ type: 'blob', path }));
+  const found = new Map<string, string>();
+  const sparsePatterns = new Set<string>();
   for (const skillName of skillNames) {
     const dirs = findSkillDirsInTree(tree, skillName);
     if (dirs.length === 0) continue;
-    const pick = dirs[0];
-    sparsePatterns.add(pick === "" ? "SKILL.md" : `${pick}/**`);
-    found.set(skillName, pick === "" ? repoDir : join(repoDir, pick));
+    const pick = dirs[0] as string;
+    sparsePatterns.add(pick === '' ? 'SKILL.md' : `${pick}/**`);
+    found.set(skillName, pick === '' ? repoDir : join(repoDir, pick));
   }
-
   if (sparsePatterns.size > 0) {
-    runGit(
-      ["-C", repoDir, "sparse-checkout", "set", "--no-cone", ...sparsePatterns],
-      `git sparse-checkout ${repo}`,
-    );
+    runGit(['-C', repoDir, 'sparse-checkout', 'set', '--no-cone', ...sparsePatterns], `git sparse-checkout ${repo}`);
   }
-
   return found;
 }
 
 // ── Filesystem walk ──────────────────────────────────────────
 
 const SKIP_DIRS = new Set([
-  ".git",
-  ".github",
-  ".vscode",
-  ".idea",
-  "node_modules",
-  "dist",
-  "build",
-  "out",
-  "coverage",
-  "__pycache__",
-  ".turbo",
-  ".cache",
-  ".next",
-  ".nuxt",
-  ".output",
-  ".svelte-kit",
-  "tests",
-  "test",
-  "__tests__",
-  "fixtures",
-  "examples",
-  "example",
+  '.git',
+  '.github',
+  '.vscode',
+  '.idea',
+  'node_modules',
+  'dist',
+  'build',
+  'out',
+  'coverage',
+  '__pycache__',
+  '.turbo',
+  '.cache',
+  '.next',
+  '.nuxt',
+  '.output',
+  '.svelte-kit',
+  'tests',
+  'test',
+  '__tests__',
+  'fixtures',
+  'examples',
+  'example',
 ]);
 
-function shouldSkipSkillFile(rel) {
-  return rel.toLowerCase().endsWith(".zip");
+function shouldSkipSkillFile(rel: string): boolean {
+  return rel.toLowerCase().endsWith('.zip');
 }
 
-function findSkillDir(repoRoot, skillName) {
+function findSkillDir(repoRoot: string, skillName: string): string | null {
   const candidates = [];
   (function walk(dir, depth) {
     if (depth > 8) return;
@@ -426,15 +499,14 @@ function findSkillDir(repoRoot, skillName) {
       if (SKIP_DIRS.has(e.name)) continue;
       const p = join(dir, e.name);
       if (e.name === skillName) {
-        if (existsSync(join(p, "SKILL.md"))) candidates.push(p);
-        else if (existsSync(join(p, "skills", "SKILL.md"))) candidates.push(join(p, "skills"));
+        if (existsSync(join(p, 'SKILL.md'))) candidates.push(p);
+        else if (existsSync(join(p, 'skills', 'SKILL.md'))) candidates.push(join(p, 'skills'));
       }
       walk(p, depth + 1);
     }
   })(repoRoot, 0);
-
   if (candidates.length === 0) {
-    if (existsSync(join(repoRoot, "SKILL.md"))) {
+    if (existsSync(join(repoRoot, 'SKILL.md'))) {
       return repoRoot;
     }
     return null;
@@ -443,14 +515,14 @@ function findSkillDir(repoRoot, skillName) {
   return candidates[0];
 }
 
-function listFilesRecursive(dir) {
+function listFilesRecursive(dir: string): string[] {
   const out = [];
   (function walk(current) {
     for (const e of readdirSync(current, { withFileTypes: true })) {
       const p = join(current, e.name);
       if (e.isDirectory()) {
         walk(p);
-      } else if (e.isFile() && !shouldSkipSkillFile(relative(dir, p).split("\\").join("/"))) {
+      } else if (e.isFile() && !shouldSkipSkillFile(relative(dir, p).split('\\').join('/'))) {
         out.push(p);
       }
     }
@@ -458,8 +530,8 @@ function listFilesRecursive(dir) {
   return out.sort();
 }
 
-function sha256Hex(buf) {
-  return createHash("sha256").update(buf).digest("hex");
+function sha256Hex(buf: Buffer | string): string {
+  return createHash('sha256').update(buf).digest('hex');
 }
 
 // ── OpenAI auditor ───────────────────────────────────────────
@@ -483,67 +555,64 @@ Use:
 
 Be concise in summary (one sentence).`;
 
-async function reviewWithOpenAI(skillName, files) {
+async function reviewWithOpenAI(
+  skillName: string,
+  files: Array<{ rel: string; content: string }>,
+): Promise<ReviewResult> {
   if (FLAGS.noReview) {
-    return { status: "approved", flags: [], summary: "review skipped (--no-review)" };
+    return { status: 'approved', flags: [], summary: 'review skipped (--no-review)' };
   }
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required (or pass --no-review)");
+    throw new Error('OPENAI_API_KEY is required (or pass --no-review)');
   }
-
   const body = files
     .map(
       ({ rel, content }) =>
-        `=== FILE: ${rel} ===\n${content.length > 40000 ? content.slice(0, 40000) + "\n…(truncated)" : content}`,
+        `=== FILE: ${rel} ===\n${content.length > 40000 ? content.slice(0, 40000) + '\n…(truncated)' : content}`,
     )
-    .join("\n\n");
-
+    .join('\n\n');
   const userMsg = `Skill name: ${skillName}\n\n${body}`;
-
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: REVIEW_MODEL,
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
       messages: [
-        { role: "system", content: REVIEW_SYSTEM_PROMPT },
-        { role: "user", content: userMsg },
+        { role: 'system', content: REVIEW_SYSTEM_PROMPT },
+        { role: 'user', content: userMsg },
       ],
     }),
   });
-
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
+    const text = await res.text().catch(() => '');
     throw new Error(`OpenAI ${res.status}: ${text.slice(0, 200)}`);
   }
   const payload = await res.json();
-  const raw = payload.choices?.[0]?.message?.content ?? "{}";
+  const raw = payload.choices?.[0]?.message?.content ?? '{}';
   let parsed;
   try {
     parsed = JSON.parse(raw);
   } catch {
     return {
-      status: "rejected",
-      flags: ["invalid-json"],
-      summary: "auditor returned invalid JSON",
+      status: 'rejected',
+      flags: ['invalid-json'],
+      summary: 'auditor returned invalid JSON',
     };
   }
-  const status = ["approved", "flagged", "rejected"].includes(parsed.status)
-    ? parsed.status
-    : "rejected";
+  const status = ['approved', 'flagged', 'rejected'].includes(parsed.status) ? parsed.status : 'rejected';
   const flags = Array.isArray(parsed.flags) ? parsed.flags.map(String) : [];
-  const summary = typeof parsed.summary === "string" ? parsed.summary : "";
+  const summary = typeof parsed.summary === 'string' ? parsed.summary : '';
   return { status, flags, summary };
 }
 
 // ── Manifest ─────────────────────────────────────────────────
 
-function loadManifest() {
+function loadManifest(): Manifest {
   if (!existsSync(MANIFEST_PATH)) {
     return {
       version: 1,
@@ -553,18 +622,23 @@ function loadManifest() {
     };
   }
   try {
-    return JSON.parse(readFileSync(MANIFEST_PATH, "utf-8"));
+    return JSON.parse(readFileSync(MANIFEST_PATH, 'utf-8')) as Manifest;
   } catch {
-    return { version: 1, generatedAt: "", reviewer: {}, skills: {} };
+    return {
+      version: 1,
+      generatedAt: '',
+      reviewer: { model: REVIEW_MODEL, promptVersion: REVIEW_PROMPT_VERSION },
+      skills: {},
+    };
   }
 }
 
-function saveManifest(manifest) {
+function saveManifest(manifest: Manifest): void {
   if (!existsSync(REGISTRY_DIR)) mkdirSync(REGISTRY_DIR, { recursive: true });
-  writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
+  writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n');
 }
 
-function writeSkillToRegistry(manifest, skill) {
+function writeSkillToRegistry(manifest: Manifest, skill: SkillToWrite): void {
   const destDir = join(REGISTRY_DIR, skill.skillName);
   rmSync(destDir, { recursive: true, force: true });
   for (const f of skill.relFiles) {
@@ -572,7 +646,6 @@ function writeSkillToRegistry(manifest, skill) {
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, f.buf);
   }
-
   manifest.skills[skill.skillName] = {
     source: skill.repo,
     skillPath: skill.full,
@@ -589,19 +662,19 @@ function writeSkillToRegistry(manifest, skill) {
       reviewedAt: new Date().toISOString(),
     },
     securityCheck: {
-      status: skill.review.status === "flagged" ? "warning" : "ok",
+      status: skill.review.status === 'flagged' ? 'warning' : 'ok',
       findings: skill.review.flags,
       summary:
         skill.review.summary ||
-        (skill.review.status === "flagged"
-          ? "The sync review found issues that should be checked."
-          : "The sync review did not find security issues."),
+        (skill.review.status === 'flagged'
+          ? 'The sync review found issues that should be checked.'
+          : 'The sync review did not find security issues.'),
       checkedAt: new Date().toISOString(),
     },
   };
 }
 
-function recordFlagged(report, skill, accepted) {
+function recordFlagged(report: Report, skill: SkillToWrite, accepted: boolean): void {
   report.totals.flagged++;
   report.flagged.push({
     skill: skill.full,
@@ -611,27 +684,25 @@ function recordFlagged(report, skill, accepted) {
   });
 }
 
-function printFlaggedDetails(skill) {
+function printFlaggedDetails(skill: SkillToWrite): void {
   log();
   log(yellow(`⚠ ${skill.skillName}`) + dim(` — ${skill.full}`));
-  log(`   ${bold("Problem:")} ${skill.review.summary}`);
+  log(`   ${bold('Problem:')} ${skill.review.summary}`);
   if (skill.review.flags.length > 0) {
-    log(`   ${bold("Flags:")}`);
+    log(`   ${bold('Flags:')}`);
     for (const flag of skill.review.flags) log(`   - ${flag}`);
   } else {
-    log(`   ${bold("Flags:")} ${dim("auditor did not provide specific flags")}`);
+    log(`   ${bold('Flags:')} ${dim('auditor did not provide specific flags')}`);
   }
 }
 
-function printReviewedContent(skill) {
+function printReviewedContent(skill: SkillToWrite): void {
   log();
   log(bold(`Reviewed content for ${skill.skillName}`));
-
   if (skill.textFilesForReview.length === 0) {
-    log(dim("   No markdown or text files were included in the review."));
+    log(dim('   No markdown or text files were included in the review.'));
     return;
   }
-
   for (const file of skill.textFilesForReview) {
     log();
     log(cyan(`--- ${file.rel} ---`));
@@ -640,22 +711,19 @@ function printReviewedContent(skill) {
   }
 }
 
-async function reviewFlaggedSkills(pendingFlagged, report, manifest) {
+async function reviewFlaggedSkills(pendingFlagged: SkillToWrite[], report: Report, manifest: Manifest): Promise<void> {
   if (pendingFlagged.length === 0) return;
-
   log();
-  log(bold("Flagged skills review"));
-  log(dim("   Review each auditor finding before deciding whether to write it to the registry."));
-
+  log(bold('Flagged skills review'));
+  log(dim('   Review each auditor finding before deciding whether to write it to the registry.'));
   if (!stdin.isTTY || !stdout.isTTY) {
-    log(yellow("   Non-interactive terminal: flagged skills were not written."));
+    log(yellow('   Non-interactive terminal: flagged skills were not written.'));
     for (const skill of pendingFlagged) {
       printFlaggedDetails(skill);
       recordFlagged(report, skill, false);
     }
     return;
   }
-
   const rl = createInterface({ input: stdin, output: stdout });
   try {
     for (const skill of pendingFlagged) {
@@ -664,7 +732,6 @@ async function reviewFlaggedSkills(pendingFlagged, report, manifest) {
       if (/^(y|yes|s|si|sí)$/i.test(showContent.trim())) {
         printReviewedContent(skill);
       }
-
       const answer = await rl.question(`   Add ${skill.skillName} anyway? [Y/n] `);
       const accepted = !/^(n|no)$/i.test(answer.trim());
       if (accepted) {
@@ -680,52 +747,44 @@ async function reviewFlaggedSkills(pendingFlagged, report, manifest) {
   }
 }
 
-function getManifestRepoSha(manifest, repo, skills) {
-  const shas = new Set();
+function getManifestRepoSha(manifest: Manifest, repo: string, skills: SkillRef[]): string | null {
+  const shas = new Set<string>();
   for (const s of skills) {
-    const prev = manifest.skills[s.skillName];
+    const prev = manifest.skills[s.skillName] as ManifestEntry | undefined;
     if (!prev || prev.source !== repo || prev.skillPath !== s.full || !prev.commitSha) {
       return null;
     }
     shas.add(prev.commitSha);
   }
-  return shas.size === 1 ? [...shas][0] : null;
+  return shas.size === 1 ? ([...shas][0] as string) : null;
 }
 
 // ── Main ─────────────────────────────────────────────────────
 
-async function main() {
-  log(cyan("◆ ") + bold("skillindex sync"));
+async function main(): Promise<void> {
+  log(cyan('◆ ') + bold('skillindex sync'));
   log(dim(`   model: ${REVIEW_MODEL}  registry: ${relative(process.cwd(), REGISTRY_DIR)}`));
-  if (FLAGS.dryRun) log(dim("   --dry-run: no files will be written"));
-  if (FLAGS.noReview) log(yellow("   --no-review: skipping OpenAI audit"));
+  if (FLAGS.dryRun) log(dim('   --dry-run: no files will be written'));
+  if (FLAGS.noReview) log(yellow('   --no-review: skipping OpenAI audit'));
   log();
-
   const allSkills = collectAllSkillPaths();
   const retryFailed = FLAGS.retryFailed ? collectRetryFailedSkillNames() : null;
   if (retryFailed) {
     if (retryFailed.size === 0) {
-      log(green("No failed or flagged skills found in the last report."));
+      log(green('No failed or flagged skills found in the last report.'));
       process.exit(0);
     }
-    log(
-      dim(
-        `   --retry-failed: retrying ${retryFailed.size} skill${retryFailed.size === 1 ? "" : "s"}`,
-      ),
-    );
+    log(dim(`   --retry-failed: retrying ${retryFailed.size} skill${retryFailed.size === 1 ? '' : 's'}`));
     log();
   }
-
-  const byRepo = groupSkillsByRepo(allSkills, retryFailed);
+  const byRepo: Map<string, SkillRef[]> = groupSkillsByRepo(allSkills, retryFailed);
   if (FLAGS.retryFailed && byRepo.size === 0) {
-    log(green("No retryable skills from the last report are present in the current skills map."));
+    log(green('No retryable skills from the last report are present in the current skills map.'));
     process.exit(0);
   }
-
-  const manifest = loadManifest();
+  const manifest: Manifest = loadManifest();
   manifest.reviewer = { model: REVIEW_MODEL, promptVersion: REVIEW_PROMPT_VERSION };
-
-  const report = {
+  const report: Report = {
     generatedAt: new Date().toISOString(),
     totals: {
       repos: byRepo.size,
@@ -741,21 +800,17 @@ async function main() {
     missing: [],
     errors: [],
   };
-  const pendingFlagged = [];
-
+  const pendingFlagged: SkillToWrite[] = [];
   for (const [repo, skills] of byRepo) {
-    log(bold(repo) + dim(` (${skills.length} skill${skills.length === 1 ? "" : "s"})`));
-
-    let sha;
-    let repoRoot;
-    let directSkillDirs = null; // skillName → absolute dir (used in per-file mode)
-    const tmpDir = mkdtempSync(join(tmpdir(), "skillindex-sync-"));
-
+    log(bold(repo) + dim(` (${skills.length} skill${skills.length === 1 ? '' : 's'})`));
+    let sha: string = '';
+    let repoRoot: string | undefined;
+    let directSkillDirs: Map<string, string> | null = null; // skillName → absolute dir (used in per-file mode)
+    const tmpDir = mkdtempSync(join(tmpdir(), 'skillindex-sync-'));
     try {
-      const head = resolveRepoHead(repo);
+      const head: { defaultBranch: string; sha: string } = resolveRepoHead(repo);
       sha = head.sha;
-
-      const manifestSha = getManifestRepoSha(manifest, repo, skills);
+      const manifestSha: string | null = getManifestRepoSha(manifest, repo, skills);
       if (manifestSha === sha) {
         for (const { skillName } of skills) {
           log(dim(`   · ${skillName} — unchanged`));
@@ -765,9 +820,8 @@ async function main() {
         rmSync(tmpDir, { recursive: true, force: true });
         continue;
       }
-
       if (!GITHUB_TOKEN) {
-        log(dim("   ↳ repo changed — using sparse git checkout"));
+        log(dim('   ↳ repo changed — using sparse git checkout'));
         directSkillDirs = materializeSkillsFromSparseClone(
           repo,
           head.defaultBranch,
@@ -775,11 +829,10 @@ async function main() {
           tmpDir,
         );
       } else {
-        const info = await resolveRepoInfo(repo);
-
+        const info: { sizeKB: number } = await resolveRepoInfo(repo);
         if (info.sizeKB > HEAVY_REPO_KB) {
           log(dim(`   ↳ repo is ${(info.sizeKB / 1024).toFixed(0)} MB — using per-file fetch`));
-          const destRoot = join(tmpDir, "skills");
+          const destRoot = join(tmpDir, 'skills');
           mkdirSync(destRoot, { recursive: true });
           directSkillDirs = await materializeSkillsFromTree(
             repo,
@@ -788,75 +841,69 @@ async function main() {
             destRoot,
           );
         } else {
-          const tarFile = join(tmpDir, "repo.tar.gz");
+          const tarFile = join(tmpDir, 'repo.tar.gz');
           await downloadTarball(repo, sha, tarFile);
           repoRoot = extractTarball(tarFile, tmpDir);
         }
       }
-    } catch (err) {
-      log(red(`   ✘ repo fetch failed: ${err.message}`));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      log(red(`   ✘ repo fetch failed: ${message}`));
       for (const s of skills) {
-        report.errors.push({ skill: s.full, reason: err.message });
+        report.errors.push({ skill: s.full, reason: message });
       }
       rmSync(tmpDir, { recursive: true, force: true });
       continue;
     }
-
     for (const { full, skillName } of skills) {
       report.totals.skills++;
       const skillDir = directSkillDirs
         ? directSkillDirs.get(skillName) || null
-        : findSkillDir(repoRoot, skillName);
+        : findSkillDir(repoRoot as string, skillName);
       if (!skillDir) {
         log(red(`   ✘ ${skillName}`) + dim(` — SKILL.md not found in ${repo}`));
         report.totals.missing++;
         report.missing.push(full);
         continue;
       }
-
       const files = listFilesRecursive(skillDir);
       const relFiles = files.map((f) => ({
-        rel: relative(skillDir, f).split("\\").join("/"),
+        rel: relative(skillDir, f).split('\\').join('/'),
         abs: f,
         buf: readFileSync(f),
       }));
-
       const textFilesForReview = relFiles
         .filter((f) => /\.(md|markdown|txt)$/i.test(f.rel))
-        .map((f) => ({ rel: f.rel, content: f.buf.toString("utf-8") }));
-
-      const shaMap = {};
+        .map((f) => ({ rel: f.rel, content: f.buf.toString('utf-8') }));
+      const shaMap: Record<string, string> = {};
       for (const f of relFiles) shaMap[f.rel] = sha256Hex(f.buf);
       const bundleHash = sha256Hex(
         relFiles
-          .map((f) => `${f.rel}:${shaMap[f.rel]}`)
+          .map((f) => `${f.rel}:${shaMap[f.rel] as string}`)
           .sort()
-          .join("\n"),
+          .join('\n'),
       );
-
-      const prev = manifest.skills[skillName];
+      const prev = (manifest.skills as Record<string, ManifestEntry>)[skillName];
       if (prev && prev.bundleHash === bundleHash) {
         log(dim(`   · ${skillName} — unchanged`));
         report.totals.unchanged++;
         continue;
       }
-
-      let review;
+      let review: ReviewResult;
       try {
         review = await reviewWithOpenAI(skillName, textFilesForReview);
-      } catch (err) {
-        log(red(`   ✘ ${skillName}`) + dim(` — review error: ${err.message}`));
-        report.errors.push({ skill: full, reason: err.message });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        log(red(`   ✘ ${skillName}`) + dim(` — review error: ${message}`));
+        report.errors.push({ skill: full, reason: message });
         continue;
       }
-
-      if (review.status === "rejected") {
+      if (review.status === 'rejected') {
         log(red(`   ✘ ${skillName}`) + dim(` — rejected: ${review.summary}`));
         report.totals.rejected++;
         report.rejected.push({ skill: full, flags: review.flags, summary: review.summary });
         continue;
       }
-
       const skillToWrite = {
         repo,
         full,
@@ -868,8 +915,7 @@ async function main() {
         review,
         textFilesForReview,
       };
-
-      if (review.status === "flagged" && !FLAGS.force) {
+      if (review.status === 'flagged' && !FLAGS.force) {
         log(yellow(`   ⚠ ${skillName}`) + dim(` — flagged: ${review.summary}`));
         if (FLAGS.dryRun) {
           recordFlagged(report, skillToWrite, false);
@@ -878,35 +924,27 @@ async function main() {
         }
         continue;
       }
-
       if (FLAGS.dryRun) {
-        log(green(`   ✔ ${skillName}`) + dim(" — would write"));
-        if (review.status === "flagged") report.totals.flagged++;
+        log(green(`   ✔ ${skillName}`) + dim(' — would write'));
+        if (review.status === 'flagged') report.totals.flagged++;
         else report.totals.approved++;
         continue;
       }
-
       writeSkillToRegistry(manifest, skillToWrite);
-
       log(green(`   ✔ ${skillName}`) + dim(` — ${review.status}, ${relFiles.length} file(s)`));
-      if (review.status === "flagged") report.totals.flagged++;
+      if (review.status === 'flagged') report.totals.flagged++;
       else report.totals.approved++;
     }
-
     rmSync(tmpDir, { recursive: true, force: true });
   }
-
   await reviewFlaggedSkills(pendingFlagged, report, manifest);
-
   if (!FLAGS.dryRun) {
     manifest.generatedAt = new Date().toISOString();
     saveManifest(manifest);
   }
-
-  writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + "\n");
-
+  writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + '\n');
   log();
-  log(bold("Summary"));
+  log(bold('Summary'));
   log(
     `   ${green(`${report.totals.approved} approved`)}` +
       `  ${yellow(`${report.totals.flagged} flagged`)}` +
@@ -916,9 +954,7 @@ async function main() {
   );
   log(dim(`   report: ${relative(process.cwd(), REPORT_PATH)}`));
   log();
-
-  const exitBad =
-    report.totals.rejected > 0 || report.totals.missing > 0 || report.errors.length > 0;
+  const exitBad = report.totals.rejected > 0 || report.totals.missing > 0 || report.errors.length > 0;
   process.exit(exitBad ? 1 : 0);
 }
 

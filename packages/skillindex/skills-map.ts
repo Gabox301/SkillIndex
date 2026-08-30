@@ -1325,7 +1325,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/performing-windows-artifact-analysis-with-eric-zimmerman-tools',
       'Gabox301/SkillIndex/performing-wireless-network-penetration-test',
       'Gabox301/SkillIndex/performing-wireless-security-assessment-with-kismet',
-      'Gabox301/SkillIndex/performing-yara-rule-development-for-detection'
+      'Gabox301/SkillIndex/performing-yara-rule-development-for-detection',
     ],
   },
   {
@@ -1500,7 +1500,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/implementing-zero-trust-network-access',
       'Gabox301/SkillIndex/implementing-zero-trust-network-access-with-zscaler',
       'Gabox301/SkillIndex/implementing-zero-trust-with-beyondcorp',
-      'Gabox301/SkillIndex/implementing-zero-trust-with-hashicorp-boundary'
+      'Gabox301/SkillIndex/implementing-zero-trust-with-hashicorp-boundary',
     ],
   },
   {
@@ -1603,7 +1603,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/detecting-t1548-abuse-elevation-control-mechanism',
       'Gabox301/SkillIndex/detecting-typosquatting-packages',
       'Gabox301/SkillIndex/detecting-typosquatting-packages-in-npm-pypi',
-      'Gabox301/SkillIndex/detecting-wmi-persistence'
+      'Gabox301/SkillIndex/detecting-wmi-persistence',
     ],
   },
   {
@@ -1686,7 +1686,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/analyzing-windows-lnk-files-for-artifacts',
       'Gabox301/SkillIndex/analyzing-windows-prefetch-with-python',
       'Gabox301/SkillIndex/analyzing-windows-registry-for-artifacts',
-      'Gabox301/SkillIndex/analyzing-windows-shellbag-artifacts'
+      'Gabox301/SkillIndex/analyzing-windows-shellbag-artifacts',
     ],
   },
   {
@@ -1730,7 +1730,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/hunting-for-unusual-network-connections',
       'Gabox301/SkillIndex/hunting-for-unusual-service-installations',
       'Gabox301/SkillIndex/hunting-for-webshell-activity',
-      'Gabox301/SkillIndex/hunting-saas-sso-token-abuse'
+      'Gabox301/SkillIndex/hunting-saas-sso-token-abuse',
     ],
   },
   {
@@ -1773,7 +1773,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/building-vulnerability-aging-and-sla-tracking',
       'Gabox301/SkillIndex/building-vulnerability-dashboard-with-defectdojo',
       'Gabox301/SkillIndex/building-vulnerability-exception-tracking-system',
-      'Gabox301/SkillIndex/building-vulnerability-scanning-workflow'
+      'Gabox301/SkillIndex/building-vulnerability-scanning-workflow',
     ],
   },
   {
@@ -1814,7 +1814,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/exploiting-type-juggling-vulnerabilities',
       'Gabox301/SkillIndex/exploiting-vulnerabilities-with-metasploit-framework',
       'Gabox301/SkillIndex/exploiting-websocket-vulnerabilities',
-      'Gabox301/SkillIndex/exploiting-zerologon-vulnerability-cve-2020-1472'
+      'Gabox301/SkillIndex/exploiting-zerologon-vulnerability-cve-2020-1472',
     ],
   },
   {
@@ -1845,7 +1845,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/testing-oauth2-implementation-flaws',
       'Gabox301/SkillIndex/testing-prompt-injection-in-rag-pipelines',
       'Gabox301/SkillIndex/testing-ransomware-recovery-procedures',
-      'Gabox301/SkillIndex/testing-websocket-api-security'
+      'Gabox301/SkillIndex/testing-websocket-api-security',
     ],
   },
   {
@@ -1873,7 +1873,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/conducting-social-engineering-penetration-test',
       'Gabox301/SkillIndex/conducting-social-engineering-pretext-call',
       'Gabox301/SkillIndex/conducting-spearphishing-simulation-campaign',
-      'Gabox301/SkillIndex/conducting-wireless-network-penetration-test'
+      'Gabox301/SkillIndex/conducting-wireless-network-penetration-test',
     ],
   },
   {
@@ -1898,7 +1898,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/configuring-tls-1-3-for-secure-communications',
       'Gabox301/SkillIndex/configuring-windows-defender-advanced-settings',
       'Gabox301/SkillIndex/configuring-windows-event-logging-for-detection',
-      'Gabox301/SkillIndex/configuring-zscaler-private-access-for-ztna'
+      'Gabox301/SkillIndex/configuring-zscaler-private-access-for-ztna',
     ],
   },
   {
@@ -1918,7 +1918,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/securing-historian-server-in-ot-environment',
       'Gabox301/SkillIndex/securing-kubernetes-on-cloud',
       'Gabox301/SkillIndex/securing-remote-access-to-ot-environment',
-      'Gabox301/SkillIndex/securing-serverless-functions'
+      'Gabox301/SkillIndex/securing-serverless-functions',
     ],
   },
   {
@@ -1937,7 +1937,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/auditing-mcp-servers-for-tool-poisoning',
       'Gabox301/SkillIndex/auditing-terraform-infrastructure-for-security',
       'Gabox301/SkillIndex/auditing-tls-certificate-transparency-logs',
-      'Gabox301/SkillIndex/auditing-uefi-firmware-with-chipsec'
+      'Gabox301/SkillIndex/auditing-uefi-firmware-with-chipsec',
     ],
   },
   {
@@ -1955,7 +1955,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/deploying-palo-alto-prisma-access-zero-trust',
       'Gabox301/SkillIndex/deploying-ransomware-canary-files',
       'Gabox301/SkillIndex/deploying-software-defined-perimeter',
-      'Gabox301/SkillIndex/deploying-tailscale-for-zero-trust-vpn'
+      'Gabox301/SkillIndex/deploying-tailscale-for-zero-trust-vpn',
     ],
   },
   {
@@ -1972,7 +1972,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/sdd-propose',
       'Gabox301/SkillIndex/sdd-spec',
       'Gabox301/SkillIndex/sdd-tasks',
-      'Gabox301/SkillIndex/sdd-verify'
+      'Gabox301/SkillIndex/sdd-verify',
     ],
   },
   {
@@ -1986,7 +1986,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/scanning-iac-and-images-with-trivy',
       'Gabox301/SkillIndex/scanning-infrastructure-with-nessus',
       'Gabox301/SkillIndex/scanning-kubernetes-manifests-with-kubesec',
-      'Gabox301/SkillIndex/scanning-network-with-nmap-advanced'
+      'Gabox301/SkillIndex/scanning-network-with-nmap-advanced',
     ],
   },
   {
@@ -1999,7 +1999,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/appwrite-python',
       'Gabox301/SkillIndex/appwrite-ruby',
       'Gabox301/SkillIndex/appwrite-rust',
-      'Gabox301/SkillIndex/appwrite-typescript'
+      'Gabox301/SkillIndex/appwrite-typescript',
     ],
   },
   {
@@ -2012,7 +2012,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/extracting-credentials-from-memory-dump',
       'Gabox301/SkillIndex/extracting-iocs-from-malware-samples',
       'Gabox301/SkillIndex/extracting-memory-artifacts-with-rekall',
-      'Gabox301/SkillIndex/extracting-windows-event-logs-artifacts'
+      'Gabox301/SkillIndex/extracting-windows-event-logs-artifacts',
     ],
   },
   {
@@ -2025,7 +2025,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/reverse-engineering-ios-app-with-frida',
       'Gabox301/SkillIndex/reverse-engineering-malware-with-ghidra',
       'Gabox301/SkillIndex/reverse-engineering-ransomware-encryption-routine',
-      'Gabox301/SkillIndex/reverse-engineering-rust-malware'
+      'Gabox301/SkillIndex/reverse-engineering-rust-malware',
     ],
   },
   {
@@ -2037,7 +2037,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/executing-nist-rmf-authorization-to-operate',
       'Gabox301/SkillIndex/executing-phishing-simulation-campaign',
       'Gabox301/SkillIndex/executing-red-team-engagement-planning',
-      'Gabox301/SkillIndex/executing-red-team-exercise'
+      'Gabox301/SkillIndex/executing-red-team-exercise',
     ],
   },
   {
@@ -2049,7 +2049,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/triaging-security-incident',
       'Gabox301/SkillIndex/triaging-security-incident-with-ir-playbook',
       'Gabox301/SkillIndex/triaging-vulnerabilities-with-ssvc-framework',
-      'Gabox301/SkillIndex/triaging-windows-with-kape'
+      'Gabox301/SkillIndex/triaging-windows-with-kape',
     ],
   },
   {
@@ -2146,7 +2146,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/vercel-react-best-practices',
       'Gabox301/SkillIndex/verifying-build-provenance-with-slsa-sigstore',
       'Gabox301/SkillIndex/web-design-guidelines',
-      'Gabox301/SkillIndex/work-unit-commits'
+      'Gabox301/SkillIndex/work-unit-commits',
     ],
   },
 ];

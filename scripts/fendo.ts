@@ -14,27 +14,36 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = join(fileURLToPath(import.meta.url), '..');
-const root = resolve(__dirname, '..');
+const __dirname: string = join(fileURLToPath(import.meta.url), '..');
+const root: string = resolve(__dirname, '..');
 
 let failed = false;
 
-function fail(msg) {
+function fail(msg: string): void {
   console.error(`✘ ${msg}`);
   failed = true;
 }
-function ok(msg) {
+
+function ok(msg: string): void {
   console.log(`✔ ${msg}`);
 }
 
-function checkPackageJson(path) {
+interface PackageJson {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
+
+function checkPackageJson(path: string): void {
   if (!existsSync(path)) return;
-  const pkg = JSON.parse(readFileSync(path, 'utf-8'));
-  const allDeps = {
-    ...(pkg.dependencies || {}),
-    ...(pkg.devDependencies || {}),
-    ...(pkg.peerDependencies || {}),
-    ...(pkg.optionalDependencies || {}),
+  const pkg = JSON.parse(readFileSync(path, 'utf-8')) as PackageJson;
+  const allDeps: Record<string, string> = {
+    ...(pkg.dependencies ?? {}),
+    ...(pkg.devDependencies ?? {}),
+    ...(pkg.peerDependencies ?? {}),
+    ...(pkg.optionalDependencies ?? {}),
   };
   for (const [name, ver] of Object.entries(allDeps)) {
     const v = String(ver).trim();
@@ -50,14 +59,14 @@ function checkPackageJson(path) {
   if (Object.keys(allDeps).length > 0) ok(`${path}: versions pinned`);
 }
 
-function checkNpmrc() {
+function checkNpmrc(): void {
   const p = join(root, '.npmrc');
   if (!existsSync(p)) {
     fail('.npmrc missing — hardening not applied');
     return;
   }
   const txt = readFileSync(p, 'utf-8');
-  const checks = [
+  const checks: Array<[string, string]> = [
     ['save-exact=true', 'save-exact=true'],
     ['ignore-scripts=true', 'ignore-scripts=true'],
     ['engine-strict=true', 'engine-strict=true'],
@@ -70,10 +79,10 @@ function checkNpmrc() {
   if (txt.includes('minimum-release-age')) ok('.npmrc has minimum-release-age');
 }
 
-function checkLockfile() {
-  const candidates = ['bun.lock', 'bun.lockb', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
-  const found = candidates.filter((f) => existsSync(join(root, f)));
-  const pkgCandidates = ['pnpm-lock.yaml', 'bun.lock', 'bun.lockb'].filter((f) =>
+function checkLockfile(): void {
+  const candidates: string[] = ['bun.lock', 'bun.lockb', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
+  const found: string[] = candidates.filter((f) => existsSync(join(root, f)));
+  const pkgCandidates: string[] = ['pnpm-lock.yaml', 'bun.lock', 'bun.lockb'].filter((f) =>
     existsSync(join(root, 'packages/skillindex', f)),
   );
   if (found.length === 0 && pkgCandidates.length === 0) {
@@ -81,17 +90,20 @@ function checkLockfile() {
   } else {
     ok(`Lockfile present: ${[...found, ...pkgCandidates].join(', ')}`);
   }
-  // Check .gitignore doesn't ignore lockfile
+  // Check .gitignore doesn't ignore lockfile (exact line match to avoid substring false positive like bun.lock in bun.lockb)
   const gi = join(root, '.gitignore');
   if (existsSync(gi)) {
     const txt = readFileSync(gi, 'utf-8');
+    const lines: string[] = txt.split(/\r?\n/).map((l) => l.trim());
     for (const f of found) {
-      if (txt.includes(f)) fail(`.gitignore ignores ${f} — must be committed`);
+      if (lines.includes(f) || lines.includes(`/${f}`) || lines.includes(`**/${f}`)) {
+        fail(`.gitignore ignores ${f} — must be committed`);
+      }
     }
   }
 }
 
-function checkGitignore() {
+function checkGitignore(): void {
   // Already handled
 }
 

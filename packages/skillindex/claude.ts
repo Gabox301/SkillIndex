@@ -14,7 +14,6 @@ function findGenericBlock(content: string): { start: number; end: number; endLen
   let startIdx: number | null = null;
   let endIdx: number | null = null;
   let endLen = 0;
-
   while (true) {
     const open = content.indexOf('<!--', searchFrom);
     if (open === -1) break;
@@ -46,7 +45,6 @@ function findGenericBlock(content: string): { start: number; end: number; endLen
     searchFrom = close + 3;
     if (searchFrom >= content.length) break;
   }
-
   if (startIdx !== null && endIdx !== null) {
     return { start: startIdx, end: endIdx, endLen };
   }
@@ -62,7 +60,6 @@ export function cleanupClaudeMd(projectDir: string): CleanupResult {
   let startIdx = existing.indexOf(SECTION_START);
   let endIdx = existing.indexOf(SECTION_END);
   let sectionEndLen = SECTION_END.length;
-
   if (startIdx === -1 || endIdx === -1) {
     const generic = findGenericBlock(existing);
     if (!generic) {
@@ -75,7 +72,6 @@ export function cleanupClaudeMd(projectDir: string): CleanupResult {
       return { cleaned: false, deleted: false };
     }
   }
-
   const before = existing.slice(0, startIdx);
   const after = existing.slice(endIdx + sectionEndLen);
   const remaining = (before + after).replace(/\n{3,}/g, '\n\n').trim();

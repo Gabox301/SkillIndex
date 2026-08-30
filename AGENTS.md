@@ -4,7 +4,7 @@
 
 ## Supply Chain Security
 
-This project has been hardened against supply chain attacks using local `fendo` (`scripts/fendo.mjs` — GaboTech fork, 100% local, no external dependency).
+This project has been hardened against supply chain attacks using local `fendo` (`scripts/fendo.ts` 100% local, no external dependency).
 
 ### Rules for AI assistants and contributors
 
@@ -39,15 +39,15 @@ assert.ok(value);
 assert.strictEqual(a, b);
 ```
 
-- Use the shared helpers from `tests/helpers.mjs` (`useTmpDir`, `writePackageJson`, `writeJson`, `writeFile`, `addWorkspace`) to avoid duplicating filesystem setup logic in tests.
+- Use the shared helpers from `tests/helpers.ts` (`useTmpDir`, `writePackageJson`, `writeJson`, `writeFile`, `addWorkspace`) to avoid duplicating filesystem setup logic in tests.
 
 ## Output helpers
 
-- **Never use `console.log` or `process.stdout.write` directly** in the CLI package (`packages/skillindex`). Use the `log` and `write` helpers exported from `colors.mjs` instead.
+- **Never use `console.log` or `process.stdout.write` directly** in the CLI package (`packages/skillindex`). Use the `log` and `write` helpers exported from `colors.ts` instead.
 
 ```js
 // ✅ Correct
-import { log, write } from './colors.mjs';
+import { log, write } from './colors.ts';
 
 log('hello');
 write('raw output\n');

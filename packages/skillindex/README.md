@@ -12,11 +12,13 @@ skillindex --help
 ## Instalación
 
 **Con Cargo (Rust):**
+
 ```bash
 cargo install skillindex
 ```
 
 **Con npm (Node.js):**
+
 ```bash
 npx skillindex
 npm i -g skillindex
@@ -37,12 +39,12 @@ skillindex --dry-run
 
 ## Opciones
 
-| Flag | Descripción |
-|------|-------------|
-| `-y`, `--yes` | Omite la confirmación |
-| `--dry-run` | Muestra las skills sin instalar |
+| Flag              | Descripción                         |
+| ----------------- | ----------------------------------- |
+| `-y`, `--yes`     | Omite la confirmación               |
+| `--dry-run`       | Muestra las skills sin instalar     |
 | `-v`, `--verbose` | Muestra traza y detalles de errores |
-| `-h`, `--help` | Muestra la ayuda |
+| `-h`, `--help`    | Muestra la ayuda                    |
 
 ## Tecnologías soportadas
 

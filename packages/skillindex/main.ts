@@ -62,14 +62,12 @@ function parseArgs(): CliArgs {
 function showHelp(): void {
   log(`
   ${bold('skillindex')} — Instala automáticamente las mejores skills de IA para tu proyecto
-
   ${bold('Uso:')}
     npx skillindex                   Detecta e instala skills
     npx skillindex ${dim('-y')}                   Omitir confirmación
     npx skillindex ${dim('--dry-run')}            Mostrar qué se instalaría sin instalar
     npx skillindex ${dim('--clear-cache')}        Limpiar caché de skills descargadas
     npx skillindex ${dim('-a cursor claude-code')} Instalar solo para IDEs específicos
-
   ${bold('Opciones:')}
     -y, --yes       Omitir confirmación
     --dry-run       Mostrar qué se instalaría sin instalar
@@ -160,8 +158,7 @@ function printSkillsList(skills: SkillEntry[]): void {
   );
   const newCount = skills.filter((s) => !s.installed).length;
   const installedCount = skills.length - newCount;
-  const countLabel =
-    installedCount > 0 ? `(${skills.length}, ${installedCount} ya instaladas)` : `(${skills.length})`;
+  const countLabel = installedCount > 0 ? `(${skills.length}, ${installedCount} ya instaladas)` : `(${skills.length})`;
   log(cyan('   ◆ ') + bold(`Skills por instalar `) + dim(countLabel));
   log();
   for (let i = 0; i < entries.length; i++) {
@@ -303,9 +300,19 @@ interface SummaryOptions {
 function printSummary({ installed, failed, errors, elapsed, verbose }: SummaryOptions): void {
   log();
   if (failed === 0) {
-    log(green(bold(`   ✔ ¡Listo! ${installed} skill${installed !== 1 ? 's' : ''} instalad${installed !== 1 ? 'as' : 'a'} en ${formatTime(elapsed)}.`)));
+    log(
+      green(
+        bold(
+          `   ✔ ¡Listo! ${installed} skill${installed !== 1 ? 's' : ''} instalad${installed !== 1 ? 'as' : 'a'} en ${formatTime(elapsed)}.`,
+        ),
+      ),
+    );
   } else {
-    log(yellow(`   Completado: ${green(`${installed} instaladas`)}, ${red(`${failed} con error`)} en ${formatTime(elapsed)}.`));
+    log(
+      yellow(
+        `   Completado: ${green(`${installed} instaladas`)}, ${red(`${failed} con error`)} en ${formatTime(elapsed)}.`,
+      ),
+    );
     if (errors.length > 0) {
       log();
       log(bold(red('   Errores:')));
@@ -375,7 +382,9 @@ async function selectSkills(skills: SkillEntry[], autoYes: boolean): Promise<Ski
   const newCount = skills.filter((s) => !s.installed).length;
   const installedCount = skills.length - newCount;
   const countLabel =
-    installedCount > 0 ? `${skills.length} encontradas, ${installedCount} ya instaladas` : `${skills.length} encontradas`;
+    installedCount > 0
+      ? `${skills.length} encontradas, ${installedCount} ya instaladas`
+      : `${skills.length} encontradas`;
   log(cyan('   ◆ ') + bold(`Selecciona las skills a instalar `) + dim(`(${countLabel})`));
   log();
   const selected = await multiSelect(skills, {
@@ -425,7 +434,9 @@ async function main(): Promise<void> {
   if (clearCache) {
     const { cacheDir, removed } = clearSkillIndexCache();
     log(
-      removed ? green(`   ✔ Caché de skillindex limpiada: ${cacheDir}`) : dim(`   No se encontró caché de skillindex: ${cacheDir}`),
+      removed
+        ? green(`   ✔ Caché de skillindex limpiada: ${cacheDir}`)
+        : dim(`   No se encontró caché de skillindex: ${cacheDir}`),
     );
     log();
     process.exit(0);

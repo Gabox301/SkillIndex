@@ -1,7 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-
 import type { ComboSkill, ConfigFileContentBlock, Technology } from './skills-map.ts';
 
 export {

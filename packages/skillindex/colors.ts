@@ -13,7 +13,6 @@ export const gray = useColor ? (s: string) => `\x1b[38;5;240m${s}\x1b[39m` : (s:
 export const muted = useColor ? (s: string) => `\x1b[38;2;174;170;215m${s}\x1b[39m` : (s: string) => s;
 export const white = useColor ? (s: string) => `\x1b[97m${s}\x1b[39m` : (s: string) => s;
 export const pink = useColor ? (s: string) => `\x1b[38;5;218m${s}\x1b[39m` : (s: string) => s;
-
 export const log = console.log.bind(console);
 export const write = process.stdout.write.bind(process.stdout);
 export const HIDE_CURSOR = process.stdout.isTTY ? '\x1b[?25l' : '';
