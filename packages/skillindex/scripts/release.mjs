@@ -106,7 +106,7 @@ function getLastTag() {
 }
 
 /**
- * Collects commits affecting `packages/skillscout/` since the given tag.
+ * Collects commits affecting `packages/skillindex/` since the given tag.
  * @param {string|null} tag - Starting tag (all commits if `null`).
  * @returns {{ message: string, hash: string }[]}
  */

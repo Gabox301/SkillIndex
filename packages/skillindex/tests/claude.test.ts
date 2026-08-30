@@ -15,7 +15,7 @@ describe("cleanupClaudeMd", () => {
     strictEqual(result.deleted, false);
   });
 
-  it("returns cleaned=false when CLAUDE.md has no skillscout markers", () => {
+  it("returns cleaned=false when CLAUDE.md has no skillindex markers", () => {
     writeFileSync(join(tmp.path, "CLAUDE.md"), "# CLAUDE.md\n\nMy custom instructions.\n");
     const result = cleanupClaudeMd(tmp.path);
     strictEqual(result.cleaned, false);
@@ -24,10 +24,10 @@ describe("cleanupClaudeMd", () => {
     strictEqual(output, "# CLAUDE.md\n\nMy custom instructions.\n");
   });
 
-  it("deletes CLAUDE.md when only the skillscout section remains", () => {
+  it("deletes CLAUDE.md when only the skillindex section remains", () => {
     writeFileSync(
       join(tmp.path, "CLAUDE.md"),
-      "# CLAUDE.md\n\n<!-- skillscout:start -->\n\nGenerated content.\n\n<!-- skillscout:end -->\n",
+      "# CLAUDE.md\n\n<!-- skillindex:start -->\n\nGenerated content.\n\n<!-- skillindex:end -->\n",
     );
     const result = cleanupClaudeMd(tmp.path);
     strictEqual(result.cleaned, true);
@@ -35,9 +35,9 @@ describe("cleanupClaudeMd", () => {
     ok(!existsSync(join(tmp.path, "CLAUDE.md")));
   });
 
-  it("removes skillscout section but preserves user content", () => {
+  it("removes skillindex section but preserves user content", () => {
     const content =
-      "# CLAUDE.md\n\nMy custom instructions.\n\n<!-- skillscout:start -->\n\nGenerated content.\n\n<!-- skillscout:end -->\n\n## My notes\n\nDo not touch this.\n";
+      "# CLAUDE.md\n\nMy custom instructions.\n\n<!-- skillindex:start -->\n\nGenerated content.\n\n<!-- skillindex:end -->\n\n## My notes\n\nDo not touch this.\n";
     writeFileSync(join(tmp.path, "CLAUDE.md"), content);
     const result = cleanupClaudeMd(tmp.path);
     strictEqual(result.cleaned, true);
@@ -45,13 +45,13 @@ describe("cleanupClaudeMd", () => {
     const output = readFileSync(join(tmp.path, "CLAUDE.md"), "utf-8");
     ok(output.includes("My custom instructions."));
     ok(output.includes("Do not touch this."));
-    ok(!output.includes("<!-- skillscout:start -->"));
+    ok(!output.includes("<!-- skillindex:start -->"));
     ok(!output.includes("Generated content."));
   });
 
   it("does not leave triple newlines after removing the section", () => {
     const content =
-      "# CLAUDE.md\n\nBefore.\n\n<!-- skillscout:start -->\nstuff\n<!-- skillscout:end -->\n\nAfter.\n";
+      "# CLAUDE.md\n\nBefore.\n\n<!-- skillindex:start -->\nstuff\n<!-- skillindex:end -->\n\nAfter.\n";
     writeFileSync(join(tmp.path, "CLAUDE.md"), content);
     cleanupClaudeMd(tmp.path);
     const output = readFileSync(join(tmp.path, "CLAUDE.md"), "utf-8");
@@ -61,7 +61,7 @@ describe("cleanupClaudeMd", () => {
   it("deletes file when heading is the only remaining content", () => {
     writeFileSync(
       join(tmp.path, "CLAUDE.md"),
-      "# CLAUDE.md\n\n<!-- skillscout:start -->\ngenerated\n<!-- skillscout:end -->\n",
+      "# CLAUDE.md\n\n<!-- skillindex:start -->\ngenerated\n<!-- skillindex:end -->\n",
     );
     const result = cleanupClaudeMd(tmp.path);
     strictEqual(result.cleaned, true);

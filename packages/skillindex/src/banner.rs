@@ -40,7 +40,7 @@ fn is_no_color() -> bool {
     std::env::var("NO_COLOR").is_ok()
 }
 
-/// Print the SkillScout banner — wave animation if TTY and colors enabled, else static.
+/// Print the SkillIndex banner — wave animation if TTY and colors enabled, else static.
 /// Mirrors `printBanner` in ui.ts (grayscale wave 28ms, totalFrames = ceil((cols+rows*2+10)/speed)).
 pub async fn print_banner(version: &str) {
     let ver = format!("v{version}");

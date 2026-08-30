@@ -84,7 +84,7 @@ pub fn get_package_version() -> String {
 }
 
 /// Build the list of registry raw base URLs — mirrors `getRegistryRawBaseUrls` in installer.ts
-/// Precedence: opts.registry_base_url > SKILLSCOUT_REGISTRY_BASE_URL > AUTOSKILLS_REGISTRY_BASE_URL > v{version}+main
+/// Precedence: opts.registry_base_url > SKILLINDEX_REGISTRY_BASE_URL > v{version}+main
 pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String> {
     if let Some(url) = registry_base_url {
         let trimmed = url.trim_end_matches('/').to_string();
@@ -92,12 +92,7 @@ pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String
             return vec![trimmed];
         }
     }
-    if let Ok(v) = env::var("SKILLSCOUT_REGISTRY_BASE_URL") {
-        if !v.trim().is_empty() {
-            return vec![v.trim_end_matches('/').to_string()];
-        }
-    }
-    if let Ok(v) = env::var("AUTOSKILLS_REGISTRY_BASE_URL") {
+    if let Ok(v) = env::var("SKILLINDEX_REGISTRY_BASE_URL") {
         if !v.trim().is_empty() {
             return vec![v.trim_end_matches('/').to_string()];
         }
@@ -531,21 +526,16 @@ mod tests {
     fn get_registry_raw_base_urls_default() {
         let _guard = crate::cache::env_lock();
         // Ensure no env interferes
-        let prev1 = env::var("SKILLSCOUT_REGISTRY_BASE_URL").ok();
-        let prev2 = env::var("AUTOSKILLS_REGISTRY_BASE_URL").ok();
+        let prev1 = env::var("SKILLINDEX_REGISTRY_BASE_URL").ok();
         unsafe {
-            env::remove_var("SKILLSCOUT_REGISTRY_BASE_URL");
-            env::remove_var("AUTOSKILLS_REGISTRY_BASE_URL");
+            env::remove_var("SKILLINDEX_REGISTRY_BASE_URL");
         }
         let urls = get_registry_raw_base_urls(None);
         assert_eq!(urls.len(), 2);
         assert!(urls[0].contains(&format!("/v{}/", env!("CARGO_PKG_VERSION"))));
         assert!(urls[1].ends_with("/main/packages/skillindex/skills-registry"));
         if let Some(v) = prev1 {
-            unsafe { env::set_var("SKILLSCOUT_REGISTRY_BASE_URL", v) };
-        }
-        if let Some(v) = prev2 {
-            unsafe { env::set_var("AUTOSKILLS_REGISTRY_BASE_URL", v) };
+            unsafe { env::set_var("SKILLINDEX_REGISTRY_BASE_URL", v) };
         }
     }
 
@@ -558,13 +548,13 @@ mod tests {
     #[test]
     fn get_registry_raw_base_urls_env_precedence() {
         let _guard = crate::cache::env_lock();
-        let prev = env::var("SKILLSCOUT_REGISTRY_BASE_URL").ok();
-        unsafe { env::set_var("SKILLSCOUT_REGISTRY_BASE_URL", "https://env.test/registry") };
+        let prev = env::var("SKILLINDEX_REGISTRY_BASE_URL").ok();
+        unsafe { env::set_var("SKILLINDEX_REGISTRY_BASE_URL", "https://env.test/registry") };
         let urls = get_registry_raw_base_urls(None);
         assert_eq!(urls, vec!["https://env.test/registry"]);
         match prev {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_REGISTRY_BASE_URL", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_REGISTRY_BASE_URL") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_REGISTRY_BASE_URL", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_REGISTRY_BASE_URL") },
         }
     }
 

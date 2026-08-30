@@ -960,10 +960,10 @@ fn parity_fallback_rust_help_available() {
     cmd.arg("--help").assert().success();
 }
 
-// skillindex_USE_RUST=0 fallback — ensure Node index.mjs still works via node
+// SKILLINDEX_USE_RUST=0 fallback — ensure Node index.mjs still works via node
 #[test]
 fn parity_fallback_node_via_env() {
-    // Spawn node index.mjs --help with skillindex_USE_RUST=0, should succeed via Node fallback
+    // Spawn node index.mjs --help with SKILLINDEX_USE_RUST=0, should succeed via Node fallback
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let index = manifest_dir.join("index.mjs");
     if !index.exists() {
@@ -972,7 +972,7 @@ fn parity_fallback_node_via_env() {
     let output = std::process::Command::new("node")
         .arg(index)
         .arg("--help")
-        .env("skillindex_USE_RUST", "0")
+        .env("SKILLINDEX_USE_RUST", "0")
         .output()
         .unwrap();
     assert!(
@@ -1058,8 +1058,8 @@ async fn parity_installer_rate_limit_iso() {
             .body("rate limited");
     });
     let cache_root = tmp.path().join("cache-rate-parity");
-    let prev = std::env::var("skillindex_CACHE_DIR").ok();
-    unsafe { std::env::set_var("skillindex_CACHE_DIR", cache_root.to_str().unwrap()) };
+    let prev = std::env::var("SKILLINDEX_CACHE_DIR").ok();
+    unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
     let opts = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
@@ -1073,8 +1073,8 @@ async fn parity_installer_rate_limit_iso() {
     assert!(result.output.contains("1970-01-01T00:16:39.000Z"));
     mock.assert();
     match prev {
-        Some(v) => unsafe { std::env::set_var("skillindex_CACHE_DIR", v) },
-        None => unsafe { std::env::remove_var("skillindex_CACHE_DIR") },
+        Some(v) => unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", v) },
+        None => unsafe { std::env::remove_var("SKILLINDEX_CACHE_DIR") },
     }
 }
 
@@ -1140,8 +1140,8 @@ async fn parity_installer_httpmock_network_ok() {
         then.status(200).body(content);
     });
     let cache_root = tmp.path().join("cache-net-parity");
-    let prev = std::env::var("skillindex_CACHE_DIR").ok();
-    unsafe { std::env::set_var("skillindex_CACHE_DIR", cache_root.to_str().unwrap()) };
+    let prev = std::env::var("SKILLINDEX_CACHE_DIR").ok();
+    unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
     let opts = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
@@ -1161,8 +1161,8 @@ async fn parity_installer_httpmock_network_ok() {
         .exists());
     mock.assert();
     match prev {
-        Some(v) => unsafe { std::env::set_var("skillindex_CACHE_DIR", v) },
-        None => unsafe { std::env::remove_var("skillindex_CACHE_DIR") },
+        Some(v) => unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", v) },
+        None => unsafe { std::env::remove_var("SKILLINDEX_CACHE_DIR") },
     }
 }
 

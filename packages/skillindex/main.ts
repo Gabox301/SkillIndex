@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { cleanupClaudeMd } from './claude.ts';
 import { bold, cyan, dim, gray, green, log, magenta, muted, red, SHOW_CURSOR, write, yellow } from './colors.ts';
 import type { InstallSecurityCheck } from './installer.ts';
-import { clearSkillScoutCache, installAll, loadRegistry, securityCheckForSkillPath } from './installer.ts';
+import { clearSkillIndexCache, installAll, loadRegistry, securityCheckForSkillPath } from './installer.ts';
 import type { ComboSkill, SkillEntry, Technology } from './lib.ts';
 import { collectSkills, detectAgents, detectTechnologies, getInstalledSkillNames } from './lib.ts';
 import { formatTime, multiSelect, printBanner } from './ui.ts';
@@ -21,7 +21,7 @@ const VERSION: string = (() => {
   }
   return '0.0.0';
 })();
-const ISSUES_URL = 'https://github.com/GaboTech/skillindex/issues';
+const ISSUES_URL = 'https://github.com/Gabox301/SkillIndex/issues';
 
 process.on('SIGINT', () => {
   write(SHOW_CURSOR + '\n');
@@ -423,7 +423,7 @@ async function main(): Promise<void> {
     process.exit(0);
   }
   if (clearCache) {
-    const { cacheDir, removed } = clearSkillScoutCache();
+    const { cacheDir, removed } = clearSkillIndexCache();
     log(
       removed ? green(`   ✔ Caché de skillindex limpiada: ${cacheDir}`) : dim(`   No se encontró caché de skillindex: ${cacheDir}`),
     );

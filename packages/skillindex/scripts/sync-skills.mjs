@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Sync script: downloads skills from upstream GitHub repos, reviews each one
 // with OpenAI for supply-chain / prompt-injection safety, and stores the
-// approved markdown files inside `packages/skillscout/skills-registry/`.
+// approved markdown files inside `packages/skillindex/skills-registry/`.
 //
 // Meant to be run by maintainers only — never by end users.
 
@@ -39,7 +39,7 @@ const REGISTRY_DIR = join(PKG_ROOT, "skills-registry");
 const MANIFEST_PATH = join(REGISTRY_DIR, "index.json");
 const REPORT_PATH = join(__dirname, "sync-skills.report.json");
 
-const REVIEW_MODEL = process.env.SKILLSCOUT_REVIEW_MODEL || "gpt-5.4";
+const REVIEW_MODEL = process.env.SKILLINDEX_REVIEW_MODEL || "gpt-5.4";
 const REVIEW_PROMPT_VERSION = "1.0.0";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 
@@ -144,7 +144,7 @@ function groupSkillsByRepo(skills, retryFailed = null) {
 
 async function ghFetch(url) {
   const headers = {
-    "User-Agent": "skillscout-sync",
+    "User-Agent": "skillindex-sync",
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
@@ -210,7 +210,7 @@ const TARBALL_TIMEOUT_MS = 180_000;
 
 async function downloadTarball(repo, sha, destFile) {
   const url = `https://codeload.github.com/${repo}/tar.gz/${sha}`;
-  const headers = { "User-Agent": "skillscout-sync" };
+  const headers = { "User-Agent": "skillindex-sync" };
   if (GITHUB_TOKEN) headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), TARBALL_TIMEOUT_MS);
@@ -266,7 +266,7 @@ function findSkillDirsInTree(tree, skillName) {
 
 async function downloadRawFile(repo, sha, repoPath, destFile) {
   const url = `https://raw.githubusercontent.com/${repo}/${sha}/${repoPath}`;
-  const headers = { "User-Agent": "skillscout-sync" };
+  const headers = { "User-Agent": "skillindex-sync" };
   if (GITHUB_TOKEN) headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), TARBALL_TIMEOUT_MS);
@@ -695,7 +695,7 @@ function getManifestRepoSha(manifest, repo, skills) {
 // ── Main ─────────────────────────────────────────────────────
 
 async function main() {
-  log(cyan("◆ ") + bold("skillscout sync"));
+  log(cyan("◆ ") + bold("skillindex sync"));
   log(dim(`   model: ${REVIEW_MODEL}  registry: ${relative(process.cwd(), REGISTRY_DIR)}`));
   if (FLAGS.dryRun) log(dim("   --dry-run: no files will be written"));
   if (FLAGS.noReview) log(yellow("   --no-review: skipping OpenAI audit"));
@@ -749,7 +749,7 @@ async function main() {
     let sha;
     let repoRoot;
     let directSkillDirs = null; // skillName → absolute dir (used in per-file mode)
-    const tmpDir = mkdtempSync(join(tmpdir(), "skillscout-sync-"));
+    const tmpDir = mkdtempSync(join(tmpdir(), "skillindex-sync-"));
 
     try {
       const head = resolveRepoHead(repo);

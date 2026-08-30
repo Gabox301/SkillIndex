@@ -1525,11 +1525,23 @@ describe("detectTechnologies (monorepo)", () => {
 
 describe("detectCombos", () => {
   it("returns empty array when no combos match", () => {
-    strictEqual(detectCombos(["react"]).length, 0);
+    // Domain combos (security-operations, red-team, cloud-security, forensics-ir) are always-suggested (requires: [])
+    const combos = detectCombos(["react"]);
+    const domainIds = new Set(["security-operations", "red-team", "cloud-security", "forensics-ir"]);
+    // Only domain combos should match for ["react"] alone
+    strictEqual(
+      combos.filter((c) => !domainIds.has(c.id)).length,
+      0,
+    );
+    strictEqual(combos.filter((c) => domainIds.has(c.id)).length, 4);
   });
 
   it("returns empty array for empty input", () => {
-    strictEqual(detectCombos([]).length, 0);
+    // Domain combos are always-suggested even for empty input
+    const combos = detectCombos([]);
+    const domainIds = new Set(["security-operations", "red-team", "cloud-security", "forensics-ir"]);
+    strictEqual(combos.filter((c) => domainIds.has(c.id)).length, 4);
+    strictEqual(combos.filter((c) => !domainIds.has(c.id)).length, 0);
   });
 
   it("detects expo + tailwind combo", () => {

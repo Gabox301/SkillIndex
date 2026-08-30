@@ -859,10 +859,10 @@ mod tests {
             ..Default::default()
         };
         // Use a cache dir that doesn't contain the skill
-        let prev_cache = env::var("SKILLSCOUT_CACHE_DIR").ok();
+        let prev_cache = env::var("SKILLINDEX_CACHE_DIR").ok();
         unsafe {
             env::set_var(
-                "SKILLSCOUT_CACHE_DIR",
+                "SKILLINDEX_CACHE_DIR",
                 tmp.path().join("cache-zip").to_str().unwrap(),
             )
         };
@@ -874,8 +874,8 @@ mod tests {
             .output
             .contains("se rechazó la descarga del archivo de skill no permitido"));
         match prev_cache {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_CACHE_DIR") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
         }
     }
 
@@ -1005,8 +1005,8 @@ mod tests {
 
         // point registry_base_url to mock server, and isolate cache
         let cache_root = tmp.path().join("cache-net");
-        let prev_cache = env::var("SKILLSCOUT_CACHE_DIR").ok();
-        unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", cache_root.to_str().unwrap()) };
+        let prev_cache = env::var("SKILLINDEX_CACHE_DIR").ok();
+        unsafe { env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
 
         let opts = InstallOptions {
             project_dir: Some(project_dir.clone()),
@@ -1040,8 +1040,8 @@ mod tests {
             .exists());
 
         match prev_cache {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_CACHE_DIR") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
         }
     }
 
@@ -1084,8 +1084,8 @@ mod tests {
         });
 
         let cache_root = tmp.path().join("cache-rate");
-        let prev_cache = env::var("SKILLSCOUT_CACHE_DIR").ok();
-        unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", cache_root.to_str().unwrap()) };
+        let prev_cache = env::var("SKILLINDEX_CACHE_DIR").ok();
+        unsafe { env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
 
         let opts = InstallOptions {
             project_dir: Some(project_dir.clone()),
@@ -1102,8 +1102,8 @@ mod tests {
         mock.assert();
 
         match prev_cache {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_CACHE_DIR") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
         }
     }
 
@@ -1149,8 +1149,8 @@ mod tests {
         // (reg_dir/<skill> should not exist, so local verdict fails, cache should hit)
         assert!(!reg_dir.join(skill_name).exists());
 
-        let prev_cache = env::var("SKILLSCOUT_CACHE_DIR").ok();
-        unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", cache_root.to_str().unwrap()) };
+        let prev_cache = env::var("SKILLINDEX_CACHE_DIR").ok();
+        unsafe { env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
 
         let opts = InstallOptions {
             project_dir: Some(project_dir.clone()),
@@ -1174,8 +1174,8 @@ mod tests {
         );
 
         match prev_cache {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_CACHE_DIR") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
         }
     }
 
@@ -1285,8 +1285,8 @@ mod tests {
         });
 
         let cache_root = tmp.path().join("cache-mismatch");
-        let prev_cache = env::var("SKILLSCOUT_CACHE_DIR").ok();
-        unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", cache_root.to_str().unwrap()) };
+        let prev_cache = env::var("SKILLINDEX_CACHE_DIR").ok();
+        unsafe { env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
 
         let opts = InstallOptions {
             project_dir: Some(project_dir.clone()),
@@ -1310,8 +1310,8 @@ mod tests {
         mock2.assert();
 
         match prev_cache {
-            Some(v) => unsafe { env::set_var("SKILLSCOUT_CACHE_DIR", v) },
-            None => unsafe { env::remove_var("SKILLSCOUT_CACHE_DIR") },
+            Some(v) => unsafe { env::set_var("SKILLINDEX_CACHE_DIR", v) },
+            None => unsafe { env::remove_var("SKILLINDEX_CACHE_DIR") },
         }
     }
 

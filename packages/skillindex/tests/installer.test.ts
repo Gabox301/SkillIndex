@@ -406,8 +406,8 @@ describe("installSkill", () => {
     rmSync(join(regDir, "cached-remote-skill"), { recursive: true, force: true });
     _setRegistryDir(regDir);
 
-    const prevCacheDir = process.env.SKILLSCOUT_CACHE_DIR;
-    process.env.SKILLSCOUT_CACHE_DIR = cacheDir;
+    const prevCacheDir = process.env.SKILLINDEX_CACHE_DIR;
+    process.env.SKILLINDEX_CACHE_DIR = cacheDir;
     try {
       const result = await installSkill("owner/repo/cached-remote-skill", [], {
         projectDir,
@@ -419,8 +419,8 @@ describe("installSkill", () => {
 
       ok(result.success, result.output);
     } finally {
-      if (prevCacheDir === undefined) delete process.env.SKILLSCOUT_CACHE_DIR;
-      else process.env.SKILLSCOUT_CACHE_DIR = prevCacheDir;
+      if (prevCacheDir === undefined) delete process.env.SKILLINDEX_CACHE_DIR;
+      else process.env.SKILLINDEX_CACHE_DIR = prevCacheDir;
     }
   });
 
@@ -433,8 +433,8 @@ describe("installSkill", () => {
     ]);
     _setRegistryDir(regDir);
 
-    const prevCacheDir = process.env.SKILLSCOUT_CACHE_DIR;
-    process.env.SKILLSCOUT_CACHE_DIR = join(tmp.path, "raw-github-cache");
+    const prevCacheDir = process.env.SKILLINDEX_CACHE_DIR;
+    process.env.SKILLINDEX_CACHE_DIR = join(tmp.path, "raw-github-cache");
     const trace: string[] = [];
     let result;
     try {
@@ -446,22 +446,22 @@ describe("installSkill", () => {
           const href = typeof url === "string" || url instanceof URL ? String(url) : url.url;
           ok(
             href.startsWith(
-              `https://raw.githubusercontent.com/GaboTech/skillindex/v${PACKAGE_VERSION}/`,
+              `https://raw.githubusercontent.com/Gabox301/SkillIndex/v${PACKAGE_VERSION}/`,
             ),
           );
           return fetchFromRegistry(regDir)(url);
         }) as typeof fetch,
       });
     } finally {
-      if (prevCacheDir === undefined) delete process.env.SKILLSCOUT_CACHE_DIR;
-      else process.env.SKILLSCOUT_CACHE_DIR = prevCacheDir;
+      if (prevCacheDir === undefined) delete process.env.SKILLINDEX_CACHE_DIR;
+      else process.env.SKILLINDEX_CACHE_DIR = prevCacheDir;
     }
 
     ok(result.success, result.output);
     ok(
       trace.some((line) =>
         line.includes(
-          `descargado AGENTS.md desde https://raw.githubusercontent.com/GaboTech/skillindex/v${PACKAGE_VERSION}/packages/skillindex/skills-registry/raw-skill/AGENTS.md`,
+          `descargado AGENTS.md desde https://raw.githubusercontent.com/Gabox301/SkillIndex/v${PACKAGE_VERSION}/packages/skillindex/skills-registry/raw-skill/AGENTS.md`,
         ),
       ),
     );
@@ -488,8 +488,8 @@ describe("installSkill", () => {
     writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
     _setRegistryDir(regDir);
 
-    const prevCacheDir = process.env.SKILLSCOUT_CACHE_DIR;
-    process.env.SKILLSCOUT_CACHE_DIR = join(tmp.path, "windows-path-cache");
+    const prevCacheDir = process.env.SKILLINDEX_CACHE_DIR;
+    process.env.SKILLINDEX_CACHE_DIR = join(tmp.path, "windows-path-cache");
     const seenUrls: string[] = [];
     try {
       const result = await installSkill("owner/repo/windows-path-skill", [], {
@@ -518,8 +518,8 @@ describe("installSkill", () => {
         "notes",
       );
     } finally {
-      if (prevCacheDir === undefined) delete process.env.SKILLSCOUT_CACHE_DIR;
-      else process.env.SKILLSCOUT_CACHE_DIR = prevCacheDir;
+      if (prevCacheDir === undefined) delete process.env.SKILLINDEX_CACHE_DIR;
+      else process.env.SKILLINDEX_CACHE_DIR = prevCacheDir;
     }
   });
 
@@ -532,8 +532,8 @@ describe("installSkill", () => {
     ]);
     _setRegistryDir(regDir);
 
-    const prevCacheDir = process.env.SKILLSCOUT_CACHE_DIR;
-    process.env.SKILLSCOUT_CACHE_DIR = join(tmp.path, "fallback-main-cache");
+    const prevCacheDir = process.env.SKILLINDEX_CACHE_DIR;
+    process.env.SKILLINDEX_CACHE_DIR = join(tmp.path, "fallback-main-cache");
     const seenUrls: string[] = [];
     try {
       const result = await installSkill("owner/repo/fallback-skill", [], {
@@ -542,12 +542,12 @@ describe("installSkill", () => {
         fetchImpl: (async (url: string | URL | Request) => {
           const href = typeof url === "string" || url instanceof URL ? String(url) : url.url;
           seenUrls.push(href);
-          if (href.includes(`/GaboTech/skillindex/v${PACKAGE_VERSION}/`)) {
+          if (href.includes(`/Gabox301/SkillIndex/v${PACKAGE_VERSION}/`)) {
             return new Response("not found", { status: 404, statusText: "Not Found" });
           }
-          if (href.includes("/GaboTech/skillindex/main/packages/skillindex/skills-registry/")) {
+          if (href.includes("/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/")) {
             const rel = decodeURIComponent(
-              href.split("/GaboTech/skillindex/main/packages/skillindex/skills-registry/")[1],
+              href.split("/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/")[1],
             );
             return new Response(readFileSync(join(regDir, rel)));
           }
@@ -559,7 +559,7 @@ describe("installSkill", () => {
       ok(
         seenUrls.some((url) =>
           url.startsWith(
-            "https://raw.githubusercontent.com/GaboTech/skillindex/main/packages/skillindex/skills-registry/fallback-skill/",
+            "https://raw.githubusercontent.com/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/fallback-skill/",
           ),
         ),
       );
@@ -568,8 +568,8 @@ describe("installSkill", () => {
         "# fallback",
       );
     } finally {
-      if (prevCacheDir === undefined) delete process.env.SKILLSCOUT_CACHE_DIR;
-      else process.env.SKILLSCOUT_CACHE_DIR = prevCacheDir;
+      if (prevCacheDir === undefined) delete process.env.SKILLINDEX_CACHE_DIR;
+      else process.env.SKILLINDEX_CACHE_DIR = prevCacheDir;
     }
   });
 
@@ -675,7 +675,7 @@ describe("installSkill", () => {
       join(projectDir, "skills-lock.json"),
       JSON.stringify({
         version: 1,
-        skills: { zebra: { source: "x/y", sourceType: "skillscout-registry", computedHash: "z" } },
+        skills: { zebra: { source: "x/y", sourceType: "skillindex-registry", computedHash: "z" } },
       }),
     );
     buildRegistry(regDir, [{ name: "alpha", source: "owner/repo", files: { "SKILL.md": "# a" } }]);

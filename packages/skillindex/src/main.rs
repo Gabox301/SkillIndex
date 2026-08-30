@@ -5,21 +5,21 @@ use std::time::Instant;
 use clap::Parser;
 use indicatif::{ProgressBar, ProgressStyle};
 
-use skillscout::args::Args;
-use skillscout::banner::print_banner;
-use skillscout::cache::clear_skillscout_cache;
-use skillscout::claude::cleanup_claude_md;
-use skillscout::detect::{
+use skillindex::args::Args;
+use skillindex::banner::print_banner;
+use skillindex::cache::clear_skillindex_cache;
+use skillindex::claude::cleanup_claude_md;
+use skillindex::detect::{
     collect_skills, detect_agents, detect_technologies, get_installed_skill_names,
 };
-use skillscout::display::{
+use skillindex::display::{
     format_skill_label, print_detected, print_security_checks, print_skills_list, DisplayCombo,
     DisplayTechnology,
 };
-use skillscout::installer::{install_all, InstallOptions, SkillEntry};
-use skillscout::prompt::{multi_select, MultiSelectOptions, Shortcut};
-use skillscout::registry::{load_registry, security_check_for_entry};
-use skillscout::ui::{bold, cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
+use skillindex::installer::{install_all, InstallOptions, SkillEntry};
+use skillindex::prompt::{multi_select, MultiSelectOptions, Shortcut};
+use skillindex::registry::{load_registry, security_check_for_entry};
+use skillindex::ui::{bold, cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
 
 const ISSUES_URL: &str = "https://github.com/Gabox301/SkillIndex/issues";
 
@@ -33,7 +33,7 @@ fn handle_sigint() {
 
 fn security_warning_for_skill(skill: &str) -> Option<String> {
     let registry = load_registry()?;
-    let parsed = skillscout::registry::parse_skill_path(skill);
+    let parsed = skillindex::registry::parse_skill_path(skill);
     let entry = registry.skills.get(&parsed.skill_name)?;
     let check = security_check_for_entry(&parsed.skill_name, entry);
     if check.status != "warning" {
@@ -61,7 +61,7 @@ fn security_warning_for_skill(skill: &str) -> Option<String> {
 }
 
 fn format_time(ms: u64) -> String {
-    skillscout::display::format_time(ms)
+    skillindex::display::format_time(ms)
 }
 
 fn brief_error_reason(stderr: &str, output: &str) -> String {
@@ -70,7 +70,7 @@ fn brief_error_reason(stderr: &str, output: &str) -> String {
     } else {
         output
     };
-    let stripped = skillscout::ui::strip_ansi(raw);
+    let stripped = skillindex::ui::strip_ansi(raw);
     let lines: Vec<String> = stripped
         .lines()
         .map(|l| l.trim().to_string())
@@ -88,13 +88,13 @@ fn brief_error_reason(stderr: &str, output: &str) -> String {
 }
 
 fn strip_ansi(s: &str) -> String {
-    skillscout::ui::strip_ansi(s)
+    skillindex::ui::strip_ansi(s)
 }
 
 fn print_summary(
     installed: usize,
     failed: usize,
-    errors: &[skillscout::installer::InstallError],
+    errors: &[skillindex::installer::InstallError],
     elapsed: u64,
     verbose: bool,
 ) {
@@ -300,7 +300,7 @@ async fn main() {
     let args = Args::parse();
 
     if args.clear_cache {
-        let (cache_dir, removed) = clear_skillscout_cache();
+        let (cache_dir, removed) = clear_skillindex_cache();
         if removed {
             log(&green(&format!(
                 "   ✔ Caché de skillindex limpiada: {}",

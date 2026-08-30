@@ -181,11 +181,7 @@ function sha256Buffer(buf: Buffer): string {
 }
 
 function getRegistryRawBaseUrls(opts: InstallOptions): string[] {
-  const configured =
-    opts.registryBaseUrl ||
-    process.env.SKILLINDEX_REGISTRY_BASE_URL ||
-    process.env.SKILLSCOUT_REGISTRY_BASE_URL ||
-    process.env.AUTOSKILLS_REGISTRY_BASE_URL;
+  const configured = opts.registryBaseUrl || process.env.SKILLINDEX_REGISTRY_BASE_URL;
   if (configured) return [configured.replace(/\/+$/, '')];
   const version = getPackageVersion();
   if (!version) {
@@ -202,28 +198,19 @@ function getInstallRegistryDir(opts: InstallOptions): string {
   return opts.registryDir || getRegistryDir();
 }
 
-export function getSkillScoutCacheDir(): string {
-  return (
-    process.env.SKILLINDEX_CACHE_DIR ||
-    process.env.SKILLSCOUT_CACHE_DIR ||
-    process.env.AUTOSKILLS_CACHE_DIR ||
-    join(homedir(), '.cache', 'skillindex', 'skills-registry')
-  );
+export function getSkillIndexCacheDir(): string {
+  return process.env.SKILLINDEX_CACHE_DIR || join(homedir(), '.cache', 'skillindex', 'skills-registry');
 }
 
-export function clearSkillScoutCache(): { cacheDir: string; removed: boolean } {
-  const cacheDir = getSkillScoutCacheDir();
+export function clearSkillIndexCache(): { cacheDir: string; removed: boolean } {
+  const cacheDir = getSkillIndexCacheDir();
   const removed = existsSync(cacheDir);
   rmSync(cacheDir, { recursive: true, force: true });
   return { cacheDir, removed };
 }
 
-// Backward compat aliases
-export const getAutoskillsCacheDir = getSkillScoutCacheDir;
-export const clearAutoskillsCache = clearSkillScoutCache;
-
 function getCacheRegistryDir(entry: RegistryEntry): string {
-  return join(getSkillScoutCacheDir(), entry.bundleHash);
+  return join(getSkillIndexCacheDir(), entry.bundleHash);
 }
 
 function securityCheckForEntry(skillName: string, entry: RegistryEntry): InstallSecurityCheck {

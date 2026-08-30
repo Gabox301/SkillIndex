@@ -1,6 +1,6 @@
 [package]
 name = "skillindex"
-version = "1.0.2"
+version = "2.0.0"
 edition = "2021"
 rust-version = "1.85"
 description = "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto"
@@ -17,7 +17,7 @@ name = "skillindex"
 path = "src/main.rs"
 
 [lib]
-name = "skillscout"
+name = "skillindex"
 path = "src/lib.rs"
 
 [dependencies]

@@ -74,7 +74,7 @@ function checkLockfile() {
   const candidates = ['bun.lock', 'bun.lockb', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
   const found = candidates.filter((f) => existsSync(join(root, f)));
   const pkgCandidates = ['pnpm-lock.yaml', 'bun.lock', 'bun.lockb'].filter((f) =>
-    existsSync(join(root, 'packages/skillscout', f)),
+    existsSync(join(root, 'packages/skillindex', f)),
   );
   if (found.length === 0 && pkgCandidates.length === 0) {
     fail('No lockfile found (bun.lock / pnpm-lock.yaml) — commit it');
@@ -98,7 +98,7 @@ function checkGitignore() {
 console.log('fendo — GaboTech supply-chain check\n');
 
 checkPackageJson(join(root, 'package.json'));
-checkPackageJson(join(root, 'packages/skillscout/package.json'));
+checkPackageJson(join(root, 'packages/skillindex/package.json'));
 checkNpmrc();
 checkLockfile();
 

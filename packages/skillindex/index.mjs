@@ -18,14 +18,12 @@ if (major < 22 || (major === 22 && minor < 6)) {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// ── Rust probe gate (PR4) ───────────────────────────────────────
-// Try Rust binary first, unless forced to Node via SKILLSCOUT_USE_RUST=0
-// Respects both SKILLSCOUT_USE_RUST and AUTOSKILLS_USE_RUST for backward compat.
+// ── Rust probe gate ───────────────────────────────────────
+// Try Rust binary first, unless forced to Node via SKILLINDEX_USE_RUST=0
 const forceNode =
-  process.env.SKILLSCOUT_USE_RUST === '0' ||
-  process.env.AUTOSKILLS_USE_RUST === '0' ||
-  process.env.SKILLSCOUT_USE_NODE === '1' ||
-  process.env.SKILLSCOUT_USE_RUST === 'false';
+  process.env.SKILLINDEX_USE_RUST === '0' ||
+  process.env.SKILLINDEX_USE_NODE === '1' ||
+  process.env.SKILLINDEX_USE_RUST === 'false';
 
 function findRustBinary() {
   const binName = process.platform === 'win32' ? 'skillindex.exe' : 'skillindex';

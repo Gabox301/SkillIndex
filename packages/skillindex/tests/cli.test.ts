@@ -33,11 +33,11 @@ describe("CLI", () => {
     ok(output.includes("skillindex"));
   });
 
-  it("clears the skillscout cache with --clear-cache", () => {
+  it("clears the skillindex cache with --clear-cache", () => {
     const cacheDir = join(tmp.path, "cache");
-    const prevCacheDir = process.env.SKILLSCOUT_CACHE_DIR;
+    const prevCacheDir = process.env.SKILLINDEX_CACHE_DIR;
 
-    process.env.SKILLSCOUT_CACHE_DIR = cacheDir;
+    process.env.SKILLINDEX_CACHE_DIR = cacheDir;
     try {
       writeFile(tmp.path, "cache/bundle/SKILL.md", "# cached");
 
@@ -47,8 +47,8 @@ describe("CLI", () => {
       ok(output.includes(cacheDir));
       ok(!existsSync(cacheDir));
     } finally {
-      if (prevCacheDir === undefined) delete process.env.SKILLSCOUT_CACHE_DIR;
-      else process.env.SKILLSCOUT_CACHE_DIR = prevCacheDir;
+      if (prevCacheDir === undefined) delete process.env.SKILLINDEX_CACHE_DIR;
+      else process.env.SKILLINDEX_CACHE_DIR = prevCacheDir;
     }
   });
 
@@ -274,7 +274,7 @@ describe("CLI", () => {
       writeFile(tmp.path, "bun.lockb");
       const output = run(["--dry-run"], tmp.path);
       ok(output.includes("Bun"));
-      ok(output.includes("GaboTech"));
+      ok(output.includes("Gabox301"));
       ok(output.includes("bun"));
       ok(!output.includes("https://bun.sh/docs"));
     });
