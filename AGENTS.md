@@ -4,7 +4,7 @@
 
 ## Supply Chain Security
 
-This project has been hardened against supply chain attacks using local `fendo` (`scripts/fendo.ts` 100% local, no external dependency).
+This project has been hardened against supply chain attacks using local `fendo` (`packages/skillindex/scripts/fendo.ts` 100% local, no external dependency).
 
 ### Rules for AI assistants and contributors
 

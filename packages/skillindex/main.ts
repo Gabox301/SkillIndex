@@ -177,6 +177,7 @@ function printSkillsList(skills: SkillEntry[]): void {
 }
 
 function stripAnsi(str: string): string {
+  // oxlint-disable-next-line no-control-regex -- intentional ANSI escape
   return str.replace(/\x1b\[[0-9;]*m/g, '');
 }
 

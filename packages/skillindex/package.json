@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
@@ -36,15 +36,18 @@
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "test": "bun test tests/*.test.ts",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "validate:registry": "bun run scripts/validate-registry.ts",
     "prepublishOnly": "bun run validate:registry",
     "release": "bun run scripts/release.ts",
     "sync:skills": "bun run scripts/sync-skills.ts",
-    "fendo:check": "bun run ../../scripts/fendo.ts"
+    "fendo:check": "bun run scripts/fendo.ts"
   },
   "packageManager": "bun@1.4.0",
   "devDependencies": {
     "@types/node": "26.4.0",
+    "oxlint": "1.80.0",
     "typescript": "7.0.2"
   },
   "engines": {

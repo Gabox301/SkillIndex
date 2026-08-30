@@ -15,7 +15,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname: string = join(fileURLToPath(import.meta.url), '..');
-const root: string = resolve(__dirname, '..');
+const root: string = resolve(__dirname, '../../..');
 
 let failed = false;
 
@@ -40,10 +40,10 @@ function checkPackageJson(path: string): void {
   if (!existsSync(path)) return;
   const pkg = JSON.parse(readFileSync(path, 'utf-8')) as PackageJson;
   const allDeps: Record<string, string> = {
-    ...(pkg.dependencies ?? {}),
-    ...(pkg.devDependencies ?? {}),
-    ...(pkg.peerDependencies ?? {}),
-    ...(pkg.optionalDependencies ?? {}),
+    ...pkg.dependencies,
+    ...pkg.devDependencies,
+    ...pkg.peerDependencies,
+    ...pkg.optionalDependencies,
   };
   for (const [name, ver] of Object.entries(allDeps)) {
     const v = String(ver).trim();
@@ -52,7 +52,7 @@ function checkPackageJson(path: string): void {
     }
     if (/^(git\+|github:|https?:.*\.tgz|https?:.*\.tar\.gz)/i.test(v) || v.includes('://')) {
       // Allow http for skills.sh? Block git/tarball unless approved
-      if (/^https:\/\/raw\.githubusercontent\.com\//.test(v)) continue;
+      if (v.startsWith('https://raw.githubusercontent.com/')) continue;
       fail(`${path}: ${name}@${v} looks like git/tarball URL — requires explicit approval`);
     }
   }
@@ -101,10 +101,6 @@ function checkLockfile(): void {
       }
     }
   }
-}
-
-function checkGitignore(): void {
-  // Already handled
 }
 
 console.log('fendo — GaboTech supply-chain check\n');

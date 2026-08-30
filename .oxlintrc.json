@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "**/skills-registry/**",
+    "**/dist/**",
+    "**/target/**",
+    "**/node_modules/**",
+    "**/.astro/**",
+    "**/Landing/dist/**"
+  ]
+}

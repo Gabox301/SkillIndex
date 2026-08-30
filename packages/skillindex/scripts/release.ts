@@ -29,11 +29,11 @@ function normalizeRepoUrl(rawUrl?: string): string {
     url = url.replace(/^git\+/, '');
   }
   // Convert git@github.com:owner/repo(.git)? -> https://github.com/owner/repo
-  if (/^git@github\.com:/.test(url)) {
+  if (url.startsWith('git@github.com:')) {
     url = url.replace(/^git@github\.com:/, 'https://github.com/');
   }
   // Convert ssh://git@github.com/owner/repo(.git)? -> https://github.com/owner/repo
-  if (/^ssh:\/\/git@github\.com\//.test(url)) {
+  if (url.startsWith('ssh://git@github.com/')) {
     url = url.replace(/^ssh:\/\/git@github\.com\//, 'https://github.com/');
   }
   // Remove trailing .git and trailing slash
