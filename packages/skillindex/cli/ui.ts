@@ -78,6 +78,54 @@ interface MultiSelectOptions<T> {
   shortcuts?: { key: string; label: string; fn: (items: T[]) => boolean[] }[];
 }
 
+/** Selection state of a group given the selected flags of its member indices. */
+export type GroupState = 'all' | 'none' | 'partial';
+
+export function groupSelectionState(selected: boolean[], memberIndices: number[]): GroupState {
+  if (memberIndices.length === 0) return 'none';
+  let anyOn = false;
+  let anyOff = false;
+  for (const i of memberIndices) {
+    if (selected[i]) anyOn = true;
+    else anyOff = true;
+  }
+  if (anyOn && anyOff) return 'partial';
+  return anyOn ? 'all' : 'none';
+}
+
+/**
+ * Smart group toggle: if every member is selected, clear them all; otherwise
+ * select them all. Mutates `selected` in place for the given member indices.
+ */
+export function toggleGroupSelection(selected: boolean[], memberIndices: number[]): void {
+  const next = groupSelectionState(selected, memberIndices) !== 'all';
+  for (const i of memberIndices) selected[i] = next;
+}
+
+/** A navigable row: either a group header or an item (with its item index). */
+type Row = { kind: 'group'; group: string; memberIndices: number[] } | { kind: 'item'; index: number };
+
+/** Build the ordered navigable rows. Group headers are interleaved before their items. */
+function buildRows<T>(items: T[], groupFn: ((item: T) => string) | undefined, showGroups: boolean): Row[] {
+  if (!showGroups || !groupFn) {
+    return items.map((_, index) => ({ kind: 'item', index }) as Row);
+  }
+  const rows: Row[] = [];
+  let lastGroup: string | null = null;
+  let currentHeader: Extract<Row, { kind: 'group' }> | null = null;
+  for (let i = 0; i < items.length; i++) {
+    const group = groupFn(items[i]);
+    if (group !== lastGroup) {
+      lastGroup = group;
+      currentHeader = { kind: 'group', group, memberIndices: [] };
+      rows.push(currentHeader);
+    }
+    currentHeader!.memberIndices.push(i);
+    rows.push({ kind: 'item', index: i });
+  }
+  return rows;
+}
+
 export function multiSelect<T>(
   items: T[],
   { labelFn, hintFn, groupFn, initialSelected, shortcuts = [] }: MultiSelectOptions<T>,
@@ -88,8 +136,6 @@ export function multiSelect<T>(
   if (!process.stdin.isTTY) return Promise.resolve(items);
   return new Promise((resolve) => {
     const selected = initialSelected ? initialSelected.slice() : Array.from({ length: items.length }, () => true);
-    let cursor = 0;
-    let rendered = false;
     let groupCount = 0;
     if (groupFn) {
       let last: string | null = null;
@@ -102,10 +148,14 @@ export function multiSelect<T>(
       }
     }
     const showGroups = groupCount > 1;
-    const visibleGroupCount = showGroups ? groupCount : 0;
-    const separatorCount = showGroups ? groupCount - 1 : 0;
+    // Navigable rows: group headers interleaved with their items (when grouping),
+    // otherwise one row per item. The cursor walks rows, not raw item indices.
+    const rows = buildRows(items, groupFn, showGroups);
+    let cursor = 0;
+    let rendered = false;
     function renderedLineCount(): number {
-      return items.length + visibleGroupCount + separatorCount + 1;
+      // One terminal line per row plus the trailing hint line.
+      return rows.length + 1;
     }
     function clearRendered(): void {
       if (rendered) {
@@ -117,27 +167,28 @@ export function multiSelect<T>(
       rendered = true;
       draw();
     }
+    function groupCheck(state: GroupState): string {
+      if (state === 'all') return green('◼');
+      if (state === 'partial') return yellow('◧');
+      return dim('◻');
+    }
     function draw(): void {
       const count = selected.filter(Boolean).length;
-      let lastGroup: string | null = null;
-      let isFirstGroup = true;
-      for (let i = 0; i < items.length; i++) {
-        if (showGroups && groupFn) {
-          const group = groupFn(items[i]);
-          if (group !== lastGroup) {
-            if (!isFirstGroup) write('\n');
-            isFirstGroup = false;
-            lastGroup = group;
-            write(`   ${bold(yellow(group))}\n`);
-          }
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
+        const pointer = r === cursor ? cyan('❯') : ' ';
+        if (row.kind === 'group') {
+          const state = groupSelectionState(selected, row.memberIndices);
+          write(`   ${pointer} ${groupCheck(state)} ${bold(yellow(row.group))}\n`);
+        } else {
+          const i = row.index;
+          const check = selected[i] ? green('◼') : dim('◻');
+          const label = labelFn(items[i], i);
+          const hint = hintFn ? hintFn(items[i], i) : '';
+          const indent = showGroups ? '       ' : '     ';
+          write(`${indent}${pointer} ${check} ${label}${hint ? '  ' + dim(hint) : ''}\n`);
         }
-        const pointer = i === cursor ? cyan('❯') : ' ';
-        const check = selected[i] ? green('◼') : dim('◻');
-        const label = labelFn(items[i], i);
-        const hint = hintFn ? hintFn(items[i], i) : '';
-        write(`     ${pointer} ${check} ${label}${hint ? '  ' + dim(hint) : ''}\n`);
       }
-      write('\n');
       const shortcutHints = shortcuts.map((s) => white(bold(`[${s.key}]`)) + dim(` ${s.label}`)).join(dim(' · '));
       const shortcutPart = shortcuts.length > 0 ? shortcutHints + dim(' · ') : '';
       write(
@@ -145,7 +196,7 @@ export function multiSelect<T>(
           white(bold('[↑↓]')) +
           dim(' mover · ') +
           white(bold('[espacio]')) +
-          dim(' alternar · ') +
+          dim(showGroups ? ' alternar item/grupo · ' : ' alternar · ') +
           white(bold('[a]')) +
           dim(' todas · ') +
           shortcutPart +
@@ -186,7 +237,12 @@ export function multiSelect<T>(
         return;
       }
       if (key === ' ') {
-        selected[cursor] = !selected[cursor];
+        const row = rows[cursor];
+        if (row.kind === 'group') {
+          toggleGroupSelection(selected, row.memberIndices);
+        } else {
+          selected[row.index] = !selected[row.index];
+        }
         render();
         return;
       }
@@ -205,12 +261,12 @@ export function multiSelect<T>(
         }
       }
       if (key === '\x1b[A' || key === 'k') {
-        cursor = (cursor - 1 + items.length) % items.length;
+        cursor = (cursor - 1 + rows.length) % rows.length;
         render();
         return;
       }
       if (key === '\x1b[B' || key === 'j') {
-        cursor = (cursor + 1) % items.length;
+        cursor = (cursor + 1) % rows.length;
         render();
         return;
       }

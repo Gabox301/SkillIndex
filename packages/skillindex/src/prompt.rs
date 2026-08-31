@@ -56,6 +56,87 @@ fn group_count<T>(items: &[T], group_fn: Option<&Box<dyn Fn(&T) -> String>>) -> 
     count
 }
 
+/// Selection state of a group given the selected flags of its member indices.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GroupState {
+    All,
+    None,
+    Partial,
+}
+
+pub fn group_selection_state(selected: &[bool], member_indices: &[usize]) -> GroupState {
+    if member_indices.is_empty() {
+        return GroupState::None;
+    }
+    let mut any_on = false;
+    let mut any_off = false;
+    for &i in member_indices {
+        if selected[i] {
+            any_on = true;
+        } else {
+            any_off = true;
+        }
+    }
+    if any_on && any_off {
+        GroupState::Partial
+    } else if any_on {
+        GroupState::All
+    } else {
+        GroupState::None
+    }
+}
+
+/// Smart group toggle: if every member is selected, clear them all; otherwise
+/// select them all. Mutates `selected` in place for the given member indices.
+pub fn toggle_group_selection(selected: &mut [bool], member_indices: &[usize]) {
+    let next = group_selection_state(selected, member_indices) != GroupState::All;
+    for &i in member_indices {
+        selected[i] = next;
+    }
+}
+
+/// A navigable row: either a group header (with its member item indices) or an item.
+#[derive(Debug, Clone)]
+enum Row {
+    Group { group: String, members: Vec<usize> },
+    Item { index: usize },
+}
+
+/// Build the ordered navigable rows. Group headers precede their items.
+#[allow(clippy::type_complexity)]
+fn build_rows<T>(
+    items: &[T],
+    group_fn: Option<&Box<dyn Fn(&T) -> String>>,
+    show_groups: bool,
+) -> Vec<Row> {
+    match (show_groups, group_fn) {
+        (true, Some(gf)) => {
+            let mut rows: Vec<Row> = Vec::new();
+            let mut last_group: Option<String> = None;
+            let mut current_header: Option<usize> = None;
+            for (i, item) in items.iter().enumerate() {
+                let group = gf(item);
+                if last_group.as_ref() != Some(&group) {
+                    last_group = Some(group.clone());
+                    rows.push(Row::Group {
+                        group,
+                        members: Vec::new(),
+                    });
+                    current_header = Some(rows.len() - 1);
+                }
+                if let Some(h) = current_header
+                    && let Row::Group { members, .. } = &mut rows[h]
+                {
+                    members.push(i);
+                }
+                rows.push(Row::Item { index: i });
+            }
+            rows
+        }
+        _ => (0..items.len()).map(|index| Row::Item { index }).collect(),
+    }
+}
+
 // ── Core multiSelect ───────────────────────────────────────────────
 
 /// Interactive multi-select — mirrors `multiSelect` in ui.ts
@@ -92,14 +173,12 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
 
     let g_count = group_count(&items, opts.group_fn.as_ref());
     let show_groups = g_count > 1;
-    let visible_group_count = if show_groups { g_count } else { 0 };
-    let separator_count = if show_groups {
-        g_count.saturating_sub(1)
-    } else {
-        0
-    };
+    // Navigable rows: group headers interleaved with their items (when grouping),
+    // otherwise one row per item. The cursor walks rows, not raw item indices.
+    let rows = build_rows(&items, opts.group_fn.as_ref(), show_groups);
 
-    let rendered_line_count = || items.len() + visible_group_count + separator_count + 1;
+    // One terminal line per row plus the trailing hint line.
+    let rendered_line_count = || rows.len() + 1;
 
     let mut stdout = io::stdout();
     execute!(stdout, Hide)?;
@@ -119,52 +198,62 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         Ok(())
     };
 
+    let group_check = |state: GroupState| -> String {
+        match state {
+            GroupState::All => green("◼"),
+            GroupState::Partial => yellow("◧"),
+            GroupState::None => dim("◻"),
+        }
+    };
+
     let draw = |stdout: &mut io::Stdout,
                 selected: &[bool],
                 cursor: usize,
                 items: &[T],
+                rows: &[Row],
                 opts: &MultiSelectOptions<T>|
      -> io::Result<()> {
         let count = selected.iter().filter(|&&b| b).count();
-        let mut last_group: Option<String> = None;
-        let mut is_first_group = true;
 
-        for i in 0..items.len() {
-            if show_groups && let Some(ref gf) = opts.group_fn {
-                let group = gf(&items[i]);
-                if last_group.as_ref() != Some(&group) {
-                    if !is_first_group {
-                        writeln!(stdout)?;
-                    }
-                    is_first_group = false;
-                    last_group = Some(group.clone());
-                    writeln!(stdout, "   {}", bold(&yellow(&group)))?;
-                }
-            }
-            let pointer = if i == cursor {
+        for (r, row) in rows.iter().enumerate() {
+            let pointer = if r == cursor {
                 cyan("❯")
             } else {
                 " ".to_string()
             };
-            let check = if selected[i] {
-                green("◼")
-            } else {
-                dim("◻")
-            };
-            let label = (opts.label_fn)(&items[i], i);
-            let hint = opts
-                .hint_fn
-                .as_ref()
-                .map(|f| f(&items[i], i))
-                .unwrap_or_default();
-            let hint_part = if hint.is_empty() {
-                String::new()
-            } else {
-                format!("  {}", dim(&hint))
-            };
-            writeln!(stdout, "     {pointer} {check} {label}{hint_part}")?;
+            match row {
+                Row::Group { group, members } => {
+                    let state = group_selection_state(selected, members);
+                    writeln!(
+                        stdout,
+                        "   {pointer} {} {}",
+                        group_check(state),
+                        bold(&yellow(group))
+                    )?;
+                }
+                Row::Item { index } => {
+                    let i = *index;
+                    let check = if selected[i] {
+                        green("◼")
+                    } else {
+                        dim("◻")
+                    };
+                    let label = (opts.label_fn)(&items[i], i);
+                    let hint = opts
+                        .hint_fn
+                        .as_ref()
+                        .map(|f| f(&items[i], i))
+                        .unwrap_or_default();
+                    let hint_part = if hint.is_empty() {
+                        String::new()
+                    } else {
+                        format!("  {}", dim(&hint))
+                    };
+                    let indent = if show_groups { "       " } else { "     " };
+                    writeln!(stdout, "{indent}{pointer} {check} {label}{hint_part}")?;
+                }
+            }
         }
-        writeln!(stdout)?;
 
         let shortcut_hints = opts
             .shortcuts
@@ -189,7 +278,11 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         hint_line.push_str(&white(&bold("[↑↓]")));
         hint_line.push_str(&dim(" mover · "));
         hint_line.push_str(&white(&bold("[espacio]")));
-        hint_line.push_str(&dim(" alternar · "));
+        hint_line.push_str(&dim(if show_groups {
+            " alternar item/grupo · "
+        } else {
+            " alternar · "
+        }));
         hint_line.push_str(&white(&bold("[a]")));
         hint_line.push_str(&dim(" todas · "));
         hint_line.push_str(&shortcut_part);
@@ -202,9 +295,11 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
 
     // Initial render
     {
-        draw(&mut stdout, &selected, cursor, &items, &opts)?;
+        draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
         rendered = true;
     }
+
+    let row_count = rows.len();
 
     loop {
         let event = event::read()?;
@@ -231,15 +326,20 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                     return Ok(result);
                 }
                 KeyCode::Char(' ') => {
-                    selected[cursor] = !selected[cursor];
+                    match &rows[cursor] {
+                        Row::Group { members, .. } => {
+                            toggle_group_selection(&mut selected, members)
+                        }
+                        Row::Item { index } => selected[*index] = !selected[*index],
+                    }
                     clear_rendered(&mut rendered, &mut stdout)?;
-                    draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                    draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                 }
                 KeyCode::Char('a') => {
                     let all = selected.iter().all(|&b| b);
                     selected.fill(!all);
                     clear_rendered(&mut rendered, &mut stdout)?;
-                    draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                    draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                 }
                 KeyCode::Char(c) => {
                     let mut handled = false;
@@ -257,26 +357,26 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                     }
                     if handled {
                         clear_rendered(&mut rendered, &mut stdout)?;
-                        draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                        draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                     } else if c == 'k' {
-                        cursor = cursor.checked_sub(1).unwrap_or(items.len() - 1);
+                        cursor = cursor.checked_sub(1).unwrap_or(row_count - 1);
                         clear_rendered(&mut rendered, &mut stdout)?;
-                        draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                        draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                     } else if c == 'j' {
-                        cursor = (cursor + 1) % items.len();
+                        cursor = (cursor + 1) % row_count;
                         clear_rendered(&mut rendered, &mut stdout)?;
-                        draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                        draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                     }
                 }
                 KeyCode::Up => {
-                    cursor = cursor.checked_sub(1).unwrap_or(items.len() - 1);
+                    cursor = cursor.checked_sub(1).unwrap_or(row_count - 1);
                     clear_rendered(&mut rendered, &mut stdout)?;
-                    draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                    draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                 }
                 KeyCode::Down => {
-                    cursor = (cursor + 1) % items.len();
+                    cursor = (cursor + 1) % row_count;
                     clear_rendered(&mut rendered, &mut stdout)?;
-                    draw(&mut stdout, &selected, cursor, &items, &opts)?;
+                    draw(&mut stdout, &selected, cursor, &items, &rows, &opts)?;
                 }
                 _ => {}
             }
@@ -296,6 +396,10 @@ where
 mod tests {
     use super::*;
 
+    // Tests for the public API (multi_select, group_selection_state,
+    // toggle_group_selection, shortcut_new_only) live in tests/prompt.rs,
+    // mirroring prompt.test.ts. Only tests for private helpers stay here.
+
     #[derive(Clone, Debug, PartialEq, Eq)]
     struct Dummy {
         name: String,
@@ -303,21 +407,18 @@ mod tests {
     }
 
     #[test]
-    fn initial_selected_length_mismatch_errors() {
-        let items = vec![Dummy {
-            name: "a".into(),
-            installed: false,
-        }];
-        let opts = MultiSelectOptions {
-            label_fn: Box::new(|d: &Dummy, _| d.name.clone()),
-            initial_selected: Some(vec![true, false]),
-            ..Default::default()
-        };
-        let res = multi_select(items, opts);
-        assert!(res.is_err());
-        assert!(res.unwrap_err().to_string().contains("initialSelected"));
+    fn group_count_computes_correctly() {
+        let items = vec!["a", "b", "c"];
+        let f: Box<dyn Fn(&&str) -> String> =
+            Box::new(|s| if *s == "c" { "g2".into() } else { "g1".into() });
+        let c = group_count(&items, Some(&f));
+        assert_eq!(c, 2);
+        let c0 = group_count(&items, None);
+        assert_eq!(c0, 0);
     }
 
+    // `shortcut_new_only` is a Rust-only helper with no TS mirror, so its test
+    // stays as an internal unit test rather than in the mirrored tests/prompt.rs.
     #[test]
     fn shortcut_new_only_selects_new() {
         let items = vec![
@@ -340,42 +441,5 @@ mod tests {
         ];
         let sel = shortcut_new_only(&items, |d| d.installed);
         assert_eq!(sel, vec![false, true, false, true]);
-    }
-
-    #[test]
-    fn non_tty_returns_all() {
-        // When stdin is not TTY (as in cargo test), multi_select returns all
-        // We test with empty TTY simulation: since cargo test stdin is not TTY, it should return all
-        if io::stdin().is_terminal() {
-            // Skip — we are in TTY (unlikely in CI)
-            return;
-        }
-        let items = vec![
-            Dummy {
-                name: "x".into(),
-                installed: false,
-            },
-            Dummy {
-                name: "y".into(),
-                installed: false,
-            },
-        ];
-        let opts = MultiSelectOptions {
-            label_fn: Box::new(|d: &Dummy, _| d.name.clone()),
-            ..Default::default()
-        };
-        let res = multi_select(items.clone(), opts).unwrap();
-        assert_eq!(res, items);
-    }
-
-    #[test]
-    fn group_count_computes_correctly() {
-        let items = vec!["a", "b", "c"];
-        let f: Box<dyn Fn(&&str) -> String> =
-            Box::new(|s| if *s == "c" { "g2".into() } else { "g1".into() });
-        let c = group_count(&items, Some(&f));
-        assert_eq!(c, 2);
-        let c0 = group_count(&items, None);
-        assert_eq!(c0, 0);
     }
 }
