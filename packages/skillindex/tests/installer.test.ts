@@ -1,4 +1,4 @@
-import { deepEqual, equal, ok } from 'node:assert/strict';
+import { deepEqual, equal, ok, throws } from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -536,14 +536,14 @@ describe('installSkill', () => {
     }
   });
 
-  it('creates symlinks for requested agents', async () => {
+  it('copies the skill directly into each mapped agent folder', async () => {
     const regDir = join(tmp.path, 'registry');
     const projectDir = join(tmp.path, 'project');
     mkdirSync(projectDir, { recursive: true });
     buildRegistry(regDir, [{ name: 's1', source: 'owner/repo', files: { 'SKILL.md': '# s1' } }]);
     _setRegistryDir(regDir);
 
-    const result = await installSkill('owner/repo/s1', ['universal', 'claude-code', 'junie'], {
+    const result = await installSkill('owner/repo/s1', ['claude-code', 'junie'], {
       projectDir,
       registryDir: regDir,
       registryBaseUrl: 'https://example.test/skills-registry',
@@ -551,24 +551,81 @@ describe('installSkill', () => {
     });
     ok(result.success, result.output);
 
-    const claudeLink = join(projectDir, '.claude', 'skills', 's1');
-    const junieLink = join(projectDir, '.junie', 'skills', 's1');
-    ok(existsSync(claudeLink));
-    ok(existsSync(junieLink));
+    // Each mapped agent gets its own real copy — no symlinks, no canonical dir.
+    const claudeSkill = join(projectDir, '.claude', 'skills', 's1');
+    const junieSkill = join(projectDir, '.junie', 'skills', 's1');
+    ok(existsSync(join(claudeSkill, 'SKILL.md')), 'claude-code should have a real copy');
+    ok(existsSync(join(junieSkill, 'SKILL.md')), 'junie should have a real copy');
+    equal(readFileSync(join(claudeSkill, 'SKILL.md'), 'utf-8'), '# s1');
+    equal(readFileSync(join(junieSkill, 'SKILL.md'), 'utf-8'), '# s1');
 
-    // On Windows without dev mode, ensureSymlinkTo falls back to copyDir on EPERM/EINVAL
-    try {
-      const target = readlinkSync(claudeLink);
-      ok(target.includes('.agents/skills/s1') || target.includes('.agents\\skills\\s1'));
-    } catch (e: unknown) {
-      const err = e as NodeJS.ErrnoException;
-      if (err.code === 'EINVAL' || err.code === 'UNKNOWN') {
-        ok(existsSync(join(claudeLink, 'SKILL.md')), 'copy fallback should have SKILL.md');
-        ok(existsSync(join(junieLink, 'SKILL.md')), 'copy fallback should have SKILL.md for junie');
-      } else {
-        throw e;
-      }
-    }
+    // The copies are directories, not symlinks.
+    throws(() => readlinkSync(claudeSkill));
+  });
+
+  it('does not create the universal .agents copy when a mapped agent is present', async () => {
+    const regDir = join(tmp.path, 'registry');
+    const projectDir = join(tmp.path, 'project');
+    mkdirSync(projectDir, { recursive: true });
+    buildRegistry(regDir, [{ name: 's1', source: 'owner/repo', files: { 'SKILL.md': '# s1' } }]);
+    _setRegistryDir(regDir);
+
+    // `universal` alongside a mapped agent must not spawn a second `.agents` path.
+    const result = await installSkill('owner/repo/s1', ['universal', 'kiro-cli'], {
+      projectDir,
+      registryDir: regDir,
+      registryBaseUrl: 'https://example.test/skills-registry',
+      fetchImpl: fetchFromRegistry(regDir),
+    });
+    ok(result.success, result.output);
+    ok(existsSync(join(projectDir, '.kiro', 'skills', 's1', 'SKILL.md')), 'kiro copy exists');
+    ok(!existsSync(join(projectDir, '.agents', 'skills', 's1')), '.agents must not be created');
+  });
+
+  it('installs into .agents only when universal is the explicit target', async () => {
+    const regDir = join(tmp.path, 'registry');
+    const projectDir = join(tmp.path, 'project');
+    mkdirSync(projectDir, { recursive: true });
+    buildRegistry(regDir, [{ name: 's1', source: 'owner/repo', files: { 'SKILL.md': '# s1' } }]);
+    _setRegistryDir(regDir);
+
+    const result = await installSkill('owner/repo/s1', ['universal'], {
+      projectDir,
+      registryDir: regDir,
+      registryBaseUrl: 'https://example.test/skills-registry',
+      fetchImpl: fetchFromRegistry(regDir),
+    });
+    ok(result.success, result.output);
+    ok(existsSync(join(projectDir, '.agents', 'skills', 's1', 'SKILL.md')), '.agents copy exists');
+    ok(!existsSync(join(projectDir, '.kiro', 'skills', 's1')), 'no agent folder created');
+  });
+
+  it('reinstalls only the target that is missing', async () => {
+    const regDir = join(tmp.path, 'registry');
+    const projectDir = join(tmp.path, 'project');
+    mkdirSync(projectDir, { recursive: true });
+    buildRegistry(regDir, [{ name: 's1', source: 'owner/repo', files: { 'SKILL.md': '# s1' } }]);
+    _setRegistryDir(regDir);
+
+    const first = await installSkill('owner/repo/s1', ['claude-code', 'junie'], {
+      projectDir,
+      registryDir: regDir,
+      registryBaseUrl: 'https://example.test/skills-registry',
+      fetchImpl: fetchFromRegistry(regDir),
+    });
+    ok(first.success, first.output);
+
+    // Remove one target; a second install must restore just that one.
+    rmSync(join(projectDir, '.junie', 'skills', 's1'), { recursive: true, force: true });
+    const second = await installSkill('owner/repo/s1', ['claude-code', 'junie'], {
+      projectDir,
+      registryDir: regDir,
+      registryBaseUrl: 'https://example.test/skills-registry',
+      fetchImpl: fetchFromRegistry(regDir),
+    });
+    ok(second.success, second.output);
+    ok(existsSync(join(projectDir, '.claude', 'skills', 's1', 'SKILL.md')), 'claude copy intact');
+    ok(existsSync(join(projectDir, '.junie', 'skills', 's1', 'SKILL.md')), 'junie copy restored');
   });
 
   it('rejects when skill is not in the registry', async () => {

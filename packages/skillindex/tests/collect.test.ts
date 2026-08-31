@@ -326,6 +326,23 @@ describe('getInstalledSkillNames', () => {
     ok(result.has('shadcn'));
   });
 
+  it('falls back to mapped agent folders when no lockfile', () => {
+    writeFile(tmp.path, '.kiro/skills/react-best-practices/.keep');
+    writeFile(tmp.path, '.claude/skills/vue-best-practices/.keep');
+    const result = getInstalledSkillNames(tmp.path);
+    strictEqual(result.size, 2);
+    ok(result.has('react-best-practices'));
+    ok(result.has('vue-best-practices'));
+  });
+
+  it('deduplicates skill names present in multiple agent folders', () => {
+    writeFile(tmp.path, '.kiro/skills/shared-skill/.keep');
+    writeFile(tmp.path, '.claude/skills/shared-skill/.keep');
+    const result = getInstalledSkillNames(tmp.path);
+    strictEqual(result.size, 1);
+    ok(result.has('shared-skill'));
+  });
+
   it('prefers lockfile over directory listing', () => {
     writeJson(tmp.path, 'skills-lock.json', {
       version: 1,

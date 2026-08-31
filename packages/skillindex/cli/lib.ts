@@ -555,11 +555,20 @@ export function getInstalledSkillNames(projectDir: string): Set<string> {
       return new Set(Object.keys(lock.skills));
     }
   } catch {}
-  try {
-    const entries = readdirSync(join(projectDir, '.agents', 'skills'), { withFileTypes: true });
-    return new Set(entries.filter((e) => e.isDirectory()).map((e) => e.name));
-  } catch {}
-  return new Set();
+  // Fallback when there is no lockfile: scan every known skills folder. Skills
+  // now live under each mapped agent folder (e.g. `.kiro/skills`), and `.agents`
+  // is only used for the universal destination.
+  const skillsFolders = [...Object.keys(AGENT_FOLDER_MAP), '.agents'];
+  const names = new Set<string>();
+  for (const folder of skillsFolders) {
+    try {
+      const entries = readdirSync(join(projectDir, folder, 'skills'), { withFileTypes: true });
+      for (const e of entries) {
+        if (e.isDirectory()) names.add(e.name);
+      }
+    } catch {}
+  }
+  return names;
 }
 
 // ── Skill Collection ─────────────────────────────────────────

@@ -305,7 +305,7 @@ async fn install_skill_rejects_disallowed_zip_files() {
 }
 
 #[tokio::test]
-async fn install_skill_creates_symlinks_for_agents() {
+async fn install_skill_copies_directly_into_each_mapped_agent_folder() {
     let tmp = tempdir().unwrap();
     let reg_dir = tmp.path().join("registry");
     let project_dir = tmp.path().join("project");
@@ -328,8 +328,118 @@ async fn install_skill_creates_symlinks_for_agents() {
     .await;
     assert!(result.success, "install failed: {}", result.output);
 
-    assert!(project_dir.join(".claude/skills/s1").exists());
-    assert!(project_dir.join(".junie/skills/s1").exists());
+    // Each mapped agent gets its own real copy — no symlinks, no canonical dir.
+    let claude_skill = project_dir.join(".claude/skills/s1");
+    let junie_skill = project_dir.join(".junie/skills/s1");
+    assert!(claude_skill.join("SKILL.md").exists());
+    assert!(junie_skill.join("SKILL.md").exists());
+    assert_eq!(
+        fs::read_to_string(claude_skill.join("SKILL.md")).unwrap(),
+        "# s1"
+    );
+    assert_eq!(
+        fs::read_to_string(junie_skill.join("SKILL.md")).unwrap(),
+        "# s1"
+    );
+    // The copies are real directories, not symlinks.
+    assert!(
+        !claude_skill
+            .symlink_metadata()
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+}
+
+#[tokio::test]
+async fn install_skill_does_not_create_agents_when_mapped_agent_present() {
+    let tmp = tempdir().unwrap();
+    let reg_dir = tmp.path().join("registry");
+    let project_dir = tmp.path().join("project");
+    fs::create_dir_all(&project_dir).unwrap();
+
+    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    build_registry(&reg_dir, vec![("s1".into(), entry)]);
+    registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
+
+    let opts = InstallOptions {
+        project_dir: Some(project_dir.clone()),
+        registry_dir: Some(reg_dir.clone()),
+        ..Default::default()
+    };
+    // `universal` alongside a mapped agent must not spawn a second `.agents` path.
+    let result = install_skill(
+        "owner/repo/s1",
+        &["universal".to_string(), "kiro-cli".to_string()],
+        opts,
+    )
+    .await;
+    assert!(result.success, "install failed: {}", result.output);
+    assert!(project_dir.join(".kiro/skills/s1/SKILL.md").exists());
+    assert!(!project_dir.join(".agents/skills/s1").exists());
+}
+
+#[tokio::test]
+async fn install_skill_uses_agents_only_when_universal_is_explicit() {
+    let tmp = tempdir().unwrap();
+    let reg_dir = tmp.path().join("registry");
+    let project_dir = tmp.path().join("project");
+    fs::create_dir_all(&project_dir).unwrap();
+
+    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    build_registry(&reg_dir, vec![("s1".into(), entry)]);
+    registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
+
+    let opts = InstallOptions {
+        project_dir: Some(project_dir.clone()),
+        registry_dir: Some(reg_dir.clone()),
+        ..Default::default()
+    };
+    let result = install_skill("owner/repo/s1", &["universal".to_string()], opts).await;
+    assert!(result.success, "install failed: {}", result.output);
+    assert!(project_dir.join(".agents/skills/s1/SKILL.md").exists());
+    assert!(!project_dir.join(".kiro/skills/s1").exists());
+}
+
+#[tokio::test]
+async fn install_skill_reinstalls_only_the_missing_target() {
+    let tmp = tempdir().unwrap();
+    let reg_dir = tmp.path().join("registry");
+    let project_dir = tmp.path().join("project");
+    fs::create_dir_all(&project_dir).unwrap();
+
+    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    build_registry(&reg_dir, vec![("s1".into(), entry)]);
+    registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
+
+    let agents = ["claude-code".to_string(), "junie".to_string()];
+    let first = install_skill(
+        "owner/repo/s1",
+        &agents,
+        InstallOptions {
+            project_dir: Some(project_dir.clone()),
+            registry_dir: Some(reg_dir.clone()),
+            ..Default::default()
+        },
+    )
+    .await;
+    assert!(first.success, "first install failed: {}", first.output);
+
+    // Remove one target; a second install must restore just that one.
+    fs::remove_dir_all(project_dir.join(".junie/skills/s1")).unwrap();
+    let second = install_skill(
+        "owner/repo/s1",
+        &agents,
+        InstallOptions {
+            project_dir: Some(project_dir.clone()),
+            registry_dir: Some(reg_dir.clone()),
+            ..Default::default()
+        },
+    )
+    .await;
+    assert!(second.success, "second install failed: {}", second.output);
+    assert!(project_dir.join(".claude/skills/s1/SKILL.md").exists());
+    assert!(project_dir.join(".junie/skills/s1/SKILL.md").exists());
 }
 
 // ── install_all ───────────────────────────────────────────────────

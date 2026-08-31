@@ -644,22 +644,29 @@ pub fn get_installed_skill_names(project_dir: &Path) -> HashSet<String> {
     {
         return obj.keys().cloned().collect();
     }
-    let agents_skills = project_dir.join(".agents").join("skills");
-    if let Ok(entries) = fs::read_dir(&agents_skills) {
-        let mut set = HashSet::new();
-        for entry in entries.flatten() {
-            if let Ok(ft) = entry.file_type()
-                && ft.is_dir()
-                && let Some(name) = entry.file_name().to_str()
-            {
-                set.insert(name.to_string());
+    // Fallback when there is no lockfile: scan every known skills folder. Skills
+    // now live under each mapped agent folder (e.g. `.kiro/skills`), and `.agents`
+    // is only used for the universal destination.
+    let mut folders: Vec<String> = get_agent_folder_map()
+        .into_iter()
+        .map(|(folder, _agent)| folder)
+        .collect();
+    folders.push(".agents".to_string());
+    let mut set = HashSet::new();
+    for folder in folders {
+        let skills_dir = project_dir.join(&folder).join("skills");
+        if let Ok(entries) = fs::read_dir(&skills_dir) {
+            for entry in entries.flatten() {
+                if let Ok(ft) = entry.file_type()
+                    && ft.is_dir()
+                    && let Some(name) = entry.file_name().to_str()
+                {
+                    set.insert(name.to_string());
+                }
             }
         }
-        if !set.is_empty() {
-            return set;
-        }
     }
-    HashSet::new()
+    set
 }
 
 #[cfg(test)]

@@ -1,14 +1,4 @@
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  statSync,
-  symlinkSync,
-  writeFileSync,
-} from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { AGENT_FOLDER_MAP } from '../skills-map.ts';
@@ -379,20 +369,6 @@ async function downloadRegistryEntryToCache(
   return skillDir;
 }
 
-function ensureSymlinkTo(target: string, linkPath: string): void {
-  mkdirSync(dirname(linkPath), { recursive: true });
-  try {
-    const st = statSync(linkPath);
-    if (st) rmSync(linkPath, { recursive: true, force: true });
-  } catch {}
-  const rel = relativePosixPath(dirname(linkPath), target);
-  try {
-    symlinkSync(rel, linkPath, 'dir');
-  } catch {
-    copyDir(target, linkPath);
-  }
-}
-
 function copyDir(src: string, dest: string): void {
   mkdirSync(dest, { recursive: true });
   for (const e of readdirSync(src, { withFileTypes: true })) {
@@ -411,6 +387,70 @@ export function agentFolderFor(agent: string): string | null {
     if (name === agent) return folder;
   }
   return null;
+}
+
+/** Folder used when no mapped agent applies (explicit `universal` or fallback). */
+export const UNIVERSAL_SKILLS_FOLDER = '.agents';
+
+export interface InstallTarget {
+  /** Agent folder relative to the project root, e.g. `.kiro` or `.agents`. */
+  folder: string;
+  /** Absolute path to the folder that holds installed skill directories. */
+  skillsDir: string;
+}
+
+/**
+ * Resolve the concrete destination folders where a skill must be installed.
+ *
+ * Each mapped agent (kiro, claude-code, …) resolves to its own folder, so a
+ * skill is copied directly into every agent's `skills` directory. There is no
+ * canonical `.agents` copy plus per-agent symlinks anymore — every target is an
+ * independent copy, which removes the universal + agent double-path duplication.
+ *
+ * `.agents` is only used when the destination is `universal`: either chosen
+ * explicitly by the user (`-a universal`) or as the fallback when no mapped
+ * agent folder resolves.
+ */
+export function resolveInstallTargets(projectDir: string, agents: string[]): InstallTarget[] {
+  const folders = new Set<string>();
+  for (const agent of agents) {
+    if (agent === 'universal') continue;
+    const folder = agentFolderFor(agent);
+    if (folder) folders.add(folder);
+  }
+  // `.agents` is only used when `universal` is the sole destination: either the
+  // user chose it explicitly (`-a universal`) or nothing else resolved. When a
+  // mapped agent is present, the auto-detector's `universal` entry is ignored so
+  // we never recreate the universal + agent double path.
+  if (folders.size === 0) {
+    folders.add(UNIVERSAL_SKILLS_FOLDER);
+  }
+  return [...folders].map((folder) => ({
+    folder,
+    skillsDir: join(projectDir, folder, 'skills'),
+  }));
+}
+
+/**
+ * Materialize a verified skill bundle into `destDir`, trying local registry,
+ * download cache, and finally a fresh download to the cache. The bundle is
+ * hash-verified end to end, so every destination gets byte-identical content.
+ */
+async function materializeSkillInto(
+  skillName: string,
+  entry: RegistryEntry,
+  destDir: string,
+  opts: InstallOptions,
+): Promise<void> {
+  if (
+    !copyRegistryEntryFromLocal(skillName, entry, destDir, opts) &&
+    !copyRegistryEntryFromCache(skillName, entry, destDir, opts)
+  ) {
+    const cachedSkillDir = await downloadRegistryEntryToCache(skillName, entry, opts);
+    rmSync(destDir, { recursive: true, force: true });
+    copyDir(cachedSkillDir, destDir);
+    opts.onTrace?.(`bundle descargado copiado en ${destDir}`);
+  }
 }
 
 function updateSkillsLock(projectDir: string, skillName: string, entry: RegistryEntry): void {
@@ -464,42 +504,29 @@ export async function installSkill(
   }
   const securityCheck = securityCheckForEntry(skillName, entry);
   opts.onTrace?.(`origen del registro: ${entry.source} @ ${entry.commitSha}`);
-  const canonicalDir = join(projectDir, '.agents', 'skills', skillName);
-  try {
-    const installedVerdict = verifyRegistryEntry(skillName, entry, join(projectDir, '.agents', 'skills'));
-    if (installedVerdict.ok) {
-      opts.onTrace?.(`ya instalada y verificada: ${canonicalDir}`);
-    } else {
-      opts.onTrace?.(`la copia instalada necesita actualizarse: ${installedVerdict.reason}`);
-    }
-    if (
-      !installedVerdict.ok &&
-      !copyRegistryEntryFromLocal(skillName, entry, canonicalDir, opts) &&
-      !copyRegistryEntryFromCache(skillName, entry, canonicalDir, opts)
-    ) {
-      const cachedSkillDir = await downloadRegistryEntryToCache(skillName, entry, opts);
-      rmSync(canonicalDir, { recursive: true, force: true });
-      copyDir(cachedSkillDir, canonicalDir);
-      opts.onTrace?.(`bundle descargado copiado en ${canonicalDir}`);
-    }
-  } catch (err) {
-    return fail(`falló la descarga: ${(err as Error).message}`);
-  }
-  const uniqueFolders = new Set<string>();
-  for (const agent of agents) {
-    if (agent === 'universal') continue;
-    const folder = agentFolderFor(agent);
-    if (folder) uniqueFolders.add(folder);
-  }
-  const symlinkErrors: string[] = [];
-  for (const folder of uniqueFolders) {
-    const linkPath = join(projectDir, folder, 'skills', skillName);
+  const targets = resolveInstallTargets(projectDir, agents);
+  const installErrors: string[] = [];
+  for (const target of targets) {
+    const destDir = join(target.skillsDir, skillName);
     try {
-      ensureSymlinkTo(canonicalDir, linkPath);
-      opts.onTrace?.(`enlazada ${linkPath} -> ${canonicalDir}`);
+      // The skill is "already installed" for this target only when it exists
+      // and matches the registry hash. If it is missing or drifted, we (re)install
+      // just this target — the bundle is hash-verified so all copies stay identical.
+      const verdict = verifyRegistryEntry(skillName, entry, target.skillsDir);
+      if (verdict.ok) {
+        opts.onTrace?.(`ya instalada y verificada: ${destDir}`);
+        continue;
+      }
+      opts.onTrace?.(`la copia en ${target.folder} necesita actualizarse: ${verdict.reason}`);
+      await materializeSkillInto(skillName, entry, destDir, opts);
+      opts.onTrace?.(`instalada en ${destDir}`);
     } catch (err) {
-      symlinkErrors.push(`${folder}: ${(err as Error).message}`);
+      installErrors.push(`${target.folder}: ${(err as Error).message}`);
     }
+  }
+  if (installErrors.length > 0) {
+    const msg = `falló la instalación: ${installErrors.join('; ')}`;
+    return { success: false, output: msg, stderr: msg, exitCode: 1, command };
   }
   try {
     updateSkillsLock(projectDir, skillName, entry);
@@ -507,18 +534,10 @@ export async function installSkill(
   } catch (err) {
     return fail(`falló la actualización del lockfile: ${(err as Error).message}`);
   }
-  if (symlinkErrors.length > 0) {
-    return {
-      success: false,
-      output: symlinkErrors.join('\n'),
-      stderr: symlinkErrors.join('\n'),
-      exitCode: 1,
-      command,
-    };
-  }
+  const destinations = targets.map((t) => relativePosixPath(projectDir, join(t.skillsDir, skillName)));
   return {
     success: true,
-    output: `instalada ${skillName} en ${relativePosixPath(projectDir, canonicalDir)}`,
+    output: `instalada ${skillName} en ${destinations.join(', ')}`,
     stderr: '',
     exitCode: 0,
     command,

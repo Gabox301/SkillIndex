@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -206,6 +205,79 @@ pub fn ensure_symlink_to(target: &Path, link_path: &Path) -> std::io::Result<()>
             Err(_) => copy_dir(target, link_path),
         }
     }
+}
+
+/// Folder used when no mapped agent applies (explicit `universal` or fallback).
+pub const UNIVERSAL_SKILLS_FOLDER: &str = ".agents";
+
+/// A concrete destination where a skill must be installed.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InstallTarget {
+    /// Agent folder relative to the project root, e.g. `.kiro` or `.agents`.
+    pub folder: String,
+    /// Absolute path to the folder that holds installed skill directories.
+    pub skills_dir: PathBuf,
+}
+
+/// Resolve the concrete destination folders where a skill must be installed.
+///
+/// Each mapped agent (kiro, claude-code, …) resolves to its own folder, so a
+/// skill is copied directly into every agent's `skills` directory. There is no
+/// canonical `.agents` copy plus per-agent symlinks anymore — every target is an
+/// independent copy, which removes the universal + agent double-path duplication.
+///
+/// `.agents` is only used when `universal` is the sole destination: either the
+/// user chose it explicitly (`-a universal`) or nothing else resolved. When a
+/// mapped agent is present, the auto-detector's `universal` entry is ignored so
+/// we never recreate the universal + agent double path.
+pub fn resolve_install_targets(project_dir: &Path, agents: &[String]) -> Vec<InstallTarget> {
+    let mut folders: Vec<String> = Vec::new();
+    for agent in agents {
+        if agent == "universal" {
+            continue;
+        }
+        if let Some(folder) = agent_folder_for(agent) {
+            let folder = folder.to_string();
+            if !folders.contains(&folder) {
+                folders.push(folder);
+            }
+        }
+    }
+    if folders.is_empty() {
+        folders.push(UNIVERSAL_SKILLS_FOLDER.to_string());
+    }
+    folders
+        .into_iter()
+        .map(|folder| {
+            let skills_dir = project_dir.join(&folder).join("skills");
+            InstallTarget { folder, skills_dir }
+        })
+        .collect()
+}
+
+/// Materialize a verified skill bundle into `dest_dir`, trying local registry,
+/// download cache, and finally a fresh download to the cache. The bundle is
+/// hash-verified end to end, so every destination gets byte-identical content.
+async fn materialize_skill_into(
+    skill_name: &str,
+    entry: &RegistryEntry,
+    dest_dir: &Path,
+    opts: &InstallOptions,
+    client: &reqwest::Client,
+) -> Result<(), String> {
+    let local_ok = copy_registry_entry_from_local(skill_name, entry, dest_dir, opts);
+    let cache_ok = if !local_ok {
+        copy_registry_entry_from_cache(skill_name, entry, dest_dir)
+    } else {
+        false
+    };
+    if !local_ok && !cache_ok {
+        let cached_skill_dir =
+            download_registry_entry_to_cache(skill_name, entry, opts, client).await?;
+        let _ = fs::remove_dir_all(dest_dir);
+        copy_dir(&cached_skill_dir, dest_dir).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 pub fn update_skills_lock(
@@ -464,62 +536,25 @@ pub async fn install_skill_with_client(
     };
     let security_check = security_check_for_entry(&skill_name, entry);
 
-    let canonical_dir = project_dir.join(".agents").join("skills").join(&skill_name);
-
-    // 3-tier retrieval
-    let installed_verdict = verify_registry_entry(
-        &skill_name,
-        entry,
-        &project_dir.join(".agents").join("skills"),
-    );
-    let needs_refresh = !installed_verdict.ok;
-
-    if needs_refresh {
-        let local_ok = copy_registry_entry_from_local(&skill_name, entry, &canonical_dir, opts);
-        let cache_ok = if !local_ok {
-            copy_registry_entry_from_cache(&skill_name, entry, &canonical_dir)
-        } else {
-            false
-        };
-        if !local_ok && !cache_ok {
-            match download_registry_entry_to_cache(&skill_name, entry, opts, client).await {
-                Ok(cached_skill_dir) => {
-                    let _ = fs::remove_dir_all(&canonical_dir);
-                    if let Err(e) = copy_dir(&cached_skill_dir, &canonical_dir) {
-                        return fail(format!("falló la descarga: {e}"));
-                    }
-                }
-                Err(e) => {
-                    return fail(format!("falló la descarga: {e}"));
-                }
-            }
-        }
-    }
-
-    // link for agents
-    let mut unique_folders: HashSet<String> = HashSet::new();
-    for agent in agents {
-        if agent == "universal" {
+    // Copy the skill directly into each destination. Each mapped agent gets its
+    // own real copy; `.agents` is used only for the universal destination. A
+    // target is skipped when it already exists and matches the registry hash, so
+    // only missing or drifted targets are (re)installed.
+    let targets = resolve_install_targets(&project_dir, agents);
+    let mut install_errors: Vec<String> = Vec::new();
+    for target in &targets {
+        let dest_dir = target.skills_dir.join(&skill_name);
+        let verdict = verify_registry_entry(&skill_name, entry, &target.skills_dir);
+        if verdict.ok {
             continue;
         }
-        if let Some(folder) = agent_folder_for(agent) {
-            unique_folders.insert(folder.to_string());
-        }
-    }
-    let mut symlink_errors: Vec<String> = Vec::new();
-    for folder in unique_folders {
-        let link_path = project_dir.join(&folder).join("skills").join(&skill_name);
-        if let Err(e) = ensure_symlink_to(&canonical_dir, &link_path) {
-            symlink_errors.push(format!("{folder}: {e}"));
+        if let Err(e) = materialize_skill_into(&skill_name, entry, &dest_dir, opts, client).await {
+            install_errors.push(format!("{}: {e}", target.folder));
         }
     }
 
-    if let Err(e) = update_skills_lock(&project_dir, &skill_name, entry) {
-        return fail(format!("falló la actualización del lockfile: {e}"));
-    }
-
-    if !symlink_errors.is_empty() {
-        let msg = symlink_errors.join("\n");
+    if !install_errors.is_empty() {
+        let msg = format!("falló la instalación: {}", install_errors.join("; "));
         return InstallResult {
             success: false,
             output: msg.clone(),
@@ -530,13 +565,18 @@ pub async fn install_skill_with_client(
         };
     }
 
+    if let Err(e) = update_skills_lock(&project_dir, &skill_name, entry) {
+        return fail(format!("falló la actualización del lockfile: {e}"));
+    }
+
+    let destinations: Vec<String> = targets
+        .iter()
+        .map(|t| rel_path_from_to(&project_dir, &t.skills_dir.join(&skill_name)))
+        .collect();
+
     InstallResult {
         success: true,
-        output: format!(
-            "instalada {} en {}",
-            skill_name,
-            rel_path_from_to(&project_dir, &canonical_dir)
-        ),
+        output: format!("instalada {} en {}", skill_name, destinations.join(", ")),
         stderr: String::new(),
         exit_code: Some(0),
         command,

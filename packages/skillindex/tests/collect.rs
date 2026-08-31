@@ -323,6 +323,27 @@ fn falls_back_to_agents_skills_dir_when_no_lockfile() {
 }
 
 #[test]
+fn falls_back_to_mapped_agent_folders_when_no_lockfile() {
+    let dir = tempdir().unwrap();
+    write_file(dir.path(), ".kiro/skills/react-best-practices/.keep", "");
+    write_file(dir.path(), ".claude/skills/vue-best-practices/.keep", "");
+    let result = get_installed_skill_names(dir.path());
+    assert_eq!(result.len(), 2);
+    assert!(result.contains("react-best-practices"));
+    assert!(result.contains("vue-best-practices"));
+}
+
+#[test]
+fn deduplicates_skill_names_present_in_multiple_agent_folders() {
+    let dir = tempdir().unwrap();
+    write_file(dir.path(), ".kiro/skills/shared-skill/.keep", "");
+    write_file(dir.path(), ".claude/skills/shared-skill/.keep", "");
+    let result = get_installed_skill_names(dir.path());
+    assert_eq!(result.len(), 1);
+    assert!(result.contains("shared-skill"));
+}
+
+#[test]
 fn prefers_lockfile_over_directory_listing() {
     let dir = tempdir().unwrap();
     write_json(
