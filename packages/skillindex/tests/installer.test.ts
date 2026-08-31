@@ -9,6 +9,7 @@ import {
   agentFolderFor,
   installAll,
   installSkill,
+  progressBarLine,
   securityCheckForSkillPath,
   verifyRegistryEntry,
 } from '../cli/installer.ts';
@@ -706,5 +707,40 @@ describe('installSkill', () => {
     const lock = JSON.parse(readFileSync(join(projectDir, 'skills-lock.json'), 'utf-8'));
     deepEqual(Object.keys(lock.skills), ['alpha', 'zebra']);
     equal(lock.skills.zebra.source, 'x/y');
+  });
+});
+
+function stripAnsi(value: string): string {
+  const esc = String.fromCharCode(27);
+  return value.replace(new RegExp(esc + '\\[[0-9;]*m', 'g'), '');
+}
+
+describe('progressBarLine', () => {
+  it('renders an empty bar at zero progress', () => {
+    const line = stripAnsi(progressBarLine({ done: 0, total: 20, active: 6, frame: 0 }));
+    ok(line.includes('Instalando skills'));
+    ok(line.includes('0/20'));
+    ok(line.includes('░'));
+    ok(!line.includes('█'));
+  });
+
+  it('shows the in-flight count while installing', () => {
+    const line = stripAnsi(progressBarLine({ done: 8, total: 20, active: 6, frame: 2 }));
+    ok(line.includes('8/20'));
+    ok(line.includes('6 en curso'));
+  });
+
+  it('fills the whole bar and drops the in-flight suffix when complete', () => {
+    const line = stripAnsi(progressBarLine({ done: 20, total: 20, active: 0, frame: 0 }));
+    ok(line.includes('20/20'));
+    ok(line.includes('█'.repeat(20)));
+    ok(!line.includes('░'));
+    ok(!line.includes('en curso'));
+  });
+
+  it('treats an empty selection as complete without dividing by zero', () => {
+    const line = stripAnsi(progressBarLine({ done: 0, total: 0, active: 0, frame: 0 }));
+    ok(line.includes('0/0'));
+    ok(line.includes('█'.repeat(20)));
   });
 });

@@ -19,8 +19,12 @@ pub struct InstallOptions {
     pub project_dir: Option<PathBuf>,
     pub registry_dir: Option<PathBuf>,
     pub registry_base_url: Option<String>,
-    /// Test-only override for multiple base URLs to test fallback (e.g., v{ver}→main)
-    #[cfg(test)]
+    /// Override for the list of registry base URLs, bypassing the version/main
+    /// resolution. Defaults to `None` (production path); tests set it to exercise
+    /// the multi-base fallback (e.g. v{ver} → main). Kept as a always-present
+    /// field so the struct has one consistent shape across unit tests, integration
+    /// tests, and production, instead of a `#[cfg(test)]` field that only exists in
+    /// some compilation contexts.
     pub registry_base_urls_override: Option<Vec<String>>,
 }
 
@@ -340,14 +344,11 @@ async fn download_registry_file(
         .ok_or_else(|| format!("sin hash registrado para {normalized}"))?
         .clone();
 
-    #[cfg(test)]
     let base_urls = if let Some(override_urls) = &opts.registry_base_urls_override {
         override_urls.clone()
     } else {
         get_registry_raw_base_urls(opts.registry_base_url.as_deref())
     };
-    #[cfg(not(test))]
-    let base_urls = get_registry_raw_base_urls(opts.registry_base_url.as_deref());
     let mut errors: Vec<String> = Vec::new();
 
     for base in &base_urls {

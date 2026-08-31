@@ -22,9 +22,21 @@ use skillindex::registry::{
 use skillindex::workspace::resolve_workspaces;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
 use tempfile::tempdir;
+use tokio::sync::{Mutex, MutexGuard};
 
 // ── Helpers ────────────────────────────────────────────────────────
+
+/// Serializes tests that mutate the process-global `SKILLINDEX_CACHE_DIR`.
+/// Integration tests run in parallel and cannot reach the crate-internal
+/// `env_lock`, so without this guard one test can swap the cache dir out from
+/// under another mid-download, causing spurious `os error 3` copy failures.
+/// Uses tokio's async mutex so the guard can be safely held across `.await`.
+async fn cache_env_guard() -> MutexGuard<'static, ()> {
+    static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+    LOCK.get_or_init(|| Mutex::new(())).lock().await
+}
 
 fn write_file(base: &Path, rel: &str, content: &str) {
     let p = base.join(rel);
@@ -87,8 +99,10 @@ fn parity_hash_bundle_sorted() {
     assert_eq!(bundle1, bundle2);
     // sorted join check
     let sorted = {
-        let mut v = [("a.md".to_string(), sha256_buffer(b"a")),
-            ("b.md".to_string(), sha256_buffer(b"b"))];
+        let mut v = [
+            ("a.md".to_string(), sha256_buffer(b"a")),
+            ("b.md".to_string(), sha256_buffer(b"b")),
+        ];
         v.sort_by(|a, b| a.0.cmp(&b.0));
         v.iter()
             .map(|(k, h)| format!("{k}:{h}"))
@@ -1019,6 +1033,7 @@ fn parity_fallback_node_via_env() {
 
 #[tokio::test]
 async fn parity_installer_rate_limit_iso() {
+    let _cache_guard = cache_env_guard().await;
     use httpmock::MockServer;
     use skillindex::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
@@ -1089,6 +1104,7 @@ async fn parity_installer_rate_limit_iso() {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
+        ..Default::default()
     };
     let client = reqwest::Client::new();
     let result = install_skill_with_client("owner/repo/rate-skill", &[], &opts, &client).await;
@@ -1107,6 +1123,7 @@ async fn parity_installer_rate_limit_iso() {
 
 #[tokio::test]
 async fn parity_installer_httpmock_network_ok() {
+    let _cache_guard = cache_env_guard().await;
     use httpmock::MockServer;
     use skillindex::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
@@ -1173,6 +1190,7 @@ async fn parity_installer_httpmock_network_ok() {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
+        ..Default::default()
     };
     let client = reqwest::Client::new();
     let result =
@@ -1295,8 +1313,10 @@ fn parity_hash_bundle_two_files_references() {
         ("SKILL.md".to_string(), h1.clone()),
         ("references/notes.md".to_string(), h2.clone()),
     ]);
-    let mut sorted = [("SKILL.md".to_string(), h1),
-        ("references/notes.md".to_string(), h2)];
+    let mut sorted = [
+        ("SKILL.md".to_string(), h1),
+        ("references/notes.md".to_string(), h2),
+    ];
     sorted.sort_by(|a, b| a.0.cmp(&b.0));
     let expected = sha256_buffer(
         sorted

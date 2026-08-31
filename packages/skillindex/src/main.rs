@@ -440,14 +440,6 @@ async fn main() {
     let elapsed = start.elapsed().as_millis() as u64;
     let claude_cleanup = cleanup_claude_md(&project_dir);
 
-    if is_tty() && !args.verbose {
-        // Move cursor up and rewrite Done! like TS
-        let up = selected_skills.len() + 2;
-        write(&format!("\x1b[{up}A\r\x1b[K"));
-        log(&(green("   ◆ ") + &bold("¡Listo!")));
-        write(&format!("\x1b[{}B", selected_skills.len() + 1));
-    }
-
     if claude_cleanup.cleaned {
         if claude_cleanup.deleted {
             log(&dim(

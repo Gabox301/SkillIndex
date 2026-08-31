@@ -2,7 +2,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync,
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { AGENT_FOLDER_MAP } from '../skills-map.ts';
-import { HIDE_CURSOR, SHOW_CURSOR, SPINNER, cyan, dim, green, log, red, write } from './colors.ts';
+import { HIDE_CURSOR, SHOW_CURSOR, SPINNER, bold, cyan, dim, green, log, red, write } from './colors.ts';
 import { sha256File, sha256Hex } from './helper/hash.ts';
 import { relativePosixPath, toPosixPath } from './helper/paths.ts';
 import type { SkillEntry } from './lib.ts';
@@ -578,66 +578,40 @@ export async function installAll(
   const CONCURRENCY = 6;
   const sorted = sortByRepo(skills);
   const total = sorted.length;
-  const states = sorted.map(({ skill }) => ({
-    name: skill,
-    skill,
-    status: 'pending' as 'pending' | 'installing' | 'success' | 'failed',
-    output: '',
-  }));
   let frame = 0;
-  let rendered = false;
+  let installed = 0;
+  let failed = 0;
   let activeCount = 0;
-  function render(): void {
-    if (rendered) {
-      write(`\x1b[${total}A\r`);
-    }
-    rendered = true;
-    write('\x1b[J');
-    for (const state of states) {
-      switch (state.status) {
-        case 'pending':
-          write(dim(`   ◌ ${state.name}`) + '\n');
-          break;
-        case 'installing':
-          write(cyan(`   ${SPINNER[frame]}`) + ` ${state.name}...\n`);
-          break;
-        case 'success':
-          write(green(`   ✔ ${state.name}`) + '\n');
-          break;
-        case 'failed':
-          write(red(`   ✘ ${state.name}`) + dim(' — failed') + '\n');
-          break;
-      }
-    }
+  // The full skill list was already shown during selection, so during install
+  // we render a single progress line that we overwrite in place. Using \x1b[2K
+  // (erase the whole line) + \r avoids the blank-then-redraw flash of clearing
+  // and reprinting N lines every frame.
+  function renderBar(): void {
+    const done = installed + failed;
+    write('\r\x1b[2K' + progressBarLine({ done, total, active: activeCount, frame }));
   }
   write(HIDE_CURSOR);
   const timer = setInterval(() => {
     frame = (frame + 1) % SPINNER.length;
-    if (activeCount > 0) render();
+    if (activeCount > 0) renderBar();
   }, 80);
-  let installed = 0;
-  let failed = 0;
   const errors: InstallAllResult['errors'] = [];
   const securityChecks: InstallSecurityCheck[] = [];
   let nextIdx = 0;
   async function worker(): Promise<void> {
     while (nextIdx < total) {
       const idx = nextIdx++;
-      const state = states[idx];
-      state.status = 'installing';
+      const state = sorted[idx];
       activeCount++;
-      render();
+      renderBar();
       const result = await installSkill(state.skill, agents, opts);
       activeCount--;
       if (result.success) {
-        state.status = 'success';
         installed++;
         if (result.securityCheck) securityChecks.push(result.securityCheck);
       } else {
-        state.status = 'failed';
-        state.output = result.output;
         errors.push({
-          name: state.name,
+          name: state.skill,
           output: result.output,
           stderr: result.stderr,
           exitCode: result.exitCode,
@@ -645,15 +619,41 @@ export async function installAll(
         });
         failed++;
       }
-      render();
+      renderBar();
     }
   }
   const workers = Array.from({ length: Math.min(CONCURRENCY, total) }, () => worker());
   await Promise.all(workers);
   clearInterval(timer);
-  render();
+  // Resolve the line to its final state and end it with a newline so the caller
+  // can print the summary right after, without any cursor gymnastics.
+  write('\r\x1b[2K' + progressBarLine({ done: installed + failed, total, active: 0, frame }) + '\n');
   write(SHOW_CURSOR);
   return { installed, failed, errors, securityChecks };
+}
+
+const PROGRESS_BAR_WIDTH = 20;
+
+/** Build the single progress line: filled bar + done/total + in-flight count. */
+export function progressBarLine({
+  done,
+  total,
+  active,
+  frame,
+}: {
+  done: number;
+  total: number;
+  active: number;
+  frame: number;
+}): string {
+  const ratio = total > 0 ? Math.min(1, done / total) : 1;
+  const filled = Math.round(ratio * PROGRESS_BAR_WIDTH);
+  const bar = '█'.repeat(filled) + '░'.repeat(PROGRESS_BAR_WIDTH - filled);
+  const complete = done >= total;
+  const icon = complete ? green('◆') : cyan(SPINNER[frame % SPINNER.length]);
+  const count = `${done}/${total}`;
+  const activeSuffix = !complete && active > 0 ? dim(` · ${active} en curso`) : '';
+  return `   ${icon} ${bold('Instalando skills')}  ${cyan(bar)}  ${count}${activeSuffix}`;
 }
 
 async function installAllVerbose(

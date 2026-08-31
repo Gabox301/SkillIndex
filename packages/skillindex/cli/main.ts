@@ -483,12 +483,6 @@ async function main(): Promise<void> {
   });
   const elapsed = Date.now() - startTime;
   const claudeCleanup = cleanupClaudeMd(projectDir);
-  if (process.stdout.isTTY && !verbose) {
-    const up = selectedSkills.length + 2;
-    write(`\x1b[${up}A\r\x1b[K`);
-    log(green('   ◆ ') + bold('¡Listo!'));
-    write(`\x1b[${selectedSkills.length + 1}B`);
-  }
   if (claudeCleanup.cleaned) {
     if (claudeCleanup.deleted) {
       log(dim('   Se eliminó la sección de skillindex de CLAUDE.md (archivo vacío, eliminado).'));
