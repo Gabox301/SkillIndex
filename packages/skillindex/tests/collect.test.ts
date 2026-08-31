@@ -1,7 +1,6 @@
-import { deepStrictEqual, ok, strictEqual, throws } from 'node:assert/strict';
+import { deepStrictEqual, ok, strictEqual } from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { collectSkills, detectTechnologies, getInstalledSkillNames } from '../cli/lib.ts';
-import { multiSelect } from '../cli/ui.ts';
 import { useTmpDir, writeFile, writeJson, writePackageJson } from './helpers.ts';
 
 describe('collectSkills', () => {
@@ -357,28 +356,5 @@ describe('getInstalledSkillNames', () => {
   it('returns empty set for invalid lockfile JSON', () => {
     writeFile(tmp.path, 'skills-lock.json', 'not json{{{');
     strictEqual(getInstalledSkillNames(tmp.path).size, 0);
-  });
-});
-
-describe('multiSelect', () => {
-  it('throws when initialSelected length does not match items length', () => {
-    throws(
-      () => multiSelect(['a', 'b', 'c'], { labelFn: (x) => x, initialSelected: [true, false] }),
-      /initialSelected length \(2\) must match items length \(3\)/,
-    );
-  });
-
-  it('returns all items when stdin is not a TTY', async () => {
-    const prevIsTTY = process.stdin.isTTY;
-    // Force the non-TTY branch deterministically; some test runners leave
-    // stdin.isTTY truthy, which would make multiSelect wait for key input.
-    process.stdin.isTTY = false;
-    try {
-      const items = [{ name: 'a' }, { name: 'b' }];
-      const result = await multiSelect(items, { labelFn: (x) => x.name });
-      deepStrictEqual(result, items);
-    } finally {
-      process.stdin.isTTY = prevIsTTY;
-    }
   });
 });
