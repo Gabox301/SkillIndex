@@ -12,9 +12,8 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __dirname: string = join(fileURLToPath(import.meta.url), '..');
+const __dirname: string = import.meta.dirname;
 const root: string = resolve(__dirname, '../../..');
 
 let failed = false;

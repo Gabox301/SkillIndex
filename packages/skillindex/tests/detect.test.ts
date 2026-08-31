@@ -9,7 +9,7 @@ import {
   readDenoJson,
   readGemfile,
   readPackageJson,
-} from '../lib.ts';
+} from '../cli/lib.ts';
 import { addWorkspace, useTmpDir, writeFile, writeJson, writePackageJson } from './helpers.ts';
 
 // ── getAllPackageNames ─────────────────────────────────────────

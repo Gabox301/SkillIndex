@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { cleanupClaudeMd } from './claude.ts';
 import { bold, cyan, dim, gray, green, log, magenta, muted, red, SHOW_CURSOR, write, yellow } from './colors.ts';
 import type { InstallSecurityCheck } from './installer.ts';
@@ -9,9 +8,9 @@ import type { ComboSkill, SkillEntry, Technology } from './lib.ts';
 import { collectSkills, detectAgents, detectTechnologies, getInstalledSkillNames } from './lib.ts';
 import { formatTime, multiSelect, printBanner } from './ui.ts';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const VERSION: string = (() => {
-  for (const base of [__dirname, resolve(__dirname, '..')]) {
+  for (const base of [__dirname, resolve(__dirname, '..'), resolve(__dirname, '..', '..')]) {
     const p = join(base, 'package.json');
     if (!existsSync(p)) continue;
     try {

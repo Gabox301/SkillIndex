@@ -2,7 +2,7 @@ import { ok, strictEqual } from 'node:assert/strict';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
-import { cleanupClaudeMd } from '../claude.ts';
+import { cleanupClaudeMd } from '../cli/claude.ts';
 import { useTmpDir } from './helpers.ts';
 
 describe('cleanupClaudeMd', () => {

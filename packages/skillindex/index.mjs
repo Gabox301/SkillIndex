@@ -4,10 +4,9 @@
 // La lógica canónica vive en index.ts -> dist/index.js (generado por tsc).
 
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 // En el paquete publicado, dist/index.js existe y es el entry compilado.
 // En dev (sin dist), fallback a index.ts via bun (no requiere strip-types en node_modules).

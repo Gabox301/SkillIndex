@@ -6,7 +6,6 @@
 // Meant to be run by maintainers only — never by end users.
 
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import {
   createWriteStream,
   existsSync,
@@ -23,9 +22,11 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { pipeline } from 'node:stream/promises';
-import { fileURLToPath } from 'node:url';
-import { bold, cyan, dim, green, log, red, yellow } from '../colors.ts';
-import { parseSkillPath } from '../lib.ts';
+import { bold, cyan, dim, green, log, red, yellow } from '../cli/colors.ts';
+import { sha256Hex } from '../cli/helper/hash.ts';
+import { normalizeLineEndings } from '../cli/helper/line-endings.ts';
+import { relativePosixPath } from '../cli/helper/paths.ts';
+import { parseSkillPath } from '../cli/lib.ts';
 import { COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP } from '../skills-map.ts';
 
 try {
@@ -127,7 +128,7 @@ interface GithubTreeEntry {
 
 // ── Config ───────────────────────────────────────────────────
 
-const __dirname: string = dirname(fileURLToPath(import.meta.url));
+const __dirname: string = import.meta.dirname;
 const PKG_ROOT: string = resolve(__dirname, '..');
 const REGISTRY_DIR: string = join(PKG_ROOT, 'skills-registry');
 const MANIFEST_PATH: string = join(REGISTRY_DIR, 'index.json');
@@ -522,16 +523,12 @@ function listFilesRecursive(dir: string): string[] {
       const p = join(current, e.name);
       if (e.isDirectory()) {
         walk(p);
-      } else if (e.isFile() && !shouldSkipSkillFile(relative(dir, p).split('\\').join('/'))) {
+      } else if (e.isFile() && !shouldSkipSkillFile(relativePosixPath(dir, p))) {
         out.push(p);
       }
     }
   })(dir);
   return out.sort();
-}
-
-function sha256Hex(buf: Buffer | string): string {
-  return createHash('sha256').update(buf).digest('hex');
 }
 
 // ── OpenAI auditor ───────────────────────────────────────────
@@ -868,9 +865,9 @@ async function main(): Promise<void> {
       }
       const files = listFilesRecursive(skillDir);
       const relFiles = files.map((f) => ({
-        rel: relative(skillDir, f).split('\\').join('/'),
+        rel: relativePosixPath(skillDir, f),
         abs: f,
-        buf: readFileSync(f),
+        buf: normalizeLineEndings(readFileSync(f)),
       }));
       const textFilesForReview = relFiles
         .filter((f) => /\.(md|markdown|txt)$/i.test(f.rel))

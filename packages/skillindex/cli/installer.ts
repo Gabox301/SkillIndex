@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import {
   copyFileSync,
   existsSync,
@@ -11,12 +10,13 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { homedir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { AGENT_FOLDER_MAP } from '../skills-map.ts';
 import { HIDE_CURSOR, SHOW_CURSOR, SPINNER, cyan, dim, green, log, red, write } from './colors.ts';
+import { sha256File, sha256Hex } from './helper/hash.ts';
+import { relativePosixPath, toPosixPath } from './helper/paths.ts';
 import type { SkillEntry } from './lib.ts';
 import { parseSkillPath } from './lib.ts';
-import { AGENT_FOLDER_MAP } from './skills-map.ts';
 
 // ── Registry ─────────────────────────────────────────────────
 
@@ -53,7 +53,7 @@ export interface Registry {
   skills: Record<string, RegistryEntry>;
 }
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 let _cachedRegistry: Registry | null | undefined;
 let _cachedRegistryDir: string | null = null;
@@ -61,7 +61,11 @@ let _cachedPackageVersion: string | null | undefined;
 
 function getPackageVersion(): string | null {
   if (_cachedPackageVersion !== undefined) return _cachedPackageVersion;
-  const candidates = [join(__dirname, 'package.json'), join(__dirname, '..', 'package.json')];
+  const candidates = [
+    join(__dirname, 'package.json'),
+    join(__dirname, '..', 'package.json'),
+    join(__dirname, '..', '..', 'package.json'),
+  ];
   for (const c of candidates) {
     try {
       const pkg = JSON.parse(readFileSync(c, 'utf-8')) as { version?: unknown };
@@ -77,7 +81,11 @@ function getPackageVersion(): string | null {
 
 export function getRegistryDir(): string {
   if (_cachedRegistryDir) return _cachedRegistryDir;
-  const candidates = [join(__dirname, 'skills-registry'), join(__dirname, '..', 'skills-registry')];
+  const candidates = [
+    join(__dirname, 'skills-registry'),
+    join(__dirname, '..', 'skills-registry'),
+    join(__dirname, '..', '..', 'skills-registry'),
+  ];
   for (const c of candidates) {
     if (existsSync(join(c, 'index.json'))) {
       _cachedRegistryDir = c;
@@ -109,10 +117,6 @@ export function _setRegistryDir(dir: string | null): void {
 
 // ── Integrity ────────────────────────────────────────────────
 
-function sha256File(path: string): string {
-  return createHash('sha256').update(readFileSync(path)).digest('hex');
-}
-
 export function verifyRegistryEntry(
   skillName: string,
   entry: RegistryEntry,
@@ -123,7 +127,7 @@ export function verifyRegistryEntry(
     return { ok: false, reason: `directorio faltante ${skillDir}` };
   }
   for (const rel of entry.files) {
-    const normalizedRel = normalizeRegistryRelPath(rel);
+    const normalizedRel = toPosixPath(rel);
     const abs = join(skillDir, ...normalizedRel.split('/'));
     if (!existsSync(abs)) {
       return { ok: false, reason: `archivo faltante ${normalizedRel}` };
@@ -167,19 +171,6 @@ interface InstallOptions {
   onTrace?: (message: string) => void;
 }
 
-function relPathFromTo(from: string, to: string): string {
-  const rel = relative(from, to);
-  return rel.split('\\').join('/');
-}
-
-function normalizeRegistryRelPath(rel: string): string {
-  return rel.split('\\').join('/');
-}
-
-function sha256Buffer(buf: Buffer): string {
-  return createHash('sha256').update(buf).digest('hex');
-}
-
 function getRegistryRawBaseUrls(opts: InstallOptions): string[] {
   const configured = opts.registryBaseUrl || process.env.SKILLINDEX_REGISTRY_BASE_URL;
   if (configured) return [configured.replace(/\/+$/, '')];
@@ -188,10 +179,10 @@ function getRegistryRawBaseUrls(opts: InstallOptions): string[] {
     throw new Error('no se pudo resolver la versión del paquete skillindex para la descarga del registro');
   }
   const base = DEFAULT_REGISTRY_RAW_BASE_URL_PREFIX;
-  return [
-    `${base}/v${version}/packages/skillindex/skills-registry`,
-    `${base}/main/packages/skillindex/skills-registry`,
-  ];
+  const suffix = 'packages/skillindex/skills-registry';
+  // Prefer the exact release tag; fall back to the repository's default
+  // branch, which is `master`.
+  return [`${base}/v${version}/${suffix}`, `${base}/master/${suffix}`];
 }
 
 function getInstallRegistryDir(opts: InstallOptions): string {
@@ -244,7 +235,7 @@ export function securityCheckForSkillPath(skillPath: string): InstallSecurityChe
 }
 
 function encodeRawPath(skillName: string, rel: string): string {
-  return [skillName, ...normalizeRegistryRelPath(rel).split('/')].map(encodeURIComponent).join('/');
+  return [skillName, ...toPosixPath(rel).split('/')].map(encodeURIComponent).join('/');
 }
 
 function githubDownloadHeaders(url: string): HeadersInit {
@@ -266,7 +257,7 @@ async function downloadRegistryFile(
   rel: string,
   opts: InstallOptions,
 ): Promise<{ buf: Buffer; url: string }> {
-  const normalizedRel = normalizeRegistryRelPath(rel);
+  const normalizedRel = toPosixPath(rel);
   if (isDisallowedSkillFile(normalizedRel)) {
     throw new Error(`se rechazó la descarga del archivo de skill no permitido: ${normalizedRel}`);
   }
@@ -295,7 +286,7 @@ async function downloadRegistryFile(
       continue;
     }
     const buf = Buffer.from(await res.arrayBuffer());
-    const actual = sha256Buffer(buf);
+    const actual = sha256Hex(buf);
     if (actual !== expected) {
       errors.push(`hash no coincide desde ${baseUrl}`);
       opts.onTrace?.(`hash no coincide para ${normalizedRel} desde ${baseUrl}`);
@@ -316,18 +307,16 @@ async function downloadRegistryEntry(
   const files = [];
   for (const rel of entry.files) {
     files.push({
-      rel: normalizeRegistryRelPath(rel),
+      rel: toPosixPath(rel),
       ...(await downloadRegistryFile(skillName, entry, rel, opts)),
     });
   }
-  const bundleHash = createHash('sha256')
-    .update(
-      files
-        .map(({ rel, buf }) => `${rel}:${sha256Buffer(buf)}`)
-        .sort()
-        .join('\n'),
-    )
-    .digest('hex');
+  const bundleHash = sha256Hex(
+    files
+      .map(({ rel, buf }) => `${rel}:${sha256Hex(buf)}`)
+      .sort()
+      .join('\n'),
+  );
   if (bundleHash !== entry.bundleHash) {
     throw new Error('el hash del bundle no coincide');
   }
@@ -396,7 +385,7 @@ function ensureSymlinkTo(target: string, linkPath: string): void {
     const st = statSync(linkPath);
     if (st) rmSync(linkPath, { recursive: true, force: true });
   } catch {}
-  const rel = relPathFromTo(dirname(linkPath), target);
+  const rel = relativePosixPath(dirname(linkPath), target);
   try {
     symlinkSync(rel, linkPath, 'dir');
   } catch {
@@ -529,7 +518,7 @@ export async function installSkill(
   }
   return {
     success: true,
-    output: `instalada ${skillName} en ${relPathFromTo(projectDir, canonicalDir)}`,
+    output: `instalada ${skillName} en ${relativePosixPath(projectDir, canonicalDir)}`,
     stderr: '',
     exitCode: 0,
     command,

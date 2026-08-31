@@ -2,7 +2,7 @@ import { deepEqual, equal, ok } from 'node:assert/strict';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
-import { AGENT_FOLDER_MAP, detectAgents } from '../lib.ts';
+import { AGENT_FOLDER_MAP, detectAgents } from '../cli/lib.ts';
 import { useTmpDir } from './helpers.ts';
 
 describe('detectAgents', () => {

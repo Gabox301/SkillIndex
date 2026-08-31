@@ -2,8 +2,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 const [major, minor]: number[] = process.versions.node.split('.').map(Number) as number[];
 
@@ -16,7 +15,7 @@ if (major < 22 || (major === 22 && minor < 6)) {
   process.exit(1);
 }
 
-const __dirname: string = dirname(fileURLToPath(import.meta.url));
+const __dirname: string = import.meta.dirname;
 
 // ── Rust probe gate ───────────────────────────────────────
 // Try Rust binary first, unless forced to Node via SKILLINDEX_USE_RUST=0
@@ -63,19 +62,19 @@ if (!forceNode) {
 
 // ── Node/Bun fallback (original, preserved) ──────────────────────────
 // Mantiene `npx/bunx skillindex` funcionando cuando Rust no está presente o se fuerza Node.
-// Preserva el probe `dist/main.js` + `bun` para `main.ts`.
+// Preserva el probe `dist/cli/main.js` + `bun` para `cli/main.ts`.
 
-if (existsSync(join(__dirname, 'dist', 'main.js'))) {
+if (existsSync(join(__dirname, 'dist', 'cli', 'main.js'))) {
   // @ts-ignore — dist artifact has no types, runtime import only
-  await import('./dist/main.js');
+  await import('./dist/cli/main.js');
 } else {
   try {
-    await import('./main.ts');
+    await import('./cli/main.ts');
   } catch (err: unknown) {
     const code = (err as { code?: string })?.code;
     if (code !== 'ERR_UNKNOWN_FILE_EXTENSION') throw err;
     const { spawn } = await import('node:child_process');
-    const mainPath: string = join(__dirname, 'main.ts');
+    const mainPath: string = join(__dirname, 'cli', 'main.ts');
     const child = spawn('bun', [mainPath, ...process.argv.slice(2)], { stdio: 'inherit' });
     child.on('exit', (code: number | null, signal: string | null) => {
       if (signal) process.kill(process.pid, signal as NodeJS.Signals);

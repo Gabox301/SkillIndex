@@ -1,7 +1,7 @@
 import { deepStrictEqual, ok, strictEqual, throws } from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { collectSkills, detectTechnologies, getInstalledSkillNames } from '../lib.ts';
-import { multiSelect } from '../ui.ts';
+import { collectSkills, detectTechnologies, getInstalledSkillNames } from '../cli/lib.ts';
+import { multiSelect } from '../cli/ui.ts';
 import { useTmpDir, writeFile, writeJson, writePackageJson } from './helpers.ts';
 
 describe('collectSkills', () => {
@@ -352,8 +352,16 @@ describe('multiSelect', () => {
   });
 
   it('returns all items when stdin is not a TTY', async () => {
-    const items = [{ name: 'a' }, { name: 'b' }];
-    const result = await multiSelect(items, { labelFn: (x) => x.name });
-    deepStrictEqual(result, items);
+    const prevIsTTY = process.stdin.isTTY;
+    // Force the non-TTY branch deterministically; some test runners leave
+    // stdin.isTTY truthy, which would make multiSelect wait for key input.
+    process.stdin.isTTY = false;
+    try {
+      const items = [{ name: 'a' }, { name: 'b' }];
+      const result = await multiSelect(items, { labelFn: (x) => x.name });
+      deepStrictEqual(result, items);
+    } finally {
+      process.stdin.isTTY = prevIsTTY;
+    }
   });
 });

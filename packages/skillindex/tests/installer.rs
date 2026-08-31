@@ -221,9 +221,9 @@ async fn install_skill_copies_files_to_agents_and_updates_lock() {
         "owner/repo",
         &[("SKILL.md", "# hello"), ("references/notes.md", "notes")],
     );
+    build_registry(&reg_dir, vec![("hello-skill".into(), entry)]);
     registry_content(&reg_dir, "hello-skill", "SKILL.md", "# hello");
     registry_content(&reg_dir, "hello-skill", "references/notes.md", "notes");
-    build_registry(&reg_dir, vec![("hello-skill".into(), entry)]);
 
     let opts = InstallOptions {
         project_dir: Some(project_dir.clone()),
@@ -312,15 +312,20 @@ async fn install_skill_creates_symlinks_for_agents() {
     fs::create_dir_all(&project_dir).unwrap();
 
     let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
-    registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
     build_registry(&reg_dir, vec![("s1".into(), entry)]);
+    registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
 
     let opts = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill("owner/repo/s1", &["claude-code".to_string(), "junie".to_string()], opts).await;
+    let result = install_skill(
+        "owner/repo/s1",
+        &["claude-code".to_string(), "junie".to_string()],
+        opts,
+    )
+    .await;
     assert!(result.success, "install failed: {}", result.output);
 
     assert!(project_dir.join(".claude/skills/s1").exists());
@@ -347,12 +352,12 @@ async fn install_all_collects_security_checks() {
         checked_at: "2026-01-01T00:00:00Z".to_string(),
     });
 
-    registry_content(&reg_dir, "first-skill", "SKILL.md", "# first");
-    registry_content(&reg_dir, "second-skill", "SKILL.md", "# second");
     build_registry(
         &reg_dir,
         vec![("first-skill".into(), e1), ("second-skill".into(), e2)],
     );
+    registry_content(&reg_dir, "first-skill", "SKILL.md", "# first");
+    registry_content(&reg_dir, "second-skill", "SKILL.md", "# second");
 
     let skill_entries = vec![
         SkillEntry {

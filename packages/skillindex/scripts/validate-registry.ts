@@ -1,20 +1,16 @@
 #!/usr/bin/env node
 
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parseSkillPath } from '../lib.ts';
+import { join, relative, resolve } from 'node:path';
+import { sha256Hex } from '../cli/helper/hash.ts';
+import { normalizeLineEndings } from '../cli/helper/line-endings.ts';
+import { parseSkillPath } from '../cli/lib.ts';
 import { COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP } from '../skills-map.ts';
 
-const __dirname: string = dirname(fileURLToPath(import.meta.url));
+const __dirname: string = import.meta.dirname;
 const PKG_ROOT: string = resolve(__dirname, '..');
 const REGISTRY_DIR: string = join(PKG_ROOT, 'skills-registry');
 const MANIFEST_PATH: string = join(REGISTRY_DIR, 'index.json');
-
-function sha256Hex(buf: Buffer | string): string {
-  return createHash('sha256').update(buf).digest('hex');
-}
 
 interface DeclaredSkillInfo {
   full: string;
@@ -80,7 +76,7 @@ function validateEntryFiles(skillName: string, entry: RegistryEntry, errors: str
       errors.push(`${skillName}: ${file} is not a file`);
       continue;
     }
-    const actualSha = sha256Hex(readFileSync(filePath));
+    const actualSha = sha256Hex(normalizeLineEndings(readFileSync(filePath)));
     if (shaMap[file] !== actualSha) {
       errors.push(`${skillName}: hash mismatch for ${file}`);
     }

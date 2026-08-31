@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
-import type { RegistryEntry } from '../installer.ts';
+import type { RegistryEntry } from '../cli/installer.ts';
 import {
   _setRegistryDir,
   agentFolderFor,
@@ -11,7 +11,7 @@ import {
   installSkill,
   securityCheckForSkillPath,
   verifyRegistryEntry,
-} from '../installer.ts';
+} from '../cli/installer.ts';
 import { useTmpDir } from './helpers.ts';
 
 const PACKAGE_VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
@@ -491,7 +491,7 @@ describe('installSkill', () => {
     }
   });
 
-  it('falls back to the main registry mirror when the release registry mirror is missing files', async () => {
+  it('falls back to the master registry mirror when the release registry mirror is missing files', async () => {
     const regDir = join(tmp.path, 'registry');
     const projectDir = join(tmp.path, 'project');
     mkdirSync(projectDir, { recursive: true });
@@ -511,9 +511,9 @@ describe('installSkill', () => {
           if (href.includes(`/Gabox301/SkillIndex/v${PACKAGE_VERSION}/`)) {
             return new Response('not found', { status: 404, statusText: 'Not Found' });
           }
-          if (href.includes('/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/')) {
+          if (href.includes('/Gabox301/SkillIndex/master/packages/skillindex/skills-registry/')) {
             const rel = decodeURIComponent(
-              href.split('/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/')[1],
+              href.split('/Gabox301/SkillIndex/master/packages/skillindex/skills-registry/')[1],
             );
             return new Response(readFileSync(join(regDir, rel)));
           }
@@ -525,7 +525,7 @@ describe('installSkill', () => {
       ok(
         seenUrls.some((url) =>
           url.startsWith(
-            'https://raw.githubusercontent.com/Gabox301/SkillIndex/main/packages/skillindex/skills-registry/fallback-skill/',
+            'https://raw.githubusercontent.com/Gabox301/SkillIndex/master/packages/skillindex/skills-registry/fallback-skill/',
           ),
         ),
       );

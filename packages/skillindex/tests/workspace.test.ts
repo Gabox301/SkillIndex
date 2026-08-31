@@ -1,6 +1,6 @@
 import { deepStrictEqual, ok, strictEqual } from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { resolveWorkspaces } from '../lib.ts';
+import { resolveWorkspaces } from '../cli/lib.ts';
 import { addWorkspace, useTmpDir, writeFile, writeJson, writePackageJson } from './helpers.ts';
 
 describe('resolveWorkspaces', () => {

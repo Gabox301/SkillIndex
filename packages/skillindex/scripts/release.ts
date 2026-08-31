@@ -3,10 +3,9 @@
 import type { ExecSyncOptions } from 'node:child_process';
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-const __dirname: string = dirname(fileURLToPath(import.meta.url));
+const __dirname: string = import.meta.dirname;
 const ROOT: string = resolve(__dirname, '..');
 const REPO_ROOT: string = resolve(ROOT, '..', '..');
 const PKG_PATH: string = resolve(ROOT, 'package.json');

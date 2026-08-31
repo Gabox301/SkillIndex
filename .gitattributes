@@ -1,0 +1,14 @@
+# Ensure registry files use LF line endings (prevents hash mismatch on Windows checkout via core.autocrlf)
+packages/skillindex/skills-registry/** text eol=lf
+packages/skillindex/skills-registry/index.json text eol=lf
+
+# General: keep LF for code and registry (prevents Windows CRLF mismatches)
+*.ts text eol=lf
+*.rs text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.toml text eol=lf
+*.lock text eol=lf
+LICENSE text eol=lf

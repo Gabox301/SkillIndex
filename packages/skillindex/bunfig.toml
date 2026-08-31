@@ -1,0 +1,6 @@
+[test]
+# Exclude build output from test discovery. `target/` holds Cargo build
+# artifacts, including packaged snapshots (target/package/<name>-<version>/)
+# that ship their own stale *.test.ts copies. Without this, `bun test` would
+# traverse those directories and run outdated tests against outdated source.
+pathIgnorePatterns = ["target/**", "dist/**", "node_modules/**"]
