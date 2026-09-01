@@ -16,7 +16,7 @@
   "homepage": "https://skillindex.netlify.app/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gabox301/SkillIndex.git"
+    "url": "git+https://github.com/Gabox301/SkillIndex.git"
   },
   "bugs": {
     "url": "https://github.com/Gabox301/SkillIndex/issues"
