@@ -102,6 +102,38 @@ export function toggleGroupSelection(selected: boolean[], memberIndices: number[
   for (const i of memberIndices) selected[i] = next;
 }
 
+/**
+ * Compute the new viewport start offset so the cursor stays visible with a
+ * margin of context rows above/below. The window slides minimally: it only
+ * moves when the cursor gets within `margin` rows of an edge, keeping prior
+ * scroll position stable otherwise. The result is clamped to a valid start.
+ */
+export function computeViewportStart({
+  cursor,
+  total,
+  height,
+  margin,
+  prevStart,
+}: {
+  cursor: number;
+  total: number;
+  height: number;
+  margin: number;
+  prevStart: number;
+}): number {
+  // Everything fits: no scrolling.
+  if (height >= total) return 0;
+  const maxStart = total - height;
+  // Effective margin cannot exceed what the window can show on each side.
+  const m = Math.min(margin, Math.floor((height - 1) / 2));
+  let start = prevStart;
+  if (cursor - m < start) start = cursor - m;
+  if (cursor + m > start + height - 1) start = cursor - height + 1 + m;
+  if (start < 0) start = 0;
+  if (start > maxStart) start = maxStart;
+  return start;
+}
+
 /** A navigable row: either a group header or an item (with its item index). */
 type Row = { kind: 'group'; group: string; memberIndices: number[] } | { kind: 'item'; index: number };
 
@@ -153,13 +185,30 @@ export function multiSelect<T>(
     const rows = buildRows(items, groupFn, showGroups);
     let cursor = 0;
     let rendered = false;
-    function renderedLineCount(): number {
-      // One terminal line per row plus the trailing hint line.
-      return rows.length + 1;
+    // Viewport: when the list is taller than the terminal, only a sliding window
+    // of rows is drawn so the block always fits and the cursor stays visible.
+    const VIEWPORT_MARGIN = 1;
+    // Reserve lines for the surrounding chrome (hint line + up/down indicators +
+    // some breathing room already printed above the list).
+    const RESERVED_ROWS = 6;
+    const terminalRows = process.stdout.rows || 24;
+    const viewportHeight = Math.max(3, Math.min(rows.length, terminalRows - RESERVED_ROWS));
+    let viewStart = 0;
+    // Number of terminal lines the last draw() produced above the hint line.
+    // Derived from the actual render so the rewind count can never drift.
+    let lastDrawnLines = 0;
+    function clampViewport(): void {
+      viewStart = computeViewportStart({
+        cursor,
+        total: rows.length,
+        height: viewportHeight,
+        margin: VIEWPORT_MARGIN,
+        prevStart: viewStart,
+      });
     }
     function clearRendered(): void {
       if (rendered) {
-        write(`\x1b[${renderedLineCount()}A\r\x1b[J`);
+        write(`\x1b[${lastDrawnLines}A\r\x1b[J`);
       }
     }
     function render(): void {
@@ -173,8 +222,16 @@ export function multiSelect<T>(
       return dim('◻');
     }
     function draw(): void {
+      clampViewport();
       const count = selected.filter(Boolean).length;
-      for (let r = 0; r < rows.length; r++) {
+      const end = Math.min(rows.length, viewStart + viewportHeight);
+      let lines = 0;
+      // Overflow indicator: rows hidden above the window.
+      if (viewStart > 0) {
+        write(dim(`   ↑ ${viewStart} más`) + '\n');
+        lines++;
+      }
+      for (let r = viewStart; r < end; r++) {
         const row = rows[r];
         const pointer = r === cursor ? cyan('❯') : ' ';
         if (row.kind === 'group') {
@@ -188,7 +245,15 @@ export function multiSelect<T>(
           const indent = showGroups ? '       ' : '     ';
           write(`${indent}${pointer} ${check} ${label}${hint ? '  ' + dim(hint) : ''}\n`);
         }
+        lines++;
       }
+      // Overflow indicator: rows hidden below the window.
+      const belowCount = rows.length - end;
+      if (belowCount > 0) {
+        write(dim(`   ↓ ${belowCount} más`) + '\n');
+        lines++;
+      }
+      lastDrawnLines = lines;
       const shortcutHints = shortcuts.map((s) => white(bold(`[${s.key}]`)) + dim(` ${s.label}`)).join(dim(' · '));
       const shortcutPart = shortcuts.length > 0 ? shortcutHints + dim(' · ') : '';
       write(

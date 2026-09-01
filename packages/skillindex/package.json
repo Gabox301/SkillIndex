@@ -41,7 +41,6 @@
     "lint:fix": "oxlint --fix",
     "validate:registry": "bun run scripts/validate-registry.ts",
     "prepublishOnly": "bun run check && bun run lint && bun run test && bun run build && bun run validate:registry",
-    "release": "bun run scripts/release.ts",
     "sync:skills": "bun run scripts/sync-skills.ts",
     "fendo:check": "bun run scripts/fendo.ts"
   },

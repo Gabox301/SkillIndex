@@ -1,6 +1,6 @@
 import { deepStrictEqual, strictEqual, throws } from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { groupSelectionState, multiSelect, toggleGroupSelection } from '../cli/ui.ts';
+import { computeViewportStart, groupSelectionState, multiSelect, toggleGroupSelection } from '../cli/ui.ts';
 
 describe('multiSelect', () => {
   it('throws when initialSelected length does not match items length', () => {
@@ -73,5 +73,36 @@ describe('toggleGroupSelection', () => {
     // Group covers indices 2,3; index 0,1 must be untouched.
     toggleGroupSelection(selected, [2, 3]);
     deepStrictEqual(selected, [true, true, true, true]);
+  });
+});
+
+describe('computeViewportStart', () => {
+  it('returns 0 when everything fits in the viewport', () => {
+    strictEqual(computeViewportStart({ cursor: 4, total: 5, height: 10, margin: 1, prevStart: 0 }), 0);
+  });
+
+  it('keeps start at 0 when the cursor is near the top', () => {
+    strictEqual(computeViewportStart({ cursor: 0, total: 20, height: 5, margin: 1, prevStart: 0 }), 0);
+    strictEqual(computeViewportStart({ cursor: 1, total: 20, height: 5, margin: 1, prevStart: 0 }), 0);
+  });
+
+  it('slides down to keep the cursor visible with margin', () => {
+    // cursor 10, height 5, margin 1 => start = 10 - 5 + 1 + 1 = 7
+    strictEqual(computeViewportStart({ cursor: 10, total: 20, height: 5, margin: 1, prevStart: 0 }), 7);
+  });
+
+  it('slides up to keep the cursor visible with margin', () => {
+    // cursor 3 from a scrolled window => start = cursor - margin = 2
+    strictEqual(computeViewportStart({ cursor: 3, total: 20, height: 5, margin: 1, prevStart: 7 }), 2);
+  });
+
+  it('clamps to the last full window at the bottom', () => {
+    // total 20, height 5 => maxStart = 15
+    strictEqual(computeViewportStart({ cursor: 19, total: 20, height: 5, margin: 1, prevStart: 0 }), 15);
+  });
+
+  it('does not move when the cursor stays within the window and margin', () => {
+    // window [7,11], cursor 9 is comfortably inside => start unchanged
+    strictEqual(computeViewportStart({ cursor: 9, total: 20, height: 5, margin: 1, prevStart: 7 }), 7);
   });
 });

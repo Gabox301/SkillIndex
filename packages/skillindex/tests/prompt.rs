@@ -1,7 +1,8 @@
 //! Mirrors prompt.test.ts — one test per `it(...)` block.
 
 use skillindex::prompt::{
-    GroupState, MultiSelectOptions, group_selection_state, multi_select, toggle_group_selection,
+    GroupState, MultiSelectOptions, compute_viewport_start, group_selection_state, multi_select,
+    toggle_group_selection,
 };
 use std::io::{self, IsTerminal};
 
@@ -113,4 +114,41 @@ fn only_touches_the_given_member_indices() {
     // Group covers indices 2,3; index 0,1 must be untouched.
     toggle_group_selection(&mut selected, &[2, 3]);
     assert_eq!(selected, vec![true, true, true, true]);
+}
+
+// ── computeViewportStart ────────────────────────────────────────────
+
+#[test]
+fn returns_0_when_everything_fits_in_the_viewport() {
+    assert_eq!(compute_viewport_start(4, 5, 10, 1, 0), 0);
+}
+
+#[test]
+fn keeps_start_at_0_when_the_cursor_is_near_the_top() {
+    assert_eq!(compute_viewport_start(0, 20, 5, 1, 0), 0);
+    assert_eq!(compute_viewport_start(1, 20, 5, 1, 0), 0);
+}
+
+#[test]
+fn slides_down_to_keep_the_cursor_visible_with_margin() {
+    // cursor 10, height 5, margin 1 => start = 10 - 5 + 1 + 1 = 7
+    assert_eq!(compute_viewport_start(10, 20, 5, 1, 0), 7);
+}
+
+#[test]
+fn slides_up_to_keep_the_cursor_visible_with_margin() {
+    // cursor 3 from a scrolled window => start = cursor - margin = 2
+    assert_eq!(compute_viewport_start(3, 20, 5, 1, 7), 2);
+}
+
+#[test]
+fn clamps_to_the_last_full_window_at_the_bottom() {
+    // total 20, height 5 => max_start = 15
+    assert_eq!(compute_viewport_start(19, 20, 5, 1, 0), 15);
+}
+
+#[test]
+fn does_not_move_when_the_cursor_stays_within_the_window_and_margin() {
+    // window [7,11], cursor 9 is comfortably inside => start unchanged
+    assert_eq!(compute_viewport_start(9, 20, 5, 1, 7), 7);
 }
