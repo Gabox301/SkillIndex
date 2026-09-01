@@ -1,8 +1,6 @@
-use assert_cmd::Command;
 use clap::Parser;
 use skillindex::args::Args;
 use skillindex::cache::get_cache_registry_dir;
-use skillindex::detect::{DetectResult, detect_technologies};
 use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_detected, format_security_checks, format_skill_label,
     truncate_visible, visible_pad, wrap_text,
@@ -13,13 +11,8 @@ use skillindex::gradle::{gradle_layout_candidate_paths, parse_settings_gradle_mo
 use skillindex::hash::{
     bundle_hash, is_disallowed_skill_file, normalize_registry_rel_path, sha256_buffer,
 };
-use skillindex::installer::{
-    copy_dir, encode_raw_path, ensure_symlink_to, rel_path_from_to, update_skills_lock,
-};
-use skillindex::registry::{
-    Registry, agent_folder_for, get_registry_raw_base_urls, parse_skill_path,
-};
-use skillindex::workspace::resolve_workspaces;
+use skillindex::installer::encode_raw_path;
+use skillindex::registry::{Registry, get_registry_raw_base_urls, parse_skill_path};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
@@ -44,20 +37,6 @@ fn write_file(base: &Path, rel: &str, content: &str) {
         fs::create_dir_all(parent).unwrap();
     }
     fs::write(p, content).unwrap();
-}
-
-fn write_json(base: &Path, rel: &str, data: serde_json::Value) {
-    let p = base.join(rel);
-    if let Some(parent) = p.parent() {
-        fs::create_dir_all(parent).unwrap();
-    }
-    fs::write(p, serde_json::to_string(&data).unwrap()).unwrap();
-}
-
-fn add_workspace_pkg(root: &Path, ws: &str) {
-    let p = root.join(ws);
-    fs::create_dir_all(&p).unwrap();
-    fs::write(p.join("package.json"), "{}").unwrap();
 }
 
 // ── 5.1 parity — hash (219 fixtures, bundle_hash, normalization) ──
@@ -181,126 +160,8 @@ fn parity_hash_bundle_spec_example() {
 
 // ── workspace parity (14 fixtures vs node:test) ───────────────────
 
-#[test]
-fn parity_workspace_pnpm_wins() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "package.json", r#"{"workspaces":["other/*"]}"#);
-    write_file(
-        dir.path(),
-        "pnpm-workspace.yaml",
-        "packages:\n  - packages/*\n",
-    );
-    add_workspace_pkg(dir.path(), "packages/core");
-    add_workspace_pkg(dir.path(), "other/ignored");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-    assert!(result[0].to_string_lossy().contains("core"));
-}
-
-#[test]
-fn parity_workspace_npm_array() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":["packages/*"]}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/app-a");
-    add_workspace_pkg(dir.path(), "packages/app-b");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 2);
-}
-
-#[test]
-fn parity_workspace_npm_object() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":{"packages":["packages/*"]}}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/lib");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-}
-
-#[test]
-fn parity_workspace_deno_fallback() {
-    let dir = tempdir().unwrap();
-    write_json(
-        dir.path(),
-        "deno.json",
-        serde_json::json!({"workspace":["packages/*"]}),
-    );
-    add_workspace_pkg(dir.path(), "packages/x");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-    assert!(result[0].to_string_lossy().contains("x"));
-}
-
-#[test]
-fn parity_workspace_star_expansion_skip_non_pkg() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":["packages/*"]}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/has-pkg");
-    write_file(dir.path(), "packages/no-pkg/.gitkeep", "");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-}
-
-#[test]
-fn parity_workspace_skip_scan_skip_dirs() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":["packages/*"]}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/node_modules");
-    add_workspace_pkg(dir.path(), "packages/real");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-    assert!(result[0].to_string_lossy().contains("real"));
-}
-
-#[test]
-fn parity_workspace_quoted_patterns() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "pnpm-workspace.yaml",
-        "packages:\n  - 'packages/*'\n  - \"apps/*\"\n",
-    );
-    add_workspace_pkg(dir.path(), "packages/ui");
-    add_workspace_pkg(dir.path(), "apps/web");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 2);
-}
-
-#[test]
-fn parity_workspace_empty_when_no_pkg() {
-    let dir = tempdir().unwrap();
-    let result = resolve_workspaces(dir.path());
-    assert!(result.is_empty());
-}
-
-#[test]
-fn parity_workspace_deno_star() {
-    let dir = tempdir().unwrap();
-    write_json(
-        dir.path(),
-        "deno.json",
-        serde_json::json!({"workspace":["packages/*"]}),
-    );
-    fs::create_dir_all(dir.path().join("packages/deno-only")).unwrap();
-    fs::write(dir.path().join("packages/deno-only/deno.json"), "{}").unwrap();
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-}
+// workspace resolution parity lives in tests/workspace.rs (per-language mirror);
+// the duplicate cross-checks that used to be here were removed.
 
 // ── gradle parity (12 parse + layout) ─────────────────────────────
 
@@ -563,114 +424,8 @@ fn parity_frontend_dot_skip() {
     assert!(!has_web_frontend_files(dir.path(), 3));
 }
 
-// ── detect parity (technologies, combos, frontend flag) ─────────
-
-#[test]
-fn parity_detect_react() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"react":"^19"}}"#,
-    );
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "react"));
-}
-
-#[test]
-fn parity_detect_next_from_config() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "package.json", "{}");
-    write_file(dir.path(), "next.config.mjs", "export default {}");
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "nextjs"));
-}
-
-#[test]
-fn parity_detect_go_from_go_mod() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "go.mod", "module example.com/test\ngo 1.24.0\n");
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "go"));
-}
-
-#[test]
-fn parity_detect_frontend_flag_true() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"react":"^19"}}"#,
-    );
-    let DetectResult { is_frontend, .. } = detect_technologies(dir.path());
-    assert!(is_frontend);
-}
-
-#[test]
-fn parity_detect_frontend_flag_false() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"express":"^4"}}"#,
-    );
-    let DetectResult { is_frontend, .. } = detect_technologies(dir.path());
-    assert!(!is_frontend);
-}
-
-#[test]
-fn parity_detect_frontend_file_fallback() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "package.json", "{}");
-    write_file(dir.path(), "src/App.vue", "<template></template>");
-    let DetectResult { is_frontend, .. } = detect_technologies(dir.path());
-    assert!(is_frontend);
-}
-
-#[test]
-fn parity_detect_typescript() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "package.json", "{}");
-    write_file(dir.path(), "tsconfig.json", "{}");
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "typescript"));
-}
-
-#[test]
-fn parity_detect_java_via_pom() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "pom.xml",
-        "<project><groupId>com.example</groupId></project>",
-    );
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "java"));
-}
-
-#[test]
-fn parity_detect_combo_hook_form_zod() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"react-hook-form":"^7.58.0","zod":"^4.3.6"}}"#,
-    );
-    let DetectResult { combos, .. } = detect_technologies(dir.path());
-    assert!(combos.iter().any(|c| c.id == "react-hook-form-zod"));
-}
-
-#[test]
-fn parity_detect_no_combo_when_single() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"expo":"^52"}}"#,
-    );
-    let DetectResult { combos, .. } = detect_technologies(dir.path());
-    assert!(!combos.iter().any(|c| c.id == "expo-tailwind"));
-}
+// technology/combo/frontend-flag detection parity lives in tests/detect.rs
+// (per-language mirror); the duplicate cross-checks that used to be here were removed.
 
 // ── installer / cache / registry parity ───────────────────────────
 
@@ -699,99 +454,11 @@ fn parity_installer_encode_spaces() {
     );
 }
 
-#[test]
-fn parity_installer_rel_path() {
-    assert_eq!(
-        rel_path_from_to(Path::new("/a/b/c"), Path::new("/a/b/d/e")),
-        "../d/e"
-    );
-    assert_eq!(
-        rel_path_from_to(Path::new("/a/b"), Path::new("/a/b/c/d")),
-        "c/d"
-    );
-    assert_eq!(
-        rel_path_from_to(Path::new("/a/b/c"), Path::new("/a/b/c")),
-        "."
-    );
-}
+// rel_path_from_to / copy_dir / ensure_symlink_to parity live in tests/installer.rs
+// (per-language mirror); the duplicate cross-checks that used to be here were removed.
 
-#[test]
-fn parity_installer_copy_dir() {
-    let src = tempdir().unwrap();
-    let dest = tempdir().unwrap();
-    fs::create_dir_all(src.path().join("sub")).unwrap();
-    fs::write(src.path().join("a.txt"), b"hello").unwrap();
-    fs::write(src.path().join("sub/b.txt"), b"world").unwrap();
-    let out = dest.path().join("out");
-    copy_dir(src.path(), &out).unwrap();
-    assert_eq!(fs::read_to_string(out.join("a.txt")).unwrap(), "hello");
-    assert_eq!(fs::read_to_string(out.join("sub/b.txt")).unwrap(), "world");
-}
-
-#[test]
-fn parity_installer_ensure_symlink_or_copy() {
-    let tmp = tempdir().unwrap();
-    let target = tmp.path().join("target");
-    fs::create_dir_all(&target).unwrap();
-    fs::write(target.join("file.txt"), b"data").unwrap();
-    let link = tmp.path().join("link").join("skill");
-    ensure_symlink_to(&target, &link).unwrap();
-    assert!(link.exists() || link.is_symlink());
-    assert_eq!(fs::read_to_string(link.join("file.txt")).unwrap(), "data");
-}
-
-#[test]
-fn parity_installer_lock_sorted_newline() {
-    let tmp = tempdir().unwrap();
-    let project = tmp.path();
-    fs::write(
-        project.join("skills-lock.json"),
-        serde_json::to_string(&serde_json::json!({
-            "version": 1,
-            "skills": { "zebra": {"source":"x/y","sourceType":"skillindex-registry","computedHash":"z"}}
-        }))
-        .unwrap(),
-    )
-    .unwrap();
-    // craft a dummy registry entry via update_skills_lock directly with real registry entry shape
-    // Use a minimal entry via json and call update_skills_lock through installer API by building a temp entry
-    // We call the function indirectly: create a skill entry manually and use update function via a dummy RegistryEntry
-    // Build entry via helper that mirrors registry.rs sample_entry
-    let mut entry = skillindex::registry::RegistryEntry {
-        source: "owner/repo".to_string(),
-        skill_path: "owner/repo/alpha".to_string(),
-        commit_sha: "deadbeef".to_string(),
-        files: vec!["SKILL.md".to_string()],
-        sha256: {
-            let mut m = std::collections::HashMap::new();
-            m.insert("SKILL.md".to_string(), sha256_buffer(b"content"));
-            m
-        },
-        bundle_hash: {
-            let mut v = vec![("SKILL.md".to_string(), sha256_buffer(b"content"))];
-            v.sort_by(|a, b| a.0.cmp(&b.0));
-            bundle_hash(&v)
-        },
-        review: skillindex::registry::Review {
-            status: "approved".to_string(),
-            flags: vec![],
-            summary: "t".to_string(),
-            model: "m".to_string(),
-            prompt_version: "1".to_string(),
-            reviewed_at: "2026-01-01T00:00:00Z".to_string(),
-        },
-        security_check: None,
-    };
-    // normalize: need bundle hash computed correctly
-    let computed = bundle_hash(&[("SKILL.md".to_string(), sha256_buffer(b"content"))]);
-    entry.bundle_hash = computed;
-    update_skills_lock(project, "alpha", &entry).unwrap();
-    let content = fs::read_to_string(project.join("skills-lock.json")).unwrap();
-    assert!(content.ends_with('\n'));
-    let v: serde_json::Value = serde_json::from_str(&content).unwrap();
-    let keys: Vec<String> = v["skills"].as_object().unwrap().keys().cloned().collect();
-    assert_eq!(keys, vec!["alpha", "zebra"]);
-}
+// update_skills_lock parity lives in tests/installer.rs (per-language mirror);
+// the duplicate cross-check that used to be here was removed.
 
 #[test]
 fn parity_registry_base_urls_default() {
@@ -813,12 +480,8 @@ fn parity_registry_parse_skill_path() {
     assert_eq!(http.skill_name, "");
 }
 
-#[test]
-fn parity_registry_agent_folder() {
-    assert_eq!(agent_folder_for("claude-code"), Some(".claude"));
-    assert_eq!(agent_folder_for("junie"), Some(".junie"));
-    assert_eq!(agent_folder_for("unknown"), None);
-}
+// agent_folder_for parity lives in tests/installer.rs (per-language mirror);
+// the duplicate cross-check that used to be here was removed.
 
 #[test]
 fn parity_cache_dir_appends_hash() {
@@ -828,20 +491,8 @@ fn parity_cache_dir_appends_hash() {
 
 // ── args / display parity (clap, 3-col, wrap, truncate) ──────────
 
-#[test]
-fn parity_args_help() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    cmd.arg("--help").assert().success();
-    let out = cmd.output().unwrap();
-    let s = String::from_utf8_lossy(&out.stdout);
-    assert!(s.contains("--dry-run") || s.contains("dry-run"));
-}
-
-#[test]
-fn parity_args_version() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    cmd.arg("--version").assert().success();
-}
+// --help / --version exit-code parity lives in tests/cli.rs (per-language mirror);
+// the duplicate cross-checks that used to be here were removed.
 
 #[test]
 fn parity_args_dry_run_flag() {
@@ -921,68 +572,10 @@ fn parity_display_security_sorted() {
 
 // ── installer httpmock + fallback parity (network, rate-limit, EPERM) ─
 
-#[test]
-fn parity_cli_clear_cache() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    cmd.arg("--clear-cache").assert().success();
-}
-
-#[test]
-fn parity_cli_dry_run_no_prompt() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"react":"^18"}}"#,
-    );
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd
-        .current_dir(dir.path())
-        .arg("--dry-run")
-        .output()
-        .unwrap();
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("--dry-run: no se instaló nada")
-            || stdout.contains("--dry-run: nothing was installed")
-    );
-}
-
-#[test]
-fn parity_cli_seven_techs_via_binary() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"react":"^18","next":"^14","vue":"^3","nuxt":"^3","svelte":"^4","astro":"^4","tailwindcss":"^3"}}"#,
-    );
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd
-        .current_dir(dir.path())
-        .arg("--dry-run")
-        .output()
-        .unwrap();
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let plain = skillindex::ui::strip_ansi(&stdout);
-    for name in [
-        "React",
-        "Next.js",
-        "Vue",
-        "Nuxt",
-        "Svelte",
-        "Astro",
-        "Tailwind CSS",
-    ] {
-        assert!(plain.contains(name), "missing {name} in {plain}");
-    }
-}
-
-#[test]
-fn parity_fallback_rust_help_available() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    cmd.arg("--help").assert().success();
-}
+// --clear-cache / --dry-run / 7-tech dry-run / --help binary parity live in
+// tests/cli.rs (per-language mirror); the duplicate cross-checks that used to be
+// here were removed. The Node-fallback cross-check below stays: it is the only
+// test that verifies the TS implementation still runs.
 
 // SKILLINDEX_USE_RUST=0 fallback — ensure Node index.ts (or shim index.mjs) still works via node
 #[test]
@@ -1212,39 +805,10 @@ async fn parity_installer_httpmock_network_ok() {
     }
 }
 
-// ── additional fixture counts for 100+ coverage ─────────────────
-// These pad the fixture count to exceed 100 distinct checks.
-
-#[test]
-fn parity_extra_detect_variants() {
-    let cases = vec![
-        (r#"{"dependencies":{"react":"^19"}}"#, "react"),
-        (r#"{"dependencies":{"vue":"^3"}}"#, "vue"),
-        (r#"{"dependencies":{"svelte":"^4"}}"#, "svelte"),
-        (r#"{"devDependencies":{"typescript":"^5"}}"#, "typescript"),
-    ];
-    for (pkg, id) in cases {
-        let dir = tempdir().unwrap();
-        write_file(dir.path(), "package.json", pkg);
-        let DetectResult { detected, .. } = detect_technologies(dir.path());
-        assert!(
-            detected.iter().any(|t| t.id == id),
-            "missing {id} for {pkg}"
-        );
-    }
-}
-
-#[test]
-fn parity_extra_workspace_quoted_and_skip() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "pnpm-workspace.yaml",
-        "packages:\n  - \"packages/*\"\n",
-    );
-    add_workspace_pkg(dir.path(), "packages/a");
-    assert_eq!(resolve_workspaces(dir.path()).len(), 1);
-}
+// ── additional cross-language checks (dominios sin espejo) ──────
+// Detection/workspace duplicates that used to live here were removed; the
+// remaining checks cover units with no per-language mirror (frontend, gradle,
+// dotnet layout, display, hash).
 
 #[test]
 fn parity_extra_frontend_extensions_loop() {
@@ -1330,39 +894,6 @@ fn parity_hash_bundle_two_files_references() {
 }
 
 #[test]
-fn parity_workspace_multiple_patterns_mixed() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":["packages/*","apps/*"]}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/ui");
-    add_workspace_pkg(dir.path(), "apps/web");
-    add_workspace_pkg(dir.path(), "tools/cli");
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 2);
-    assert!(result.iter().any(|p| p.to_string_lossy().contains("ui")));
-    assert!(result.iter().any(|p| p.to_string_lossy().contains("web")));
-}
-
-#[test]
-fn parity_workspace_pnpm_empty_packages_key() {
-    let dir = tempdir().unwrap();
-    write_file(dir.path(), "pnpm-workspace.yaml", "packages:\n");
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"workspaces":["packages/*"]}"#,
-    );
-    add_workspace_pkg(dir.path(), "packages/a");
-    // pnpm with empty patterns falls through to package.json (mirrors lib.ts: no packages -> fallback)
-    let result = resolve_workspaces(dir.path());
-    assert_eq!(result.len(), 1);
-    assert!(result[0].to_string_lossy().contains("a"));
-}
-
-#[test]
 fn parity_gradle_parse_complex_colon_path() {
     assert_eq!(
         parse_settings_gradle_modules(r#"include(":a:b:c:d")"#),
@@ -1391,34 +922,6 @@ fn parity_frontend_scss_and_jsx() {
 }
 
 #[test]
-fn parity_detect_rust_and_python() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "Cargo.toml",
-        "[package]\nname=\"x\"\nversion=\"0.1\"",
-    );
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "rust"));
-    let dir2 = tempdir().unwrap();
-    write_file(dir2.path(), "pyproject.toml", "[tool.poetry]\nname=\"x\"");
-    let DetectResult { detected: d2, .. } = detect_technologies(dir2.path());
-    assert!(d2.iter().any(|t| t.id == "python"));
-}
-
-#[test]
-fn parity_detect_clerk_combo_via_packages() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"@clerk/nextjs":"^6"}}"#,
-    );
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "clerk"));
-}
-
-#[test]
 fn parity_display_format_time_various() {
     use skillindex::display::format_time;
     assert_eq!(format_time(0), "0ms");
@@ -1442,16 +945,6 @@ fn parity_cache_bundle_hash_dir() {
 }
 
 #[test]
-fn parity_args_help_and_version_still_work() {
-    for arg in ["--help", "-h", "--version", "-V"] {
-        let mut cmd = Command::cargo_bin("skillindex").unwrap();
-        let out = cmd.arg(arg).output().unwrap();
-        // help/version exit 0; other may also succeed
-        assert!(out.status.success() || out.status.code() == Some(0));
-    }
-}
-
-#[test]
 fn parity_installer_normalize_and_bundle() {
     assert_eq!(normalize_registry_rel_path("a\\b/c"), "a/b/c");
     let bundle = bundle_hash(&[("a.md".to_string(), "h1".to_string())]);
@@ -1466,17 +959,4 @@ fn parity_frontend_depth_boundary_exact() {
     let dir2 = tempdir().unwrap();
     write_file(dir2.path(), "a/b/c/d/App.vue", "<template></template>"); // depth 4
     assert!(!has_web_frontend_files(dir2.path(), 3));
-}
-
-#[test]
-fn parity_detect_astro_and_tailwind_together() {
-    let dir = tempdir().unwrap();
-    write_file(
-        dir.path(),
-        "package.json",
-        r#"{"dependencies":{"astro":"^4","tailwindcss":"^4"}}"#,
-    );
-    let DetectResult { detected, .. } = detect_technologies(dir.path());
-    assert!(detected.iter().any(|t| t.id == "astro"));
-    assert!(detected.iter().any(|t| t.id == "tailwind"));
 }
