@@ -30,11 +30,11 @@ import { cloudSecurityCombo } from './skills/combos/cloud-security.ts';
 import { forensicsIrCombo } from './skills/combos/forensics-ir.ts';
 import { redTeamCombo } from './skills/combos/red-team.ts';
 import { securityOperationsCombo } from './skills/combos/security-operations.ts';
-import { activeDirectoryTech } from './skills/techs/active-directory.ts';
-import { threatDetectionTech } from './skills/techs/threat-detection.ts';
-import { securityImplementationTech } from './skills/techs/security-implementation.ts';
-import { securityAnalysisTech } from './skills/techs/security-analysis.ts';
-import { threatHuntingTech } from './skills/techs/threat-hunting.ts';
+import { activeDirectoryTech } from './skills/security/active-directory.ts';
+import { threatDetectionTech } from './skills/security/threat-detection.ts';
+import { securityImplementationTech } from './skills/security/security-implementation.ts';
+import { securityAnalysisTech } from './skills/security/security-analysis.ts';
+import { threatHuntingTech } from './skills/security/threat-hunting.ts';
 import { awsTech } from './skills/techs/aws.ts';
 
 // ── Skills Map ────────────────────────────────────────────────
