@@ -786,7 +786,11 @@ export const SKILLS_MAP: Technology[] = [
         'electron-vite.config.cjs'
     ],
     },
-    skills: [],
+    skills: [
+      'full-stack-skills/electron-skills/electron',
+      'full-stack-skills/electron-skills/electron-egg',
+      'full-stack-skills/electron-skills/upgradeLink',
+    ],
   },
   {
     id: 'dotnet',
@@ -899,14 +903,6 @@ export const SKILLS_MAP: Technology[] = [
     skills: ['redis/agent-skills/redis-development'],
   },
   {
-    id: 'postgres-ruby',
-    name: 'PostgreSQL',
-    detect: {
-      gems: ['pg'],
-    },
-    skills: [],
-  },
-  {
     id: 'sorbet',
     name: 'Sorbet',
     detect: {
@@ -917,22 +913,6 @@ export const SKILLS_MAP: Technology[] = [
       'DmitryPogrebnoy/ruby-agent-skills/generating-sorbet',
       'DmitryPogrebnoy/ruby-agent-skills/generating-sorbet-inline'
     ],
-  },
-  {
-    id: 'activeadmin',
-    name: 'ActiveAdmin',
-    detect: {
-      gems: ['activeadmin'],
-    },
-    skills: [],
-  },
-  {
-    id: 'devise',
-    name: 'Devise',
-    detect: {
-      gems: ['devise'],
-    },
-    skills: [],
   },
   {
     id: 'sidekiq',
@@ -962,7 +942,11 @@ export const SKILLS_MAP: Technology[] = [
       gems: ['rubocop', 'rubocop-rails'],
       configFiles: ['.rubocop.yml'],
     },
-    skills: [],
+    skills: [
+      'TheBushidoCollective/han/rubocop-configuration',
+      'TheBushidoCollective/han/rubocop-cops',
+      'TheBushidoCollective/han/rubocop-integration',
+    ],
   },
   {
     id: 'php',

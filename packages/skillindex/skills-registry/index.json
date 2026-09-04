@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-04T14:24:32.413Z",
+  "generatedAt": "2026-09-04T14:35:11.359Z",
   "reviewer": {
     "model": "gpt-5.4",
     "promptVersion": "1.0.0"
@@ -44144,6 +44144,228 @@
         "findings": [],
         "summary": "review skipped (auditor removed)",
         "checkedAt": "2026-09-04T14:24:31.996Z"
+      }
+    },
+    "electron": {
+      "source": "full-stack-skills/electron-skills",
+      "skillPath": "full-stack-skills/electron-skills/electron",
+      "commitSha": "fb4a7b8524230caad504c296a108e2a4ae05f0ff",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "api/app.md",
+        "api/browser-window.md",
+        "examples/advanced/packaging.md",
+        "examples/api/browser-window.md",
+        "examples/api/menu.md",
+        "examples/getting-started/installation.md",
+        "examples/getting-started/quick-start.md",
+        "examples/processes/ipc-communication.md",
+        "examples/processes/main-process.md",
+        "templates/main-process.md",
+        "templates/preload-script.md"
+      ],
+      "sha256": {
+        "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "SKILL.md": "3d7a6da310baf075ec75179a4df925b9bcb2f44f7a89edd4aba23769d53ecbcb",
+        "api/app.md": "de8a6b04ed26f907e033507c7134db5991ff2e98b81fba7582b96f8f2750b587",
+        "api/browser-window.md": "ec9cdb29745be386d1f35223a586cf7f81ea3095adb74813b6bd48eee121c86d",
+        "examples/advanced/packaging.md": "b29474a402b9e1494ae840e3448bb59e7aaca8432f25408122caaa1c8d8b0bcb",
+        "examples/api/browser-window.md": "1a5129caca61a843b16fe32e51b0f83093f89492f90a5c0dbfe4c99c6de9001a",
+        "examples/api/menu.md": "ccb14c092b8f5b5e20f3aa9e2d347836d7b6368486575a322c8bfd658c5d9789",
+        "examples/getting-started/installation.md": "c261d9d5b8f4ceea2c08f035d61d3568ade15b81a2dd68e2e65e1622ac0bd26a",
+        "examples/getting-started/quick-start.md": "09e1d97cf49e75cd84645a19f11d5cac3e7666897e1c4feb6b845d4f5051589b",
+        "examples/processes/ipc-communication.md": "368944c93b4587b4341d59d54cfb8b6693ba42d68f2675679d5e3daf34ad622e",
+        "examples/processes/main-process.md": "081720043c6b8fef055ae763f5e142d49a25abad3d9c05b7483b5aa4b375dd8b",
+        "templates/main-process.md": "47e62e401608e92de93edf8cc006790af10bf4c5a86e77b2cc1d881cae427a87",
+        "templates/preload-script.md": "1ff35896679133c03436bf247caffa6b3f243c35d5fff0b0606f4a87b7e794d7"
+      },
+      "bundleHash": "4f55c8bbd9e71e7104574886d788fa8e427508bd9f36496ddf07b647fd7c1f94",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:34:20.699Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:34:20.699Z"
+      }
+    },
+    "electron-egg": {
+      "source": "full-stack-skills/electron-skills",
+      "skillPath": "full-stack-skills/electron-skills/electron-egg",
+      "commitSha": "fb4a7b8524230caad504c296a108e2a4ae05f0ff",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "api/config-api.md",
+        "api/ipc-api.md",
+        "api/main-api.md",
+        "api/renderer-api.md",
+        "api/window-api.md",
+        "examples/features/ipc-communication.md",
+        "examples/features/main-process.md",
+        "examples/features/renderer-process.md",
+        "examples/guide/build.md",
+        "examples/guide/configuration.md",
+        "examples/guide/installation.md",
+        "examples/guide/intro.md",
+        "examples/guide/project-structure.md",
+        "examples/guide/quick-start.md",
+        "templates/configuration.md",
+        "templates/installation.md",
+        "templates/project-setup.md"
+      ],
+      "sha256": {
+        "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "SKILL.md": "64dc90695811dfae4a70bd4b8e37178034e5eeaa2be4516f0fb65b65db58e1a1",
+        "api/config-api.md": "3478cb8199fe3ab9a3f4696947e069f92f1434eef14e69e63d413d3a6d959613",
+        "api/ipc-api.md": "a98fdcdc0723ea0df7184b8c1fa8dacc1f8d79689e93750cb450b1777d6e8b60",
+        "api/main-api.md": "1c2b1e90aea19aa6430bdf635e265cdd7611c4eab9aebd040e21ec8348558856",
+        "api/renderer-api.md": "6fd0dee990359dae69894db65e7776a38b81bde48f2a738f5fa45d2f7813ead8",
+        "api/window-api.md": "e4e9a9bd2562bbff497dbf01caa35fea9b8811122efde239d611930fd67b6570",
+        "examples/features/ipc-communication.md": "8d81c3a02566191b900c4d1b16e8e4f234e174ddebf1d76918f85f9877284238",
+        "examples/features/main-process.md": "a8e25417ee1ccc65f836840c4b2724bb2227c81c4e1f5573e03609c46a7a418f",
+        "examples/features/renderer-process.md": "bdb72f181ec197da624d82d51f92136923dd24141f20f2bf93f641bacefe4ea1",
+        "examples/guide/build.md": "309f44d32ba6c83b32286743a8277d8a3136e562594361d63bc3b838e7447901",
+        "examples/guide/configuration.md": "81747dd0fc1b8bd85bf9c975a86a0fddc250f6662f1e488de572ec1ec4ebe5db",
+        "examples/guide/installation.md": "1b2b195467095d09cad1034016c84322414d8449e18818a2f50b9db0ceb4f99a",
+        "examples/guide/intro.md": "7000e8de16c203c3af93fbeb0e76a0d87b41cff3bfdbe5bfe9f2ec7f2e9b8f1b",
+        "examples/guide/project-structure.md": "0dd1e831ca7df06834a3ab536637246ae26c8c1c8c9fe00746aee531f43387df",
+        "examples/guide/quick-start.md": "e0b2fbaec55edbb494877df0191394203ac54c1f3a7eccc3c938375f4098cc50",
+        "templates/configuration.md": "567bb9f0ac7b5c5f6a4d7c6c34396598fd56a1d1402c89bb0cf26680127d91a4",
+        "templates/installation.md": "291842b0f284e6d14047b783f5c6ea04f5ad662974b82be7fb219996c142d59b",
+        "templates/project-setup.md": "7cadda1af923ea96b54bff05a86883bcdd631edf97c5f78b8dd8fb3a74083bf6"
+      },
+      "bundleHash": "dabf1cc89e0ebee4a0ca9f5419488bdfa804e2b87d2188375770f8a84d618253",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:34:29.832Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:34:29.832Z"
+      }
+    },
+    "upgradeLink": {
+      "source": "full-stack-skills/electron-skills",
+      "skillPath": "full-stack-skills/electron-skills/upgradeLink",
+      "commitSha": "fb4a7b8524230caad504c296a108e2a4ae05f0ff",
+      "files": [
+        "LICENSE.txt",
+        "SKILL.md",
+        "examples/getting-started/basic-usage.md",
+        "examples/getting-started/introduction.md"
+      ],
+      "sha256": {
+        "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "SKILL.md": "55cf65a12dc4ea142cd5632ec621da25b12768a690a1a85a750ff7e6ef7329e4",
+        "examples/getting-started/basic-usage.md": "2544a4c5f5b898568928688c033cfc160e5773cbeca03cf147b8b61a4a46ee21",
+        "examples/getting-started/introduction.md": "b21995f20ed7b674f9421a5d0a1c046f9f8ea9f1f6abf5dec8b27c7bf463a03c"
+      },
+      "bundleHash": "3d5004485d1e1a65a33730e543a59aff5072bf21ff49987d8b8f1a5121f01de0",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:34:39.391Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:34:39.391Z"
+      }
+    },
+    "rubocop-configuration": {
+      "source": "TheBushidoCollective/han",
+      "skillPath": "TheBushidoCollective/han/rubocop-configuration",
+      "commitSha": "4b9bddd353079ebd937a9d822c81674945acbf1b",
+      "files": [
+        "SKILL.md"
+      ],
+      "sha256": {
+        "SKILL.md": "4080be740acb4917632b68215b1a4e824d00c508d93cf8e497e92eaeb44cd7a8"
+      },
+      "bundleHash": "f8d67690946556961aebea5f1304df315e7f194725d6b35a914548c9a209b154",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:34:50.444Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:34:50.444Z"
+      }
+    },
+    "rubocop-cops": {
+      "source": "TheBushidoCollective/han",
+      "skillPath": "TheBushidoCollective/han/rubocop-cops",
+      "commitSha": "4b9bddd353079ebd937a9d822c81674945acbf1b",
+      "files": [
+        "SKILL.md"
+      ],
+      "sha256": {
+        "SKILL.md": "d74c7ce77e5d9de616da8539a837113f42c44b1326781ac9067a88bd083c0f18"
+      },
+      "bundleHash": "86d8170362959ecb6510b6bb87b58975666ddb1868b5e56c8a54b2dcfa648bfc",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:35:00.775Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:35:00.775Z"
+      }
+    },
+    "rubocop-integration": {
+      "source": "TheBushidoCollective/han",
+      "skillPath": "TheBushidoCollective/han/rubocop-integration",
+      "commitSha": "4b9bddd353079ebd937a9d822c81674945acbf1b",
+      "files": [
+        "SKILL.md"
+      ],
+      "sha256": {
+        "SKILL.md": "4098f8653833e006c0fc8adf9b7a5e918c66138db95f306526a9e2c3be473a21"
+      },
+      "bundleHash": "fb408bc0c93a27e9db6d9d9af338956492514d674deb339ede313e6ccbba90e1",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-04T14:35:11.333Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-04T14:35:11.333Z"
       }
     }
   }
