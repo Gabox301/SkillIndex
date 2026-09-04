@@ -519,7 +519,7 @@ export function detectCombos(detectedIds: string[]): ComboSkill[] {
 export function detectAgents(home: string = homedir()): string[] {
   const agents = ['universal'];
   for (const [folder, agentName] of AGENT_FOLDER_ENTRIES) {
-    if (existsSync(join(home, folder, 'skills'))) {
+    if (existsSync(join(home, folder)) || existsSync(join(home, folder, 'skills'))) {
       agents.push(agentName);
     }
   }

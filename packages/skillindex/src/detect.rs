@@ -604,8 +604,12 @@ pub fn detect_agents_in_home(home: Option<&Path>) -> Vec<String> {
     let mut agents = vec!["universal".to_string()];
     let map = get_agent_folder_map();
     for (folder, agent) in map {
-        let skills_path = home_path.join(&folder).join("skills");
-        if skills_path.exists() {
+        let folder_path = home_path.join(&folder);
+        let skills_path = folder_path.join("skills");
+        // Detecta si el agente está instalado: basta que exista la carpeta base
+        // (ej. ~/.cursor) o su subcarpeta skills. Antes solo miraba skills/,
+        // por lo que cursor/opencode recién instalados sin skills no se detectaban.
+        if folder_path.exists() || skills_path.exists() {
             agents.push(agent);
         }
     }
@@ -630,6 +634,7 @@ fn get_agent_folder_map() -> Vec<(String, String)> {
         out.push((".continue".into(), "continue".into()));
         out.push((".kiro".into(), "kiro-cli".into()));
         out.push((".opencode".into(), "opencode".into()));
+        out.push((".cursor".into(), "cursor".into()));
     }
     out
 }

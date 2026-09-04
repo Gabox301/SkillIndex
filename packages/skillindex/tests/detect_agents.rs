@@ -71,12 +71,14 @@ fn detects_multiple_agents() {
 }
 
 #[test]
-fn ignores_agent_folders_without_skills_subdirectory() {
+fn detects_agent_folders_even_without_skills_subdirectory() {
     let dir = tempdir().unwrap();
     fs::create_dir_all(dir.path().join(".claude")).unwrap();
     fs::create_dir_all(dir.path().join(".cursor")).unwrap();
     let agents = detect_agents_in_home(Some(dir.path()));
-    assert_eq!(agents, vec!["universal"]);
+    assert!(agents.contains(&"universal".to_string()));
+    assert!(agents.contains(&"claude-code".to_string()));
+    assert!(agents.contains(&"cursor".to_string()));
 }
 
 #[test]

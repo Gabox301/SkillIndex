@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::LazyLock;
 
+#[cfg(test)]
 use walkdir::WalkDir;
 
 use crate::detect::SCAN_SKIP_DIRS;
@@ -59,7 +60,7 @@ pub fn has_web_frontend_files(project_dir: &Path, max_depth: usize) -> bool {
 }
 
 /// Walk-based alternative used for testing depth behaviour explicitly
-#[allow(dead_code)]
+#[cfg(test)]
 pub fn has_web_frontend_files_walk(project_dir: &Path, max_depth: usize) -> bool {
     for entry in WalkDir::new(project_dir)
         .max_depth(max_depth + 1)

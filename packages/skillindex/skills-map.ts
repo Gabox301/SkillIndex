@@ -2470,6 +2470,7 @@ export const AGENT_FOLDER_MAP: Record<string, string> = {
   '.continue': 'continue',
   '.kiro': 'kiro-cli',
   '.opencode': 'opencode',
+  '.cursor': 'cursor',
 };
 
 export const WEB_FRONTEND_EXTENSIONS: Set<string> = new Set([

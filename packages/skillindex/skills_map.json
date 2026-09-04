@@ -2339,6 +2339,7 @@
     ".codebuddy": "codebuddy",
     ".continue": "continue",
     ".kiro": "kiro-cli",
-    ".opencode": "opencode"
+    ".opencode": "opencode",
+    ".cursor": "cursor"
   }
 }

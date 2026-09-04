@@ -3,7 +3,13 @@ import { join, resolve } from 'node:path';
 import { cleanupClaudeMd } from './claude.ts';
 import { bold, cyan, dim, gray, green, log, magenta, muted, red, SHOW_CURSOR, write, yellow } from './colors.ts';
 import type { InstallSecurityCheck } from './installer.ts';
-import { clearSkillIndexCache, installAll, loadRegistry, securityCheckForSkillPath } from './installer.ts';
+import {
+  agentFolderFor,
+  clearSkillIndexCache,
+  installAll,
+  loadRegistry,
+  securityCheckForSkillPath,
+} from './installer.ts';
 import type { ComboSkill, SkillEntry, Technology } from './lib.ts';
 import { collectSkills, detectAgents, detectTechnologies, getInstalledSkillNames } from './lib.ts';
 import { formatTime, multiSelect, printBanner } from './ui.ts';
@@ -352,6 +358,35 @@ function printSummary({ installed, failed, errors, elapsed, verbose }: SummaryOp
   log();
 }
 
+// ── Agent Selection ──────────────────────────────────────────
+
+async function selectAgents(agents: string[], autoYes: boolean): Promise<string[]> {
+  const realAgents = agents.filter((a) => a !== 'universal');
+  if (realAgents.length <= 1) return agents;
+  if (autoYes || !process.stdout.isTTY) return agents;
+
+  log(cyan('   ◆ ') + bold('Selecciona dónde instalar') + dim(` (${realAgents.length} agentes detectados)`));
+  log(dim('   Desmarca los que no quieras. Por defecto instala en todos.'));
+  log('');
+
+  const selected = await multiSelect(realAgents, {
+    labelFn: (agent: string) => {
+      const folder = agentFolderFor(agent) ?? '.agents';
+      return `${bold(agent)} ${dim(`(${folder})`)}`;
+    },
+    initialSelected: realAgents.map(() => true),
+  });
+
+  if (selected.length === 0) {
+    log('');
+    log(dim('   Ningún agente seleccionado — no se instalará nada.'));
+    log('');
+    process.exit(0);
+  }
+
+  return selected;
+}
+
 // ── Skill Selection ──────────────────────────────────────────
 
 async function selectSkills(skills: SkillEntry[], autoYes: boolean): Promise<SkillEntry[]> {
@@ -455,7 +490,10 @@ async function main(): Promise<void> {
   printDetected(detected, combos, isFrontend);
   const installedNames = getInstalledSkillNames(projectDir);
   const skills = collectSkills({ detected, isFrontend, combos, installedNames });
-  const resolvedAgents = agents.length > 0 ? agents : detectAgents();
+  let resolvedAgents = agents.length > 0 ? agents : detectAgents();
+  if (agents.length === 0) {
+    resolvedAgents = await selectAgents(resolvedAgents, autoYes);
+  }
   if (skills.length === 0) {
     log(yellow('   Aún no hay skills disponibles para tu stack.'));
     log(dim('   Consulta https://skillindex.netlify.app para las últimas novedades.'));

@@ -44,10 +44,13 @@ describe('detectAgents', () => {
     equal(agents.length, 3);
   });
 
-  it('ignores agent folders without skills subdirectory', () => {
+  it('detects agent folders even without skills subdirectory', () => {
     mkdirSync(join(tmp.path, '.claude'), { recursive: true });
     mkdirSync(join(tmp.path, '.cursor'), { recursive: true });
-    deepEqual(detectAgents(tmp.path), ['universal']);
+    const agents = detectAgents(tmp.path);
+    ok(agents.includes('universal'));
+    ok(agents.includes('claude-code'));
+    ok(agents.includes('cursor'));
   });
 
   it('ignores unknown folders with skills subdirectory', () => {

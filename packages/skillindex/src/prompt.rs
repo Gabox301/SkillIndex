@@ -11,20 +11,26 @@ use crate::ui::{bold, cyan, dim, green, white, yellow};
 
 // ── Options ────────────────────────────────────────────────────────
 
-#[allow(clippy::type_complexity)]
+// Type aliases para evitar `type_complexity` inline y hacer explícitos los contratos
+// de los closures del prompt. Cada alias representa un `dyn Fn` sin `Box`; el `Box`
+// se aplica en el punto de uso (`Box<LabelFn<T>>`), factorizando la complejidad.
+pub type LabelFn<T> = dyn Fn(&T, usize) -> String;
+pub type HintFn<T> = dyn Fn(&T, usize) -> String;
+pub type GroupFn<T> = dyn Fn(&T) -> String;
+pub type ShortcutFn<T> = dyn Fn(&[T]) -> Vec<bool>;
+
 pub struct MultiSelectOptions<T> {
-    pub label_fn: Box<dyn Fn(&T, usize) -> String>,
-    pub hint_fn: Option<Box<dyn Fn(&T, usize) -> String>>,
-    pub group_fn: Option<Box<dyn Fn(&T) -> String>>,
+    pub label_fn: Box<LabelFn<T>>,
+    pub hint_fn: Option<Box<HintFn<T>>>,
+    pub group_fn: Option<Box<GroupFn<T>>>,
     pub initial_selected: Option<Vec<bool>>,
     pub shortcuts: Vec<Shortcut<T>>,
 }
 
-#[allow(clippy::type_complexity)]
 pub struct Shortcut<T> {
     pub key: char,
     pub label: String,
-    pub func: Box<dyn Fn(&[T]) -> Vec<bool>>,
+    pub func: Box<ShortcutFn<T>>,
 }
 
 impl<T> Default for MultiSelectOptions<T> {
@@ -41,8 +47,7 @@ impl<T> Default for MultiSelectOptions<T> {
 
 // ── Helpers ────────────────────────────────────────────────────────
 
-#[allow(clippy::type_complexity)]
-fn group_count<T>(items: &[T], group_fn: Option<&Box<dyn Fn(&T) -> String>>) -> usize {
+fn group_count<T>(items: &[T], group_fn: Option<&GroupFn<T>>) -> usize {
     let Some(f) = group_fn else { return 0 };
     let mut count = 0usize;
     let mut last: Option<String> = None;
@@ -136,10 +141,9 @@ enum Row {
 }
 
 /// Build the ordered navigable rows. Group headers precede their items.
-#[allow(clippy::type_complexity)]
 fn build_rows<T>(
     items: &[T],
-    group_fn: Option<&Box<dyn Fn(&T) -> String>>,
+    group_fn: Option<&GroupFn<T>>,
     show_groups: bool,
 ) -> Vec<Row> {
     match (show_groups, group_fn) {
@@ -204,11 +208,11 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         .unwrap_or_else(|| vec![true; items.len()]);
     let mut cursor: usize = 0;
 
-    let g_count = group_count(&items, opts.group_fn.as_ref());
+    let g_count = group_count(&items, opts.group_fn.as_deref());
     let show_groups = g_count > 1;
     // Navigable rows: group headers interleaved with their items (when grouping),
     // otherwise one row per item. The cursor walks rows, not raw item indices.
-    let rows = build_rows(&items, opts.group_fn.as_ref(), show_groups);
+    let rows = build_rows(&items, opts.group_fn.as_deref(), show_groups);
 
     // Viewport: when the list is taller than the terminal, only a sliding window
     // of rows is drawn so the block always fits and the cursor stays visible.
@@ -233,7 +237,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
 
     enable_raw_mode()?;
 
-    #[allow(unused_assignments)]
     let mut rendered = false;
 
     let clear_rendered =

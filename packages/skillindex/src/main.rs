@@ -23,6 +23,13 @@ use skillindex::ui::{bold, cyan, dim, green, is_tty, log, red, show_cursor, writ
 
 const ISSUES_URL: &str = "https://github.com/Gabox301/SkillIndex/issues";
 
+// Aliases para closures de multi_select — evitan `type_complexity` inline
+// y hacen explícito el contrato de cada callback sin silenciar lints.
+type AgentLabelFn = dyn Fn(&String, usize) -> String;
+type SkillLabelFn = dyn Fn(&SkillEntry, usize) -> String;
+type SkillHintFn = dyn Fn(&SkillEntry, usize) -> String;
+type SkillGroupFn = dyn Fn(&SkillEntry) -> String;
+
 fn handle_sigint() {
     tokio::spawn(async {
         let _ = tokio::signal::ctrl_c().await;
@@ -166,6 +173,63 @@ fn print_summary(
     log("");
 }
 
+fn select_agents_sync(agents: Vec<String>, auto_yes: bool) -> Vec<String> {
+    // Solo delega si hay ambigüedad real: más de un agente concreto detectado.
+    // Si el usuario pasó -a/--agent o --yes, se respeta sin preguntar.
+    let real_agents: Vec<String> = agents
+        .iter()
+        .filter(|a| a.as_str() != "universal")
+        .cloned()
+        .collect();
+    if real_agents.len() <= 1 {
+        return agents;
+    }
+    if auto_yes || !is_tty() {
+        return agents;
+    }
+
+    log(&format!(
+        "{}{} {}",
+        cyan("   ◆ "),
+        bold("Selecciona dónde instalar"),
+        dim(&format!("({} agentes detectados)", real_agents.len()))
+    ));
+    log(&dim(
+        "   Desmarca los que no quieras. Por defecto instala en todos.",
+    ));
+    log("");
+
+    let styled_label_fn: Box<AgentLabelFn> = Box::new(|item: &String, _| {
+        let folder = skillindex::registry::agent_folder_for(item).unwrap_or(".agents");
+        format!("{} {}", bold(item), dim(&format!("({folder})")))
+    });
+
+    let opts = MultiSelectOptions {
+        label_fn: styled_label_fn,
+        hint_fn: None,
+        group_fn: None,
+        initial_selected: Some(vec![true; real_agents.len()]),
+        shortcuts: Vec::new(),
+    };
+
+    let selected_real = multi_select(real_agents.clone(), opts).unwrap_or_default();
+
+    if selected_real.is_empty() {
+        log("");
+        log(&dim(
+            "   Ningún agente seleccionado — no se instalará nada.",
+        ));
+        log("");
+        std::process::exit(0);
+    }
+
+    // Reconstruir lista final: siempre incluir universal si estaba originalmente?
+    // No: universal solo es fallback cuando no hay agentes reales. Si el usuario
+    // eligió agentes concretos, no incluimos universal para no crear .agents duplicado.
+    // Si el usuario quiere universal explícito, debe pasarlo con -a universal.
+    selected_real
+}
+
 fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry> {
     if auto_yes {
         print_skills_list(&skills);
@@ -215,8 +279,7 @@ fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry
     log("");
 
     // Build options
-    #[allow(clippy::type_complexity)]
-    let label_fn: Box<dyn Fn(&SkillEntry, usize) -> String> =
+    let label_fn: Box<SkillLabelFn> =
         Box::new(move |item: &SkillEntry, _idx: usize| {
             let (label, styled_label, has_warn) = label_cache.get(&item.skill).unwrap();
             let installed_tag = if item.installed {
@@ -240,8 +303,7 @@ fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry
             format!("{styled_label}{installed_tag}{security_tag}{pad}")
         });
 
-    #[allow(clippy::type_complexity)]
-    let hint_fn: Box<dyn Fn(&SkillEntry, usize) -> String> = Box::new(|item: &SkillEntry, _| {
+    let hint_fn: Box<SkillHintFn> = Box::new(|item: &SkillEntry, _| {
         let tech_sources: Vec<&String> =
             item.sources.iter().filter(|s| !s.contains(" + ")).collect();
         if tech_sources.len() > 1 {
@@ -258,7 +320,7 @@ fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry
         }
     });
 
-    let group_fn: Box<dyn Fn(&SkillEntry) -> String> =
+    let group_fn: Box<SkillGroupFn> =
         Box::new(|item: &SkillEntry| item.sources.first().cloned().unwrap_or_default());
 
     let initial_selected: Vec<bool> = skills.iter().map(|s| !s.installed).collect();
@@ -370,11 +432,16 @@ async fn main() {
         Some(&installed_names),
     );
 
-    let resolved_agents = if args.agent.is_empty() {
+    let mut resolved_agents = if args.agent.is_empty() {
         detect_agents()
     } else {
         args.agent.clone()
     };
+
+    // Delegar al usuario si hay múltiples destinos detectados y no hay -a / -y
+    if args.agent.is_empty() {
+        resolved_agents = select_agents_sync(resolved_agents, args.yes);
+    }
 
     if skills.is_empty() {
         log(&yellow("   Aún no hay skills disponibles para tu stack."));

@@ -274,6 +274,7 @@ pub fn agent_folder_for(agent: &str) -> Option<&'static str> {
         "continue" => Some(".continue"),
         "kiro-cli" => Some(".kiro"),
         "opencode" => Some(".opencode"),
+        "cursor" => Some(".cursor"),
         _ => None,
     }
 }
