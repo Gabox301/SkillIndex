@@ -26,6 +26,7 @@ export interface ComboSkill {
   skills: string[];
 }
 import { awsTech } from "./skills/techs/aws.ts";
+import { activeDirectoryTech } from "./skills/techs/active-directory.ts";
 import { securityOperationsCombo } from "./skills/combos/security-operations.ts";
 import { redTeamCombo } from "./skills/combos/red-team.ts";
 import { cloudSecurityCombo } from "./skills/combos/cloud-security.ts";
@@ -493,6 +494,7 @@ export const SKILLS_MAP: Technology[] = [
     ],
   },
     awsTech,
+    activeDirectoryTech,
   {
     id: 'swiftui',
     name: 'SwiftUI',
@@ -1101,11 +1103,6 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'Gabox301/SkillIndex/performing-access-recertification-with-saviynt',
       'Gabox301/SkillIndex/performing-access-review-and-certification',
-      'Gabox301/SkillIndex/performing-active-directory-bloodhound-analysis',
-      'Gabox301/SkillIndex/performing-active-directory-compromise-investigation',
-      'Gabox301/SkillIndex/performing-active-directory-forest-trust-attack',
-      'Gabox301/SkillIndex/performing-active-directory-penetration-test',
-      'Gabox301/SkillIndex/performing-active-directory-vulnerability-assessment',
       'Gabox301/SkillIndex/performing-adversary-in-the-middle-phishing-detection',
       'Gabox301/SkillIndex/performing-agentless-vulnerability-scanning',
       'Gabox301/SkillIndex/performing-ai-driven-osint-correlation',
