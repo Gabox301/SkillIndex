@@ -34,6 +34,7 @@ import { activeDirectoryTech } from './skills/techs/active-directory.ts';
 import { threatDetectionTech } from './skills/techs/threat-detection.ts';
 import { securityImplementationTech } from './skills/techs/security-implementation.ts';
 import { securityAnalysisTech } from './skills/techs/security-analysis.ts';
+import { threatHuntingTech } from './skills/techs/threat-hunting.ts';
 import { awsTech } from './skills/techs/aws.ts';
 
 // ── Skills Map ────────────────────────────────────────────────
@@ -503,6 +504,7 @@ export const SKILLS_MAP: Technology[] = [
     threatDetectionTech,
     securityImplementationTech,
     securityAnalysisTech,
+    threatHuntingTech,
   {
     id: 'swiftui',
     name: 'SwiftUI',
@@ -1273,50 +1275,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/performing-wireless-security-assessment-with-kismet',
       'Gabox301/SkillIndex/performing-yara-rule-development-for-detection',
     ],
-  },  {
-    id: 'orphan-hunting',
-    name: 'Hunting Skills',
-    detect: {},
-    skills: [
-      'Gabox301/SkillIndex/hunting-advanced-persistent-threats',
-      'Gabox301/SkillIndex/hunting-bootkits-in-efi-system-partition',
-      'Gabox301/SkillIndex/hunting-credential-stuffing-attacks',
-      'Gabox301/SkillIndex/hunting-evtx-with-chainsaw',
-      'Gabox301/SkillIndex/hunting-for-anomalous-powershell-execution',
-      'Gabox301/SkillIndex/hunting-for-beaconing-with-frequency-analysis',
-      'Gabox301/SkillIndex/hunting-for-cobalt-strike-beacons',
-      'Gabox301/SkillIndex/hunting-for-command-and-control-beaconing',
-      'Gabox301/SkillIndex/hunting-for-data-exfiltration-indicators',
-      'Gabox301/SkillIndex/hunting-for-data-staging-before-exfiltration',
-      'Gabox301/SkillIndex/hunting-for-dcom-lateral-movement',
-      'Gabox301/SkillIndex/hunting-for-dcsync-attacks',
-      'Gabox301/SkillIndex/hunting-for-defense-evasion-via-timestomping',
-      'Gabox301/SkillIndex/hunting-for-dns-based-persistence',
-      'Gabox301/SkillIndex/hunting-for-dns-tunneling-with-zeek',
-      'Gabox301/SkillIndex/hunting-for-domain-fronting-c2-traffic',
-      'Gabox301/SkillIndex/hunting-for-lateral-movement-via-wmi',
-      'Gabox301/SkillIndex/hunting-for-living-off-the-cloud-techniques',
-      'Gabox301/SkillIndex/hunting-for-living-off-the-land-binaries',
-      'Gabox301/SkillIndex/hunting-for-lolbins-execution-in-endpoint-logs',
-      'Gabox301/SkillIndex/hunting-for-ntlm-relay-attacks',
-      'Gabox301/SkillIndex/hunting-for-persistence-mechanisms-in-windows',
-      'Gabox301/SkillIndex/hunting-for-persistence-via-wmi-subscriptions',
-      'Gabox301/SkillIndex/hunting-for-process-injection-techniques',
-      'Gabox301/SkillIndex/hunting-for-registry-persistence-mechanisms',
-      'Gabox301/SkillIndex/hunting-for-registry-run-key-persistence',
-      'Gabox301/SkillIndex/hunting-for-scheduled-task-persistence',
-      'Gabox301/SkillIndex/hunting-for-shadow-copy-deletion',
-      'Gabox301/SkillIndex/hunting-for-spearphishing-indicators',
-      'Gabox301/SkillIndex/hunting-for-startup-folder-persistence',
-      'Gabox301/SkillIndex/hunting-for-supply-chain-compromise',
-      'Gabox301/SkillIndex/hunting-for-suspicious-scheduled-tasks',
-      'Gabox301/SkillIndex/hunting-for-t1098-account-manipulation',
-      'Gabox301/SkillIndex/hunting-for-unusual-network-connections',
-      'Gabox301/SkillIndex/hunting-for-unusual-service-installations',
-      'Gabox301/SkillIndex/hunting-for-webshell-activity',
-      'Gabox301/SkillIndex/hunting-saas-sso-token-abuse',
-    ],
-  },  {
+  },    {
     id: 'orphan-building',
     name: 'Building Skills',
     detect: {},
@@ -1359,7 +1318,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/building-vulnerability-scanning-workflow',
     ],
   },
-  {
+{
     id: 'orphan-exploiting',
     name: 'Exploiting Skills',
     detect: {},
