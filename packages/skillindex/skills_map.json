@@ -392,7 +392,9 @@
           "@react-router/serve"
         ]
       },
-      "skills": []
+      "skills": [
+        "clerk/skills/clerk-react-router-patterns"
+      ]
     },
     {
       "id": "tanstack-start",
@@ -697,7 +699,29 @@
           }
         ]
       },
-      "skills": []
+      "skills": [
+        "Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions",
+        "Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna",
+        "Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies",
+        "Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog",
+        "Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation",
+        "Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation",
+        "Gabox301/SkillIndex/exploiting-aws-with-pacu",
+        "Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance",
+        "Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries",
+        "Gabox301/SkillIndex/implementing-aws-macie-for-data-classification",
+        "Gabox301/SkillIndex/implementing-aws-nitro-enclave-security",
+        "Gabox301/SkillIndex/implementing-aws-security-hub",
+        "Gabox301/SkillIndex/implementing-aws-security-hub-compliance",
+        "Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms",
+        "Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite",
+        "Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment",
+        "Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail",
+        "Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective",
+        "Gabox301/SkillIndex/securing-api-gateway-with-aws-waf",
+        "Gabox301/SkillIndex/securing-aws-iam-permissions",
+        "Gabox301/SkillIndex/securing-aws-lambda-execution-roles"
+      ]
     },
     {
       "id": "swiftui",
@@ -779,7 +803,9 @@
           "@react-three/fiber"
         ]
       },
-      "skills": []
+      "skills": [
+        "vercel-labs/json-render/react-three-fiber"
+      ]
     },
     {
       "id": "bun",
@@ -845,7 +871,9 @@
           "express"
         ]
       },
-      "skills": []
+      "skills": [
+        "aj-geddes/useful-ai-prompts/nodejs-express-server"
+      ]
     },
     {
       "id": "go",
@@ -1265,20 +1293,6 @@
       "skills": []
     },
     {
-      "id": "python",
-      "name": "Python",
-      "detect": {
-        "configFiles": [
-          "pyproject.toml",
-          "requirements.txt",
-          "setup.py",
-          "setup.cfg",
-          "Pipfile"
-        ]
-      },
-      "skills": []
-    },
-    {
       "id": "sorbet",
       "name": "Sorbet",
       "detect": {
@@ -1306,55 +1320,12 @@
       "skills": []
     },
     {
-      "id": "django",
-      "name": "Django",
-      "detect": {
-        "configFiles": [
-          "manage.py"
-        ],
-        "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "setup.cfg",
-            "Pipfile"
-          ],
-          "patterns": [
-            "django",
-            "Django"
-          ]
-        }
-      },
-      "skills": []
-    },
-    {
       "id": "devise",
       "name": "Devise",
       "detect": {
         "gems": [
           "devise"
         ]
-      },
-      "skills": []
-    },
-    {
-      "id": "fastapi",
-      "name": "FastAPI",
-      "detect": {
-        "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "setup.cfg",
-            "Pipfile"
-          ],
-          "patterns": [
-            "fastapi",
-            "FastAPI"
-          ]
-        }
       },
       "skills": []
     },
@@ -1742,8 +1713,6 @@
         "Gabox301/SkillIndex/performing-authenticated-scan-with-openvas",
         "Gabox301/SkillIndex/performing-authenticated-vulnerability-scan",
         "Gabox301/SkillIndex/performing-automated-malware-analysis-with-cape",
-        "Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite",
-        "Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment",
         "Gabox301/SkillIndex/performing-bandwidth-throttling-attack-simulation",
         "Gabox301/SkillIndex/performing-binary-exploitation-analysis",
         "Gabox301/SkillIndex/performing-blind-ssrf-exploitation",
@@ -1752,11 +1721,9 @@
         "Gabox301/SkillIndex/performing-clickjacking-attack-test",
         "Gabox301/SkillIndex/performing-cloud-asset-inventory-with-cartography",
         "Gabox301/SkillIndex/performing-cloud-forensics-investigation",
-        "Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail",
         "Gabox301/SkillIndex/performing-cloud-incident-containment-procedures",
         "Gabox301/SkillIndex/performing-cloud-log-forensics-with-athena",
         "Gabox301/SkillIndex/performing-cloud-native-forensics-with-falco",
-        "Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective",
         "Gabox301/SkillIndex/performing-cloud-penetration-testing-with-pacu",
         "Gabox301/SkillIndex/performing-cloud-storage-forensic-acquisition",
         "Gabox301/SkillIndex/performing-container-escape-detection",
@@ -1916,12 +1883,6 @@
         "Gabox301/SkillIndex/implementing-aqua-security-for-container-scanning",
         "Gabox301/SkillIndex/implementing-attack-path-analysis-with-xm-cyber",
         "Gabox301/SkillIndex/implementing-attack-surface-management",
-        "Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance",
-        "Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries",
-        "Gabox301/SkillIndex/implementing-aws-macie-for-data-classification",
-        "Gabox301/SkillIndex/implementing-aws-nitro-enclave-security",
-        "Gabox301/SkillIndex/implementing-aws-security-hub",
-        "Gabox301/SkillIndex/implementing-aws-security-hub-compliance",
         "Gabox301/SkillIndex/implementing-azure-ad-privileged-identity-management",
         "Gabox301/SkillIndex/implementing-azure-defender-for-cloud",
         "Gabox301/SkillIndex/implementing-beyondcorp-zero-trust-access-model",
@@ -1957,7 +1918,6 @@
         "Gabox301/SkillIndex/implementing-end-to-end-encryption-for-messaging",
         "Gabox301/SkillIndex/implementing-endpoint-detection-with-wazuh",
         "Gabox301/SkillIndex/implementing-endpoint-dlp-controls",
-        "Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms",
         "Gabox301/SkillIndex/implementing-epss-score-for-vulnerability-prioritization",
         "Gabox301/SkillIndex/implementing-file-integrity-monitoring-with-aide",
         "Gabox301/SkillIndex/implementing-fuzz-testing-in-cicd-with-aflplusplus",
@@ -2082,10 +2042,6 @@
         "Gabox301/SkillIndex/detecting-arp-poisoning-in-network-traffic",
         "Gabox301/SkillIndex/detecting-attacks-on-historian-servers",
         "Gabox301/SkillIndex/detecting-attacks-on-scada-systems",
-        "Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies",
-        "Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog",
-        "Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation",
-        "Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation",
         "Gabox301/SkillIndex/detecting-azure-lateral-movement",
         "Gabox301/SkillIndex/detecting-azure-service-principal-abuse",
         "Gabox301/SkillIndex/detecting-azure-storage-account-misconfigurations",
@@ -2352,7 +2308,6 @@
         "Gabox301/SkillIndex/exploiting-active-directory-with-bloodhound",
         "Gabox301/SkillIndex/exploiting-adcs-with-certipy",
         "Gabox301/SkillIndex/exploiting-api-injection-vulnerabilities",
-        "Gabox301/SkillIndex/exploiting-aws-with-pacu",
         "Gabox301/SkillIndex/exploiting-bgp-hijacking-vulnerabilities",
         "Gabox301/SkillIndex/exploiting-broken-function-level-authorization",
         "Gabox301/SkillIndex/exploiting-broken-link-hijacking",
@@ -2449,7 +2404,6 @@
       "detect": {},
       "skills": [
         "Gabox301/SkillIndex/configuring-active-directory-tiered-model",
-        "Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna",
         "Gabox301/SkillIndex/configuring-certificate-authority-with-openssl",
         "Gabox301/SkillIndex/configuring-host-based-intrusion-detection",
         "Gabox301/SkillIndex/configuring-hsm-for-key-storage",
@@ -2474,9 +2428,6 @@
       "detect": {},
       "skills": [
         "Gabox301/SkillIndex/securing-agentic-ai-tool-invocation",
-        "Gabox301/SkillIndex/securing-api-gateway-with-aws-waf",
-        "Gabox301/SkillIndex/securing-aws-iam-permissions",
-        "Gabox301/SkillIndex/securing-aws-lambda-execution-roles",
         "Gabox301/SkillIndex/securing-azure-with-microsoft-defender",
         "Gabox301/SkillIndex/securing-container-registry-images",
         "Gabox301/SkillIndex/securing-container-registry-with-harbor",
@@ -2493,7 +2444,6 @@
       "name": "Auditing Skills",
       "detect": {},
       "skills": [
-        "Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions",
         "Gabox301/SkillIndex/auditing-azure-active-directory-configuration",
         "Gabox301/SkillIndex/auditing-cloud-with-cis-benchmarks",
         "Gabox301/SkillIndex/auditing-entra-id-with-aadinternals",

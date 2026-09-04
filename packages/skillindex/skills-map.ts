@@ -1,12 +1,10 @@
 // ── Types ─────────────────────────────────────────────────────
-
 export interface ConfigFileContentBlock {
   files?: string[];
   patterns: string[];
   scanGradleLayout?: boolean;
   scanDotNetLayout?: boolean;
 }
-
 export interface DetectConfig {
   packages?: string[];
   packagePatterns?: RegExp[];
@@ -15,23 +13,19 @@ export interface DetectConfig {
   gems?: string[];
   configFileContent?: ConfigFileContentBlock | ConfigFileContentBlock[];
 }
-
 export interface Technology {
   id: string;
   name: string;
   detect: DetectConfig;
   skills: string[];
 }
-
 export interface ComboSkill {
   id: string;
   name: string;
   requires: string[];
   skills: string[];
 }
-
 // ── Skills Map ────────────────────────────────────────────────
-
 export const SKILLS_MAP: Technology[] = [
   {
     id: 'react',
@@ -51,7 +45,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'vercel-labs/next-skills/next-best-practices',
       'vercel-labs/next-skills/next-cache-components',
-      'vercel-labs/next-skills/next-upgrade',
+      'vercel-labs/next-skills/next-upgrade'
     ],
   },
   {
@@ -101,7 +95,7 @@ export const SKILLS_MAP: Technology[] = [
       'angular/angular/reference-signal-forms',
       'angular/angular/reference-compiler-cli',
       'angular/angular/adev-writing-guide',
-      'angular/angular/pr_review',
+      'angular/angular/pr_review'
     ],
   },
   {
@@ -180,8 +174,8 @@ export const SKILLS_MAP: Technology[] = [
         '@instantdb/react',
         '@instantdb/react-native',
         '@instantdb/react-native-mmkv',
-        '@instantdb/admin',
-      ],
+        '@instantdb/admin'
+    ],
       configFiles: ['instant.schema.ts', 'instant.perms.ts'],
     },
     skills: ['instantdb/skills/instantdb'],
@@ -210,7 +204,7 @@ export const SKILLS_MAP: Technology[] = [
       'expo/skills/expo-deployment',
       'expo/skills/expo-cicd-workflows',
       'expo/skills/expo-api-routes',
-      'expo/skills/use-dom',
+      'expo/skills/use-dom'
     ],
   },
   {
@@ -241,7 +235,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'jeffallan/claude-skills/flutter-expert',
       'madteacher/mad-agents-skills/flutter-animations',
-      'madteacher/mad-agents-skills/flutter-testing',
+      'madteacher/mad-agents-skills/flutter-testing'
     ],
   },
   {
@@ -254,13 +248,13 @@ export const SKILLS_MAP: Technology[] = [
           'kotlin("multiplatform")',
           'org.jetbrains.kotlin.multiplatform',
           'id("org.jetbrains.kotlin.multiplatform")',
-          'kotlin-multiplatform',
-        ],
+          'kotlin-multiplatform'
+    ],
       },
     },
     skills: [
       'Kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration',
-      'Kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration',
+      'Kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration'
     ],
   },
   {
@@ -274,8 +268,8 @@ export const SKILLS_MAP: Technology[] = [
           'com.android.library',
           'id("com.android.application")',
           'id("com.android.library")',
-          'com.android.kotlin.multiplatform.library',
-        ],
+          'com.android.kotlin.multiplatform.library'
+    ],
       },
     },
     skills: [
@@ -286,7 +280,7 @@ export const SKILLS_MAP: Technology[] = [
       'krutikJain/android-agent-skills/android-gradle-build-logic',
       'krutikJain/android-agent-skills/android-coroutines-flow',
       'krutikJain/android-agent-skills/android-networking-retrofit-okhttp',
-      'krutikJain/android-agent-skills/android-testing-unit',
+      'krutikJain/android-agent-skills/android-testing-unit'
     ],
   },
   {
@@ -303,7 +297,7 @@ export const SKILLS_MAP: Technology[] = [
     detect: {
       packages: ['react-router', '@react-router/node', '@react-router/dev', '@react-router/serve'],
     },
-    skills: [],
+    skills: ['clerk/skills/clerk-react-router-patterns'],
   },
   {
     id: 'tanstack-start',
@@ -341,8 +335,8 @@ export const SKILLS_MAP: Technology[] = [
         '@clerk/tanstack-react-start',
         '@clerk/react-router',
         '@clerk/chrome-extension',
-        '@clerk/backend',
-      ],
+        '@clerk/backend'
+    ],
       packagePatterns: [/^@clerk\//],
       configFileContent: [
         {
@@ -352,8 +346,8 @@ export const SKILLS_MAP: Technology[] = [
         {
           scanGradleLayout: true,
           patterns: ['com.clerk'],
-        },
-      ],
+        }
+    ],
     },
     skills: [
       'clerk/skills/clerk',
@@ -362,7 +356,7 @@ export const SKILLS_MAP: Technology[] = [
       'clerk/skills/clerk-backend-api',
       'clerk/skills/clerk-orgs',
       'clerk/skills/clerk-webhooks',
-      'clerk/skills/clerk-testing',
+      'clerk/skills/clerk-testing'
     ],
   },
   {
@@ -375,7 +369,7 @@ export const SKILLS_MAP: Technology[] = [
       'better-auth/skills/best-practices',
       'better-auth/skills/emailAndPassword',
       'better-auth/skills/organization',
-      'better-auth/skills/twoFactor',
+      'better-auth/skills/twoFactor'
     ],
   },
   {
@@ -406,7 +400,7 @@ export const SKILLS_MAP: Technology[] = [
       'microsoft/github-copilot-for-azure/azure-deploy',
       'microsoft/github-copilot-for-azure/azure-ai',
       'microsoft/github-copilot-for-azure/azure-cost',
-      'microsoft/github-copilot-for-azure/azure-diagnostics',
+      'microsoft/github-copilot-for-azure/azure-diagnostics'
     ],
   },
   {
@@ -446,7 +440,7 @@ export const SKILLS_MAP: Technology[] = [
       'cloudflare/skills/wrangler',
       'cloudflare/skills/workers-best-practices',
       'cloudflare/skills/web-perf',
-      'openai/skills/cloudflare-deploy',
+      'openai/skills/cloudflare-deploy'
     ],
   },
   {
@@ -490,7 +484,7 @@ export const SKILLS_MAP: Technology[] = [
       'hashicorp/agent-skills/terraform-style-guide',
       'hashicorp/agent-skills/refactor-module',
       'hashicorp/agent-skills/terraform-stacks',
-      'wshobson/agents/terraform-module-library',
+      'wshobson/agents/terraform-module-library'
     ],
   },
   {
@@ -499,7 +493,29 @@ export const SKILLS_MAP: Technology[] = [
     detect: {
       packagePatterns: [/^@aws-sdk\//, /^aws-cdk/],
     },
-    skills: [],
+    skills: [
+      'Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions',
+      'Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna',
+      'Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies',
+      'Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog',
+      'Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation',
+      'Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation',
+      'Gabox301/SkillIndex/exploiting-aws-with-pacu',
+      'Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance',
+      'Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries',
+      'Gabox301/SkillIndex/implementing-aws-macie-for-data-classification',
+      'Gabox301/SkillIndex/implementing-aws-nitro-enclave-security',
+      'Gabox301/SkillIndex/implementing-aws-security-hub',
+      'Gabox301/SkillIndex/implementing-aws-security-hub-compliance',
+      'Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms',
+      'Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite',
+      'Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment',
+      'Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail',
+      'Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective',
+      'Gabox301/SkillIndex/securing-api-gateway-with-aws-waf',
+      'Gabox301/SkillIndex/securing-aws-iam-permissions',
+      'Gabox301/SkillIndex/securing-aws-lambda-execution-roles'
+    ],
   },
   {
     id: 'swiftui',
@@ -512,7 +528,7 @@ export const SKILLS_MAP: Technology[] = [
       'avdlee/swift-concurrency-agent-skill/swift-concurrency',
       'avdlee/xcode-build-optimization-agent-skill/xcode-build-orchestrator',
       'avdlee/swift-testing-agent-skill/swift-testing-expert',
-      'avdlee/core-data-agent-skill/core-data-expert',
+      'avdlee/core-data-agent-skill/core-data-expert'
     ],
   },
   {
@@ -537,7 +553,7 @@ export const SKILLS_MAP: Technology[] = [
       'greensock/gsap-skills/gsap-plugins',
       'greensock/gsap-skills/gsap-timeline',
       'greensock/gsap-skills/gsap-utils',
-      'greensock/gsap-skills/gsap-frameworks',
+      'greensock/gsap-skills/gsap-frameworks'
     ],
   },
   {
@@ -556,7 +572,7 @@ export const SKILLS_MAP: Technology[] = [
       'cloudai-x/threejs-skills/threejs-postprocessing',
       'cloudai-x/threejs-skills/threejs-lighting',
       'cloudai-x/threejs-skills/threejs-textures',
-      'cloudai-x/threejs-skills/threejs-loaders',
+      'cloudai-x/threejs-skills/threejs-loaders'
     ],
   },
   {
@@ -565,7 +581,7 @@ export const SKILLS_MAP: Technology[] = [
     detect: {
       packages: ['@react-three/fiber'],
     },
-    skills: [],
+    skills: ['vercel-labs/json-render/react-three-fiber'],
   },
   {
     id: 'bun',
@@ -605,7 +621,7 @@ export const SKILLS_MAP: Technology[] = [
     detect: {
       packages: ['express'],
     },
-    skills: [],
+    skills: ['aj-geddes/useful-ai-prompts/nodejs-express-server'],
   },
   {
     id: 'go',
@@ -627,7 +643,7 @@ export const SKILLS_MAP: Technology[] = [
       'denoland/skills/deno-frontend',
       'denoland/skills/deno-deploy',
       'denoland/skills/deno-sandbox',
-      'mindrally/skills/deno-typescript',
+      'mindrally/skills/deno-typescript'
     ],
   },
   {
@@ -649,7 +665,7 @@ export const SKILLS_MAP: Technology[] = [
       'wordpress/agent-skills/wp-performance',
       'wordpress/agent-skills/wordpress-router',
       'wordpress/agent-skills/wp-project-triage',
-      'wordpress/agent-skills/wp-wpcli-and-ops',
+      'wordpress/agent-skills/wp-wpcli-and-ops'
     ],
   },
   {
@@ -666,8 +682,8 @@ export const SKILLS_MAP: Technology[] = [
           'id("java")',
           "id 'java'",
           'id("java-library")',
-          "id 'java-library'",
-        ],
+          "id 'java-library'"
+    ],
       },
     },
     skills: ['github/awesome-copilot/java-docs', 'affaan-m/everything-claude-code/java-coding-standards'],
@@ -679,8 +695,8 @@ export const SKILLS_MAP: Technology[] = [
       configFiles: [
         'src/main/resources/application.properties',
         'src/main/resources/application.yml',
-        'src/main/resources/application.yaml',
-      ],
+        'src/main/resources/application.yaml'
+    ],
       configFileContent: {
         files: ['pom.xml'],
         patterns: ['spring-boot-starter', 'org.springframework.boot'],
@@ -698,7 +714,7 @@ export const SKILLS_MAP: Technology[] = [
       'prisma/skills/prisma-database-setup',
       'prisma/skills/prisma-client-api',
       'prisma/skills/prisma-cli',
-      'prisma/skills/prisma-postgres',
+      'prisma/skills/prisma-postgres'
     ],
   },
   {
@@ -767,8 +783,8 @@ export const SKILLS_MAP: Technology[] = [
         'electron-vite.config.ts',
         'electron-vite.config.js',
         'electron-vite.config.mjs',
-        'electron-vite.config.cjs',
-      ],
+        'electron-vite.config.cjs'
+    ],
     },
     skills: [],
   },
@@ -785,7 +801,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'github/awesome-copilot/dotnet-best-practices',
       'github/awesome-copilot/dotnet-design-pattern-review',
-      'github/awesome-copilot/dotnet-upgrade',
+      'github/awesome-copilot/dotnet-upgrade'
     ],
   },
   {
@@ -803,7 +819,7 @@ export const SKILLS_MAP: Technology[] = [
       'github/awesome-copilot/csharp-docs',
       'github/awesome-copilot/csharp-nunit',
       'github/awesome-copilot/csharp-mstest',
-      'github/awesome-copilot/csharp-tunit',
+      'github/awesome-copilot/csharp-tunit'
     ],
   },
   {
@@ -871,7 +887,7 @@ export const SKILLS_MAP: Technology[] = [
       'igmarin/rails-agent-skills/rails-code-review',
       'igmarin/rails-agent-skills/rails-migration-safety',
       'igmarin/rails-agent-skills/rails-security-review',
-      'ombulabs/claude-code_rails-upgrade-skill/rails-upgrade',
+      'ombulabs/claude-code_rails-upgrade-skill/rails-upgrade'
     ],
   },
   {
@@ -891,14 +907,6 @@ export const SKILLS_MAP: Technology[] = [
     skills: [],
   },
   {
-    id: 'python',
-    name: 'Python',
-    detect: {
-      configFiles: ['pyproject.toml', 'requirements.txt', 'setup.py', 'setup.cfg', 'Pipfile'],
-    },
-    skills: [],
-  },
-  {
     id: 'sorbet',
     name: 'Sorbet',
     detect: {
@@ -907,7 +915,7 @@ export const SKILLS_MAP: Technology[] = [
     },
     skills: [
       'DmitryPogrebnoy/ruby-agent-skills/generating-sorbet',
-      'DmitryPogrebnoy/ruby-agent-skills/generating-sorbet-inline',
+      'DmitryPogrebnoy/ruby-agent-skills/generating-sorbet-inline'
     ],
   },
   {
@@ -919,33 +927,10 @@ export const SKILLS_MAP: Technology[] = [
     skills: [],
   },
   {
-    id: 'django',
-    name: 'Django',
-    detect: {
-      configFiles: ['manage.py'],
-      configFileContent: {
-        files: ['pyproject.toml', 'requirements.txt', 'setup.py', 'setup.cfg', 'Pipfile'],
-        patterns: ['django', 'Django'],
-      },
-    },
-    skills: [],
-  },
-  {
     id: 'devise',
     name: 'Devise',
     detect: {
       gems: ['devise'],
-    },
-    skills: [],
-  },
-  {
-    id: 'fastapi',
-    name: 'FastAPI',
-    detect: {
-      configFileContent: {
-        files: ['pyproject.toml', 'requirements.txt', 'setup.py', 'setup.cfg', 'Pipfile'],
-        patterns: ['fastapi', 'FastAPI'],
-      },
     },
     skills: [],
   },
@@ -967,7 +952,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'igmarin/rails-agent-skills/rspec-best-practices',
       'igmarin/rails-agent-skills/rspec-service-testing',
-      'lucianghinda/superpowers-ruby/test-driven-development',
+      'lucianghinda/superpowers-ruby/test-driven-development'
     ],
   },
   {
@@ -1041,7 +1026,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: [
       'vintasoftware/django-ai-plugins/django-expert',
       'affaan-m/everything-claude-code/django-patterns',
-      'affaan-m/everything-claude-code/django-security',
+      'affaan-m/everything-claude-code/django-security'
     ],
   },
   {
@@ -1077,7 +1062,7 @@ export const SKILLS_MAP: Technology[] = [
     },
     skills: [
       'bobmatnyc/claude-mpm-skills/sqlalchemy',
-      'wispbit-ai/skills/sqlalchemy-alembic-expert-best-practices-code-review',
+      'wispbit-ai/skills/sqlalchemy-alembic-expert-best-practices-code-review'
     ],
   },
   {
@@ -1113,7 +1098,7 @@ export const SKILLS_MAP: Technology[] = [
     },
     skills: [
       'pluginagentmarketplace/custom-plugin-python/machine-learning',
-      'pluginagentmarketplace/custom-plugin-python/pandas-data-analysis',
+      'pluginagentmarketplace/custom-plugin-python/pandas-data-analysis'
     ],
   },
   {
@@ -1175,8 +1160,6 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/performing-authenticated-scan-with-openvas',
       'Gabox301/SkillIndex/performing-authenticated-vulnerability-scan',
       'Gabox301/SkillIndex/performing-automated-malware-analysis-with-cape',
-      'Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite',
-      'Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment',
       'Gabox301/SkillIndex/performing-bandwidth-throttling-attack-simulation',
       'Gabox301/SkillIndex/performing-binary-exploitation-analysis',
       'Gabox301/SkillIndex/performing-blind-ssrf-exploitation',
@@ -1185,11 +1168,9 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/performing-clickjacking-attack-test',
       'Gabox301/SkillIndex/performing-cloud-asset-inventory-with-cartography',
       'Gabox301/SkillIndex/performing-cloud-forensics-investigation',
-      'Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail',
       'Gabox301/SkillIndex/performing-cloud-incident-containment-procedures',
       'Gabox301/SkillIndex/performing-cloud-log-forensics-with-athena',
       'Gabox301/SkillIndex/performing-cloud-native-forensics-with-falco',
-      'Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective',
       'Gabox301/SkillIndex/performing-cloud-penetration-testing-with-pacu',
       'Gabox301/SkillIndex/performing-cloud-storage-forensic-acquisition',
       'Gabox301/SkillIndex/performing-container-escape-detection',
@@ -1325,7 +1306,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/performing-windows-artifact-analysis-with-eric-zimmerman-tools',
       'Gabox301/SkillIndex/performing-wireless-network-penetration-test',
       'Gabox301/SkillIndex/performing-wireless-security-assessment-with-kismet',
-      'Gabox301/SkillIndex/performing-yara-rule-development-for-detection',
+      'Gabox301/SkillIndex/performing-yara-rule-development-for-detection'
     ],
   },
   {
@@ -1349,12 +1330,6 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/implementing-aqua-security-for-container-scanning',
       'Gabox301/SkillIndex/implementing-attack-path-analysis-with-xm-cyber',
       'Gabox301/SkillIndex/implementing-attack-surface-management',
-      'Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance',
-      'Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries',
-      'Gabox301/SkillIndex/implementing-aws-macie-for-data-classification',
-      'Gabox301/SkillIndex/implementing-aws-nitro-enclave-security',
-      'Gabox301/SkillIndex/implementing-aws-security-hub',
-      'Gabox301/SkillIndex/implementing-aws-security-hub-compliance',
       'Gabox301/SkillIndex/implementing-azure-ad-privileged-identity-management',
       'Gabox301/SkillIndex/implementing-azure-defender-for-cloud',
       'Gabox301/SkillIndex/implementing-beyondcorp-zero-trust-access-model',
@@ -1390,7 +1365,6 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/implementing-end-to-end-encryption-for-messaging',
       'Gabox301/SkillIndex/implementing-endpoint-detection-with-wazuh',
       'Gabox301/SkillIndex/implementing-endpoint-dlp-controls',
-      'Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms',
       'Gabox301/SkillIndex/implementing-epss-score-for-vulnerability-prioritization',
       'Gabox301/SkillIndex/implementing-file-integrity-monitoring-with-aide',
       'Gabox301/SkillIndex/implementing-fuzz-testing-in-cicd-with-aflplusplus',
@@ -1500,7 +1474,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/implementing-zero-trust-network-access',
       'Gabox301/SkillIndex/implementing-zero-trust-network-access-with-zscaler',
       'Gabox301/SkillIndex/implementing-zero-trust-with-beyondcorp',
-      'Gabox301/SkillIndex/implementing-zero-trust-with-hashicorp-boundary',
+      'Gabox301/SkillIndex/implementing-zero-trust-with-hashicorp-boundary'
     ],
   },
   {
@@ -1515,10 +1489,6 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/detecting-arp-poisoning-in-network-traffic',
       'Gabox301/SkillIndex/detecting-attacks-on-historian-servers',
       'Gabox301/SkillIndex/detecting-attacks-on-scada-systems',
-      'Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies',
-      'Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog',
-      'Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation',
-      'Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation',
       'Gabox301/SkillIndex/detecting-azure-lateral-movement',
       'Gabox301/SkillIndex/detecting-azure-service-principal-abuse',
       'Gabox301/SkillIndex/detecting-azure-storage-account-misconfigurations',
@@ -1603,7 +1573,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/detecting-t1548-abuse-elevation-control-mechanism',
       'Gabox301/SkillIndex/detecting-typosquatting-packages',
       'Gabox301/SkillIndex/detecting-typosquatting-packages-in-npm-pypi',
-      'Gabox301/SkillIndex/detecting-wmi-persistence',
+      'Gabox301/SkillIndex/detecting-wmi-persistence'
     ],
   },
   {
@@ -1686,7 +1656,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/analyzing-windows-lnk-files-for-artifacts',
       'Gabox301/SkillIndex/analyzing-windows-prefetch-with-python',
       'Gabox301/SkillIndex/analyzing-windows-registry-for-artifacts',
-      'Gabox301/SkillIndex/analyzing-windows-shellbag-artifacts',
+      'Gabox301/SkillIndex/analyzing-windows-shellbag-artifacts'
     ],
   },
   {
@@ -1730,7 +1700,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/hunting-for-unusual-network-connections',
       'Gabox301/SkillIndex/hunting-for-unusual-service-installations',
       'Gabox301/SkillIndex/hunting-for-webshell-activity',
-      'Gabox301/SkillIndex/hunting-saas-sso-token-abuse',
+      'Gabox301/SkillIndex/hunting-saas-sso-token-abuse'
     ],
   },
   {
@@ -1773,7 +1743,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/building-vulnerability-aging-and-sla-tracking',
       'Gabox301/SkillIndex/building-vulnerability-dashboard-with-defectdojo',
       'Gabox301/SkillIndex/building-vulnerability-exception-tracking-system',
-      'Gabox301/SkillIndex/building-vulnerability-scanning-workflow',
+      'Gabox301/SkillIndex/building-vulnerability-scanning-workflow'
     ],
   },
   {
@@ -1785,7 +1755,6 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/exploiting-active-directory-with-bloodhound',
       'Gabox301/SkillIndex/exploiting-adcs-with-certipy',
       'Gabox301/SkillIndex/exploiting-api-injection-vulnerabilities',
-      'Gabox301/SkillIndex/exploiting-aws-with-pacu',
       'Gabox301/SkillIndex/exploiting-bgp-hijacking-vulnerabilities',
       'Gabox301/SkillIndex/exploiting-broken-function-level-authorization',
       'Gabox301/SkillIndex/exploiting-broken-link-hijacking',
@@ -1814,7 +1783,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/exploiting-type-juggling-vulnerabilities',
       'Gabox301/SkillIndex/exploiting-vulnerabilities-with-metasploit-framework',
       'Gabox301/SkillIndex/exploiting-websocket-vulnerabilities',
-      'Gabox301/SkillIndex/exploiting-zerologon-vulnerability-cve-2020-1472',
+      'Gabox301/SkillIndex/exploiting-zerologon-vulnerability-cve-2020-1472'
     ],
   },
   {
@@ -1845,7 +1814,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/testing-oauth2-implementation-flaws',
       'Gabox301/SkillIndex/testing-prompt-injection-in-rag-pipelines',
       'Gabox301/SkillIndex/testing-ransomware-recovery-procedures',
-      'Gabox301/SkillIndex/testing-websocket-api-security',
+      'Gabox301/SkillIndex/testing-websocket-api-security'
     ],
   },
   {
@@ -1873,7 +1842,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/conducting-social-engineering-penetration-test',
       'Gabox301/SkillIndex/conducting-social-engineering-pretext-call',
       'Gabox301/SkillIndex/conducting-spearphishing-simulation-campaign',
-      'Gabox301/SkillIndex/conducting-wireless-network-penetration-test',
+      'Gabox301/SkillIndex/conducting-wireless-network-penetration-test'
     ],
   },
   {
@@ -1882,7 +1851,6 @@ export const SKILLS_MAP: Technology[] = [
     detect: {},
     skills: [
       'Gabox301/SkillIndex/configuring-active-directory-tiered-model',
-      'Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna',
       'Gabox301/SkillIndex/configuring-certificate-authority-with-openssl',
       'Gabox301/SkillIndex/configuring-host-based-intrusion-detection',
       'Gabox301/SkillIndex/configuring-hsm-for-key-storage',
@@ -1898,7 +1866,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/configuring-tls-1-3-for-secure-communications',
       'Gabox301/SkillIndex/configuring-windows-defender-advanced-settings',
       'Gabox301/SkillIndex/configuring-windows-event-logging-for-detection',
-      'Gabox301/SkillIndex/configuring-zscaler-private-access-for-ztna',
+      'Gabox301/SkillIndex/configuring-zscaler-private-access-for-ztna'
     ],
   },
   {
@@ -1907,9 +1875,6 @@ export const SKILLS_MAP: Technology[] = [
     detect: {},
     skills: [
       'Gabox301/SkillIndex/securing-agentic-ai-tool-invocation',
-      'Gabox301/SkillIndex/securing-api-gateway-with-aws-waf',
-      'Gabox301/SkillIndex/securing-aws-iam-permissions',
-      'Gabox301/SkillIndex/securing-aws-lambda-execution-roles',
       'Gabox301/SkillIndex/securing-azure-with-microsoft-defender',
       'Gabox301/SkillIndex/securing-container-registry-images',
       'Gabox301/SkillIndex/securing-container-registry-with-harbor',
@@ -1918,7 +1883,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/securing-historian-server-in-ot-environment',
       'Gabox301/SkillIndex/securing-kubernetes-on-cloud',
       'Gabox301/SkillIndex/securing-remote-access-to-ot-environment',
-      'Gabox301/SkillIndex/securing-serverless-functions',
+      'Gabox301/SkillIndex/securing-serverless-functions'
     ],
   },
   {
@@ -1926,7 +1891,6 @@ export const SKILLS_MAP: Technology[] = [
     name: 'Auditing Skills',
     detect: {},
     skills: [
-      'Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions',
       'Gabox301/SkillIndex/auditing-azure-active-directory-configuration',
       'Gabox301/SkillIndex/auditing-cloud-with-cis-benchmarks',
       'Gabox301/SkillIndex/auditing-entra-id-with-aadinternals',
@@ -1937,7 +1901,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/auditing-mcp-servers-for-tool-poisoning',
       'Gabox301/SkillIndex/auditing-terraform-infrastructure-for-security',
       'Gabox301/SkillIndex/auditing-tls-certificate-transparency-logs',
-      'Gabox301/SkillIndex/auditing-uefi-firmware-with-chipsec',
+      'Gabox301/SkillIndex/auditing-uefi-firmware-with-chipsec'
     ],
   },
   {
@@ -1955,7 +1919,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/deploying-palo-alto-prisma-access-zero-trust',
       'Gabox301/SkillIndex/deploying-ransomware-canary-files',
       'Gabox301/SkillIndex/deploying-software-defined-perimeter',
-      'Gabox301/SkillIndex/deploying-tailscale-for-zero-trust-vpn',
+      'Gabox301/SkillIndex/deploying-tailscale-for-zero-trust-vpn'
     ],
   },
   {
@@ -1972,7 +1936,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/sdd-propose',
       'Gabox301/SkillIndex/sdd-spec',
       'Gabox301/SkillIndex/sdd-tasks',
-      'Gabox301/SkillIndex/sdd-verify',
+      'Gabox301/SkillIndex/sdd-verify'
     ],
   },
   {
@@ -1986,7 +1950,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/scanning-iac-and-images-with-trivy',
       'Gabox301/SkillIndex/scanning-infrastructure-with-nessus',
       'Gabox301/SkillIndex/scanning-kubernetes-manifests-with-kubesec',
-      'Gabox301/SkillIndex/scanning-network-with-nmap-advanced',
+      'Gabox301/SkillIndex/scanning-network-with-nmap-advanced'
     ],
   },
   {
@@ -1999,7 +1963,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/appwrite-python',
       'Gabox301/SkillIndex/appwrite-ruby',
       'Gabox301/SkillIndex/appwrite-rust',
-      'Gabox301/SkillIndex/appwrite-typescript',
+      'Gabox301/SkillIndex/appwrite-typescript'
     ],
   },
   {
@@ -2012,7 +1976,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/extracting-credentials-from-memory-dump',
       'Gabox301/SkillIndex/extracting-iocs-from-malware-samples',
       'Gabox301/SkillIndex/extracting-memory-artifacts-with-rekall',
-      'Gabox301/SkillIndex/extracting-windows-event-logs-artifacts',
+      'Gabox301/SkillIndex/extracting-windows-event-logs-artifacts'
     ],
   },
   {
@@ -2025,7 +1989,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/reverse-engineering-ios-app-with-frida',
       'Gabox301/SkillIndex/reverse-engineering-malware-with-ghidra',
       'Gabox301/SkillIndex/reverse-engineering-ransomware-encryption-routine',
-      'Gabox301/SkillIndex/reverse-engineering-rust-malware',
+      'Gabox301/SkillIndex/reverse-engineering-rust-malware'
     ],
   },
   {
@@ -2037,7 +2001,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/executing-nist-rmf-authorization-to-operate',
       'Gabox301/SkillIndex/executing-phishing-simulation-campaign',
       'Gabox301/SkillIndex/executing-red-team-engagement-planning',
-      'Gabox301/SkillIndex/executing-red-team-exercise',
+      'Gabox301/SkillIndex/executing-red-team-exercise'
     ],
   },
   {
@@ -2049,7 +2013,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/triaging-security-incident',
       'Gabox301/SkillIndex/triaging-security-incident-with-ir-playbook',
       'Gabox301/SkillIndex/triaging-vulnerabilities-with-ssvc-framework',
-      'Gabox301/SkillIndex/triaging-windows-with-kape',
+      'Gabox301/SkillIndex/triaging-windows-with-kape'
     ],
   },
   {
@@ -2146,7 +2110,7 @@ export const SKILLS_MAP: Technology[] = [
       'Gabox301/SkillIndex/vercel-react-best-practices',
       'Gabox301/SkillIndex/verifying-build-provenance-with-slsa-sigstore',
       'Gabox301/SkillIndex/web-design-guidelines',
-      'Gabox301/SkillIndex/work-unit-commits',
+      'Gabox301/SkillIndex/work-unit-commits'
     ],
   },
   {
@@ -2160,7 +2124,7 @@ export const SKILLS_MAP: Technology[] = [
       'mattpocock/skills/grill-me',
       'mattpocock/skills/grill-with-docs',
       'mattpocock/skills/improve-codebase-architecture',
-      'mattpocock/skills/tdd',
+      'mattpocock/skills/tdd'
     ],
   },
   {
@@ -2170,9 +2134,7 @@ export const SKILLS_MAP: Technology[] = [
     skills: ['Leonxlnx/taste-skill/taste-skill'],
   },
 ];
-
 // ── Combo Skills Map (cross-technology) ──────────────────────
-
 export const COMBO_SKILLS_MAP: ComboSkill[] = [
   {
     id: 'expo-tailwind',
@@ -2354,7 +2316,7 @@ export const COMBO_SKILLS_MAP: ComboSkill[] = [
       'Gabox301/SkillIndex/analyzing-api-gateway-access-logs',
       'Gabox301/SkillIndex/analyzing-indicators-of-compromise',
       'Gabox301/SkillIndex/analyzing-network-traffic-for-incidents',
-      'Gabox301/SkillIndex/analyzing-cyber-kill-chain',
+      'Gabox301/SkillIndex/analyzing-cyber-kill-chain'
     ],
   },
   // Domain combo: Red Team / C2 — curates orphan-exploiting/hunting/building + abusing-* (always-suggested domain combo: requires: [] intentionally for visibility)
@@ -2387,7 +2349,7 @@ export const COMBO_SKILLS_MAP: ComboSkill[] = [
       'Gabox301/SkillIndex/building-adversary-infrastructure-tracking-system',
       'Gabox301/SkillIndex/abusing-dpapi-for-credential-access',
       'Gabox301/SkillIndex/abusing-shadow-credentials-for-privesc',
-      'Gabox301/SkillIndex/coercing-authentication-with-coercer-petitpotam',
+      'Gabox301/SkillIndex/coercing-authentication-with-coercer-petitpotam'
     ],
   },
   // Domain combo: Cloud Security & Posture — curates orphan-auditing/securing/configuring + cloud subset of orphan-implementing (always-suggested domain combo: requires: [] intentionally for visibility)
@@ -2420,7 +2382,7 @@ export const COMBO_SKILLS_MAP: ComboSkill[] = [
       'Gabox301/SkillIndex/implementing-gcp-binary-authorization',
       'Gabox301/SkillIndex/implementing-gcp-organization-policy-constraints',
       'Gabox301/SkillIndex/implementing-gcp-vpc-firewall-rules',
-      'Gabox301/SkillIndex/implementing-zero-trust-network-access',
+      'Gabox301/SkillIndex/implementing-zero-trust-network-access'
     ],
   },
   // Domain combo: Forensics & Incident Response — curates orphan-analyzing (forensic), orphan-extracting, orphan-performing (forensic), orphan-triaging (always-suggested domain combo: requires: [] intentionally for visibility)
@@ -2453,13 +2415,11 @@ export const COMBO_SKILLS_MAP: ComboSkill[] = [
       'Gabox301/SkillIndex/triaging-security-alerts-in-splunk',
       'Gabox301/SkillIndex/triaging-security-incident',
       'Gabox301/SkillIndex/triaging-windows-with-kape',
-      'Gabox301/SkillIndex/performing-network-packet-capture-analysis',
+      'Gabox301/SkillIndex/performing-network-packet-capture-analysis'
     ],
   },
 ];
-
 // ── Frontend Detection ────────────────────────────────────────
-
 export const FRONTEND_PACKAGES: Set<string> = new Set([
   'react',
   'vue',
@@ -2473,15 +2433,12 @@ export const FRONTEND_PACKAGES: Set<string> = new Set([
   'nuxt',
   '@sveltejs/kit',
 ]);
-
 export const FRONTEND_BONUS_SKILLS: string[] = [
   'anthropics/skills/frontend-design',
   'addyosmani/web-quality-skills/accessibility',
   'addyosmani/web-quality-skills/seo',
 ];
-
 // ── Agent Folder Map ─────────────────────────────────────────
-
 export const AGENT_FOLDER_MAP: Record<string, string> = {
   '.claude': 'claude-code',
   '.cline': 'cline',
@@ -2492,7 +2449,6 @@ export const AGENT_FOLDER_MAP: Record<string, string> = {
   '.opencode': 'opencode',
   '.cursor': 'cursor',
 };
-
 export const WEB_FRONTEND_EXTENSIONS: Set<string> = new Set([
   '.html',
   '.htm',
