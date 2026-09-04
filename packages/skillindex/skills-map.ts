@@ -2133,6 +2133,12 @@ export const SKILLS_MAP: Technology[] = [
     detect: {},
     skills: ['Leonxlnx/taste-skill/taste-skill'],
   },
+  {
+    id: 'archify',
+    name: 'Archify',
+    detect: {},
+    skills: ['tt-a1i/archify/archify'],
+  },
 ];
 // ── Combo Skills Map (cross-technology) ──────────────────────
 export const COMBO_SKILLS_MAP: ComboSkill[] = [

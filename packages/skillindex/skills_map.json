@@ -2687,6 +2687,14 @@
       "skills": [
         "Leonxlnx/taste-skill/taste-skill"
       ]
+    },
+    {
+      "id": "archify",
+      "name": "Archify",
+      "detect": {},
+      "skills": [
+        "tt-a1i/archify/archify"
+      ]
     }
   ],
   "combos": [
