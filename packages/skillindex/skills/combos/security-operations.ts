@@ -1,4 +1,4 @@
-// Domain combo: Security Operations — curates orphan-detecting/analyzing (SOC/SIEM, always-suggested domain combo: requires: [] intentionally for visibility via detectCombos every([])=true)
+// Domain combo: Security Operations — curates security-tooling/threat-detection (SOC/SIEM, always-suggested domain combo: requires: [] intentionally for visibility via detectCombos every([])=true)
 export const securityOperationsCombo = {
   id: 'security-operations',
   name: 'Security Operations (SOC/SIEM)',

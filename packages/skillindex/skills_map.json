@@ -1755,6 +1755,18 @@
       ]
     },
     {
+      "id": "postgres-ruby",
+      "name": "PostgreSQL",
+      "detect": {
+        "gems": [
+          "pg"
+        ]
+      },
+      "skills": [
+        "igmarin/rails-agent-skills/rails-migration-safety"
+      ]
+    },
+    {
       "id": "sorbet",
       "name": "Sorbet",
       "detect": {
@@ -1769,6 +1781,30 @@
       "skills": [
         "DmitryPogrebnoy/ruby-agent-skills/generating-sorbet",
         "DmitryPogrebnoy/ruby-agent-skills/generating-sorbet-inline"
+      ]
+    },
+    {
+      "id": "activeadmin",
+      "name": "ActiveAdmin",
+      "detect": {
+        "gems": [
+          "activeadmin"
+        ]
+      },
+      "skills": [
+        "igmarin/rails-agent-skills/rails-stack-conventions"
+      ]
+    },
+    {
+      "id": "devise",
+      "name": "Devise",
+      "detect": {
+        "gems": [
+          "devise"
+        ]
+      },
+      "skills": [
+        "igmarin/rails-agent-skills/rails-security-review"
       ]
     },
     {
@@ -2134,9 +2170,22 @@
       ]
     },
     {
-      "id": "orphan-performing",
-      "name": "Performing Skills",
-      "detect": {},
+      "id": "security-assessments",
+      "name": "Security Assessments",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "pentest-report.md",
+            "pentest-scope.json",
+            "assessment-plan.md"
+          ],
+          "patterns": [
+            "penetration test",
+            "pentest",
+            "security assessment"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/performing-access-recertification-with-saviynt",
         "Gabox301/SkillIndex/performing-access-review-and-certification",
@@ -2304,9 +2353,21 @@
       ]
     },
     {
-      "id": "orphan-building",
-      "name": "Building Skills",
-      "detect": {},
+      "id": "security-engineering",
+      "name": "Security Engineering",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "detection-engineering.md",
+            "soc-runbook.md"
+          ],
+          "patterns": [
+            "detection engineering",
+            "sigma rule",
+            "soc playbook"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/building-adversary-infrastructure-tracking-system",
         "Gabox301/SkillIndex/building-attack-pattern-library-from-cti-reports",
@@ -2347,9 +2408,21 @@
       ]
     },
     {
-      "id": "orphan-exploiting",
-      "name": "Exploiting Skills",
-      "detect": {},
+      "id": "exploitation",
+      "name": "Exploitation Techniques",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "exploits/README.md",
+            "poc/README.md"
+          ],
+          "patterns": [
+            "exploit",
+            "proof of concept",
+            "cve"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/exploiting-active-directory-certificate-services-esc1",
         "Gabox301/SkillIndex/exploiting-active-directory-with-bloodhound",
@@ -2387,9 +2460,21 @@
       ]
     },
     {
-      "id": "orphan-testing",
-      "name": "Testing Skills",
-      "detect": {},
+      "id": "security-testing",
+      "name": "Security Testing",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "security-testing.md",
+            "owasp-test-plan.md"
+          ],
+          "patterns": [
+            "owasp",
+            "security testing",
+            "attack surface"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/testing-android-intents-for-vulnerabilities",
         "Gabox301/SkillIndex/testing-api-authentication-weaknesses",
@@ -2418,9 +2503,22 @@
       ]
     },
     {
-      "id": "orphan-conducting",
-      "name": "Conducting Skills",
-      "detect": {},
+      "id": "penetration-testing",
+      "name": "Penetration Testing",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "pentest-report.md",
+            "engagement-plan.md",
+            "engagement-scope.json"
+          ],
+          "patterns": [
+            "penetration test",
+            "red team",
+            "engagement"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/conducting-api-security-testing",
         "Gabox301/SkillIndex/conducting-cloud-incident-response",
@@ -2446,9 +2544,21 @@
       ]
     },
     {
-      "id": "orphan-configuring",
-      "name": "Configuring Skills",
-      "detect": {},
+      "id": "security-configuration",
+      "name": "Security Configuration",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "security-config.md",
+            "hardening-guide.md"
+          ],
+          "patterns": [
+            "hardening",
+            "tls",
+            "zero trust"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/configuring-active-directory-tiered-model",
         "Gabox301/SkillIndex/configuring-certificate-authority-with-openssl",
@@ -2470,9 +2580,20 @@
       ]
     },
     {
-      "id": "orphan-securing",
-      "name": "Securing Skills",
-      "detect": {},
+      "id": "security-hardening",
+      "name": "Security Hardening",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "hardening-baseline.md",
+            "cis-benchmark.md"
+          ],
+          "patterns": [
+            "hardening",
+            "cis benchmark"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/securing-agentic-ai-tool-invocation",
         "Gabox301/SkillIndex/securing-azure-with-microsoft-defender",
@@ -2487,9 +2608,21 @@
       ]
     },
     {
-      "id": "orphan-auditing",
-      "name": "Auditing Skills",
-      "detect": {},
+      "id": "security-auditing",
+      "name": "Security Auditing",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "audit-report.md",
+            "security-audit.md"
+          ],
+          "patterns": [
+            "audit",
+            "compliance",
+            "iam review"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/auditing-azure-active-directory-configuration",
         "Gabox301/SkillIndex/auditing-cloud-with-cis-benchmarks",
@@ -2505,9 +2638,21 @@
       ]
     },
     {
-      "id": "orphan-deploying",
-      "name": "Deploying Skills",
-      "detect": {},
+      "id": "security-deployment",
+      "name": "Security Deployment",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "deployment-plan-security.md",
+            "zero-trust-deployment.md"
+          ],
+          "patterns": [
+            "zero trust",
+            "honeytoken",
+            "canary"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/deploying-active-directory-honeytokens",
         "Gabox301/SkillIndex/deploying-cloud-deception-with-decoy-resources",
@@ -2523,8 +2668,8 @@
       ]
     },
     {
-      "id": "orphan-sdd",
-      "name": "Sdd Skills",
+      "id": "sdd-workflow",
+      "name": "SDD Workflow",
       "detect": {},
       "skills": [
         "Gabox301/SkillIndex/sdd-apply",
@@ -2540,9 +2685,21 @@
       ]
     },
     {
-      "id": "orphan-scanning",
-      "name": "Scanning Skills",
-      "detect": {},
+      "id": "vulnerability-scanning",
+      "name": "Vulnerability Scanning",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "vulnerability-scan.md",
+            "scan-results.md"
+          ],
+          "patterns": [
+            "vulnerability scanning",
+            "nessus",
+            "trivy"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/scanning-container-images-with-grype",
         "Gabox301/SkillIndex/scanning-containers-with-trivy-in-cicd",
@@ -2554,9 +2711,15 @@
       ]
     },
     {
-      "id": "orphan-appwrite",
-      "name": "Appwrite Skills",
-      "detect": {},
+      "id": "appwrite",
+      "name": "Appwrite",
+      "detect": {
+        "packages": [
+          "appwrite",
+          "node-appwrite",
+          "@appwrite.io/console"
+        ]
+      },
       "skills": [
         "Gabox301/SkillIndex/appwrite-cli",
         "Gabox301/SkillIndex/appwrite-go",
@@ -2567,9 +2730,21 @@
       ]
     },
     {
-      "id": "orphan-extracting",
-      "name": "Extracting Skills",
-      "detect": {},
+      "id": "evidence-extraction",
+      "name": "Evidence Extraction",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "dfir-evidence.md",
+            "forensic-acquisition.md"
+          ],
+          "patterns": [
+            "forensic",
+            "evidence",
+            "acquisition"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/extracting-browser-history-artifacts",
         "Gabox301/SkillIndex/extracting-config-from-agent-tesla-rat",
@@ -2580,9 +2755,21 @@
       ]
     },
     {
-      "id": "orphan-reverse",
-      "name": "Reverse Skills",
-      "detect": {},
+      "id": "reverse-engineering",
+      "name": "Reverse Engineering",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "malware-analysis.md",
+            "reverse-engineering.md"
+          ],
+          "patterns": [
+            "reverse engineering",
+            "malware analysis",
+            "ghidra"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/reverse-engineering-android-malware-with-jadx",
         "Gabox301/SkillIndex/reverse-engineering-dotnet-malware-with-dnspy",
@@ -2593,9 +2780,21 @@
       ]
     },
     {
-      "id": "orphan-executing",
-      "name": "Executing Skills",
-      "detect": {},
+      "id": "red-team-execution",
+      "name": "Red Team Execution",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "red-team-plan.md",
+            "engagement-plan.json"
+          ],
+          "patterns": [
+            "red team",
+            "adversary simulation",
+            "engagement"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/executing-active-directory-attack-simulation",
         "Gabox301/SkillIndex/executing-nist-rmf-authorization-to-operate",
@@ -2605,9 +2804,21 @@
       ]
     },
     {
-      "id": "orphan-triaging",
-      "name": "Triaging Skills",
-      "detect": {},
+      "id": "incident-triage",
+      "name": "Incident Triage",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "incident-triage.md",
+            "ir-playbook.md"
+          ],
+          "patterns": [
+            "incident",
+            "triage",
+            "playbook"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/triaging-security-alerts-in-splunk",
         "Gabox301/SkillIndex/triaging-security-incident",
@@ -2617,9 +2828,21 @@
       ]
     },
     {
-      "id": "orphan-misc",
-      "name": "Miscellaneous Orphan Skills",
-      "detect": {},
+      "id": "security-tooling",
+      "name": "Security Tooling & Operations",
+      "detect": {
+        "configFileContent": {
+          "files": [
+            "security-tooling.md",
+            "security-ops.md"
+          ],
+          "patterns": [
+            "security operations",
+            "threat intelligence",
+            "siem"
+          ]
+        }
+      },
       "skills": [
         "Gabox301/SkillIndex/abusing-dpapi-for-credential-access",
         "Gabox301/SkillIndex/abusing-shadow-credentials-for-privesc",
@@ -2630,19 +2853,14 @@
         "Gabox301/SkillIndex/attacking-oauth-with-device-code-phishing",
         "Gabox301/SkillIndex/automating-ioc-enrichment",
         "Gabox301/SkillIndex/benchmarking-kubernetes-with-kube-bench",
-        "Gabox301/SkillIndex/branch-pr",
         "Gabox301/SkillIndex/bypassing-authentication-with-forced-browsing",
-        "Gabox301/SkillIndex/chained-pr",
         "Gabox301/SkillIndex/coercing-authentication-with-coercer-petitpotam",
-        "Gabox301/SkillIndex/cognitive-doc-design",
         "Gabox301/SkillIndex/collecting-indicators-of-compromise",
         "Gabox301/SkillIndex/collecting-open-source-intelligence",
         "Gabox301/SkillIndex/collecting-threat-intelligence-with-misp",
         "Gabox301/SkillIndex/collecting-volatile-evidence-from-compromised-host",
-        "Gabox301/SkillIndex/comment-writer",
         "Gabox301/SkillIndex/containing-active-breach",
         "Gabox301/SkillIndex/continuous-llm-red-teaming-with-promptfoo",
-        "Gabox301/SkillIndex/copywriting",
         "Gabox301/SkillIndex/correlating-security-events-in-qradar",
         "Gabox301/SkillIndex/correlating-threat-campaigns",
         "Gabox301/SkillIndex/defending-llms-with-guardrails",
@@ -2654,14 +2872,10 @@
         "Gabox301/SkillIndex/eradicating-malware-from-infected-systems",
         "Gabox301/SkillIndex/escaping-containers-to-host",
         "Gabox301/SkillIndex/evaluating-threat-intelligence-platforms",
-        "Gabox301/SkillIndex/find-skills",
         "Gabox301/SkillIndex/fleet-hunting-with-velociraptor",
         "Gabox301/SkillIndex/generating-and-analyzing-sboms",
         "Gabox301/SkillIndex/generating-forensic-timelines-with-hayabusa",
         "Gabox301/SkillIndex/generating-threat-intelligence-reports",
-        "Gabox301/SkillIndex/gentle-ai-bench",
-        "Gabox301/SkillIndex/go-testing",
-        "Gabox301/SkillIndex/graphify",
         "Gabox301/SkillIndex/hardening-docker-containers-for-production",
         "Gabox301/SkillIndex/hardening-docker-daemon-configuration",
         "Gabox301/SkillIndex/hardening-linux-endpoint-with-cis-benchmark",
@@ -2672,8 +2886,6 @@
         "Gabox301/SkillIndex/investigating-insider-threat-indicators",
         "Gabox301/SkillIndex/investigating-phishing-email-incident",
         "Gabox301/SkillIndex/investigating-ransomware-attack-artifacts",
-        "Gabox301/SkillIndex/issue-creation",
-        "Gabox301/SkillIndex/judgment-day",
         "Gabox301/SkillIndex/managing-cloud-identity-with-okta",
         "Gabox301/SkillIndex/managing-intelligence-lifecycle",
         "Gabox301/SkillIndex/managing-third-party-vendor-risk",
@@ -2693,22 +2905,40 @@
         "Gabox301/SkillIndex/prioritizing-vulnerabilities-with-cvss-scoring",
         "Gabox301/SkillIndex/processing-stix-taxii-feeds",
         "Gabox301/SkillIndex/profiling-threat-actor-groups",
-        "Gabox301/SkillIndex/rdd-defect-workflow",
         "Gabox301/SkillIndex/recovering-deleted-files-with-photorec",
         "Gabox301/SkillIndex/recovering-from-ransomware-attack",
         "Gabox301/SkillIndex/red-teaming-llms-with-garak",
         "Gabox301/SkillIndex/relaying-ntlm-for-adcs-esc8",
         "Gabox301/SkillIndex/remediating-s3-bucket-misconfiguration",
+        "Gabox301/SkillIndex/tracking-threat-actor-infrastructure",
+        "Gabox301/SkillIndex/validating-backup-integrity-for-recovery",
+        "Gabox301/SkillIndex/validating-tpm-measured-boot-attestation",
+        "Gabox301/SkillIndex/verifying-build-provenance-with-slsa-sigstore"
+      ]
+    },
+    {
+      "id": "agent-workflows",
+      "name": "Agent Development Workflows",
+      "detect": {},
+      "skills": [
+        "Gabox301/SkillIndex/branch-pr",
+        "Gabox301/SkillIndex/chained-pr",
+        "Gabox301/SkillIndex/cognitive-doc-design",
+        "Gabox301/SkillIndex/comment-writer",
+        "Gabox301/SkillIndex/copywriting",
+        "Gabox301/SkillIndex/find-skills",
+        "Gabox301/SkillIndex/gentle-ai-bench",
+        "Gabox301/SkillIndex/go-testing",
+        "Gabox301/SkillIndex/graphify",
+        "Gabox301/SkillIndex/issue-creation",
+        "Gabox301/SkillIndex/judgment-day",
+        "Gabox301/SkillIndex/rdd-defect-workflow",
         "Gabox301/SkillIndex/skill-creator",
         "Gabox301/SkillIndex/skill-improver",
         "Gabox301/SkillIndex/skill-registry",
         "Gabox301/SkillIndex/supabase",
         "Gabox301/SkillIndex/systemic-issue-triage",
-        "Gabox301/SkillIndex/tracking-threat-actor-infrastructure",
-        "Gabox301/SkillIndex/validating-backup-integrity-for-recovery",
-        "Gabox301/SkillIndex/validating-tpm-measured-boot-attestation",
         "Gabox301/SkillIndex/vercel-react-best-practices",
-        "Gabox301/SkillIndex/verifying-build-provenance-with-slsa-sigstore",
         "Gabox301/SkillIndex/web-design-guidelines",
         "Gabox301/SkillIndex/work-unit-commits"
       ]

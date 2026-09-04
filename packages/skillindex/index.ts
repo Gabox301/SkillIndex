@@ -32,6 +32,7 @@ function findRustBinary(): string | null {
     join(__dirname, '..', 'target', 'release', binName),
     join(__dirname, '..', 'target', 'debug', binName),
     join(__dirname, '..', '..', 'target', 'release', binName),
+    join(__dirname, '..', '..', 'target', 'debug', binName),
   ];
   for (const p of candidates) {
     if (existsSync(p)) return p;

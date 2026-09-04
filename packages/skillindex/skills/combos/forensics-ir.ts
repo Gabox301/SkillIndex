@@ -1,4 +1,4 @@
-// Domain combo: Forensics & Incident Response — curates orphan-analyzing (forensic), orphan-extracting, orphan-performing (forensic), orphan-triaging (always-suggested domain combo: requires: [] intentionally for visibility)
+// Domain combo: Forensics & Incident Response — curates security-analysis (forensic), evidence-extraction, security-assessments (forensic), incident-triage (always-suggested domain combo: requires: [] intentionally for visibility)
 export const forensicsIrCombo = {
   id: 'forensics-ir',
   name: 'Forensics & Incident Response',

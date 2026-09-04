@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-04T14:35:11.359Z",
+  "generatedAt": "2026-09-04T16:51:07.784Z",
   "reviewer": {
     "model": "gpt-5.4",
     "promptVersion": "1.0.0"
@@ -10624,7 +10624,7 @@
       ],
       "sha256": {
         "LICENSE": "a941b58ef0ba43a31e24ae7ece1b743a585efed9e37792b9ca063e0798be1cbe",
-        "SKILL.md": "425f34d310b04d775551121d917edb99e521a0de4b48113ee7b2f2893660a6fb",
+        "SKILL.md": "f92e7face2a58c3ac51cbf74d657a6915bc02dadf28949fa609be57961c6d52e",
         "assets/template.md": "323951763e5184d0197b8198196703e79951b8cabb97d9bfb8159e691e546342",
         "references/api-reference.md": "08632e8bbb9261cf73d024eae98f9eae38239a380d002f54f0b7061d8136f74c",
         "references/standards.md": "89fb02c69271495ce0c3676a663dd15a87a2b345b923ee377a41924dedafecfc",
@@ -10632,7 +10632,7 @@
         "scripts/agent.py": "e0a004e06a3b0ce1cbbb2c5255a7c769dcc21396a43bba2af4fc0126c191be37",
         "scripts/process.py": "a8ffff5cf223f78eb0ff3662fb55cf37e9ecc4ea6d8db94dd0c42305ec766017"
       },
-      "bundleHash": "7324d53be5a749e302923b0f80da78f463c73c11bf0afd3af1fc05ff2ebce9a0",
+      "bundleHash": "0466e066f06d39571c45f20fe6cf39bf1161c38932b803cc004d2862f3cdccd0",
       "review": {
         "status": "approved",
         "flags": [],

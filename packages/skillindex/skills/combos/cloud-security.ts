@@ -1,4 +1,4 @@
-// Domain combo: Cloud Security & Posture — curates orphan-auditing/securing/configuring + cloud subset of orphan-implementing (always-suggested domain combo: requires: [] intentionally for visibility)
+// Domain combo: Cloud Security & Posture — curates security-auditing/hardening/configuring + cloud subset of security-implementation (always-suggested domain combo: requires: [] intentionally for visibility)
 export const cloudSecurityCombo = {
   id: 'cloud-security',
   name: 'Cloud Security & Posture',

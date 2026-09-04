@@ -1,4 +1,4 @@
-// Domain combo: Red Team / C2 — curates orphan-exploiting/hunting/building + abusing-* (always-suggested domain combo: requires: [] intentionally for visibility)
+// Domain combo: Red Team / C2 — curates exploitation/threat-hunting/security-engineering + abusing-* (always-suggested domain combo: requires: [] intentionally for visibility)
 export const redTeamCombo = {
   id: 'red-team',
   name: 'Red Team & C2 Operations',
