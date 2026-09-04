@@ -25,6 +25,11 @@ export interface ComboSkill {
   requires: string[];
   skills: string[];
 }
+import { awsTech } from "./skills/techs/aws.ts";
+import { securityOperationsCombo } from "./skills/combos/security-operations.ts";
+import { redTeamCombo } from "./skills/combos/red-team.ts";
+import { cloudSecurityCombo } from "./skills/combos/cloud-security.ts";
+import { forensicsIrCombo } from "./skills/combos/forensics-ir.ts";
 // ── Skills Map ────────────────────────────────────────────────
 export const SKILLS_MAP: Technology[] = [
   {
@@ -487,36 +492,7 @@ export const SKILLS_MAP: Technology[] = [
       'wshobson/agents/terraform-module-library'
     ],
   },
-  {
-    id: 'aws',
-    name: 'AWS',
-    detect: {
-      packagePatterns: [/^@aws-sdk\//, /^aws-cdk/],
-    },
-    skills: [
-      'Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions',
-      'Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna',
-      'Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies',
-      'Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog',
-      'Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation',
-      'Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation',
-      'Gabox301/SkillIndex/exploiting-aws-with-pacu',
-      'Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance',
-      'Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries',
-      'Gabox301/SkillIndex/implementing-aws-macie-for-data-classification',
-      'Gabox301/SkillIndex/implementing-aws-nitro-enclave-security',
-      'Gabox301/SkillIndex/implementing-aws-security-hub',
-      'Gabox301/SkillIndex/implementing-aws-security-hub-compliance',
-      'Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms',
-      'Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite',
-      'Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment',
-      'Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail',
-      'Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective',
-      'Gabox301/SkillIndex/securing-api-gateway-with-aws-waf',
-      'Gabox301/SkillIndex/securing-aws-iam-permissions',
-      'Gabox301/SkillIndex/securing-aws-lambda-execution-roles'
-    ],
-  },
+    awsTech,
   {
     id: 'swiftui',
     name: 'SwiftUI',
@@ -2276,138 +2252,10 @@ export const COMBO_SKILLS_MAP: ComboSkill[] = [
     requires: ['rails', 'sidekiq'],
     skills: [],
   },
-  // Domain combo: Security Operations — curates orphan-detecting/analyzing (SOC/SIEM, always-suggested domain combo: requires: [] intentionally for visibility via detectCombos every([])=true)
-  {
-    id: 'security-operations',
-    name: 'Security Operations (SOC/SIEM)',
-    requires: [],
-    skills: [
-      'Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies',
-      'Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog',
-      'Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation',
-      'Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation',
-      'Gabox301/SkillIndex/detecting-azure-lateral-movement',
-      'Gabox301/SkillIndex/detecting-azure-service-principal-abuse',
-      'Gabox301/SkillIndex/detecting-lateral-movement-in-network',
-      'Gabox301/SkillIndex/detecting-lateral-movement-with-splunk',
-      'Gabox301/SkillIndex/detecting-lateral-movement-with-zeek',
-      'Gabox301/SkillIndex/detecting-credential-dumping-techniques',
-      'Gabox301/SkillIndex/detecting-command-and-control-over-dns',
-      'Gabox301/SkillIndex/detecting-beaconing-patterns-with-zeek',
-      'Gabox301/SkillIndex/detecting-dcsync-attack-in-active-directory',
-      'Gabox301/SkillIndex/detecting-kerberoasting-attacks',
-      'Gabox301/SkillIndex/analyzing-apt-group-with-mitre-navigator',
-      'Gabox301/SkillIndex/analyzing-threat-actor-ttps-with-mitre-attack',
-      'Gabox301/SkillIndex/analyzing-threat-actor-ttps-with-mitre-navigator',
-      'Gabox301/SkillIndex/analyzing-security-logs-with-splunk',
-      'Gabox301/SkillIndex/analyzing-windows-event-logs-in-splunk',
-      'Gabox301/SkillIndex/analyzing-azure-activity-logs-for-threats',
-      'Gabox301/SkillIndex/analyzing-kubernetes-audit-logs',
-      'Gabox301/SkillIndex/analyzing-api-gateway-access-logs',
-      'Gabox301/SkillIndex/analyzing-indicators-of-compromise',
-      'Gabox301/SkillIndex/analyzing-network-traffic-for-incidents',
-      'Gabox301/SkillIndex/analyzing-cyber-kill-chain'
-    ],
-  },
-  // Domain combo: Red Team / C2 — curates orphan-exploiting/hunting/building + abusing-* (always-suggested domain combo: requires: [] intentionally for visibility)
-  {
-    id: 'red-team',
-    name: 'Red Team & C2 Operations',
-    requires: [],
-    skills: [
-      'Gabox301/SkillIndex/exploiting-active-directory-certificate-services-esc1',
-      'Gabox301/SkillIndex/exploiting-active-directory-with-bloodhound',
-      'Gabox301/SkillIndex/exploiting-adcs-with-certipy',
-      'Gabox301/SkillIndex/exploiting-constrained-delegation-abuse',
-      'Gabox301/SkillIndex/exploiting-kerberoasting-with-impacket',
-      'Gabox301/SkillIndex/exploiting-nopac-cve-2021-42278-42287',
-      'Gabox301/SkillIndex/exploiting-zerologon-vulnerability-cve-2020-1472',
-      'Gabox301/SkillIndex/exploiting-ms17-010-eternalblue-vulnerability',
-      'Gabox301/SkillIndex/exploiting-jwt-algorithm-confusion-attack',
-      'Gabox301/SkillIndex/exploiting-aws-with-pacu',
-      'Gabox301/SkillIndex/hunting-for-cobalt-strike-beacons',
-      'Gabox301/SkillIndex/hunting-for-command-and-control-beaconing',
-      'Gabox301/SkillIndex/hunting-for-dcsync-attacks',
-      'Gabox301/SkillIndex/hunting-for-lateral-movement-via-wmi',
-      'Gabox301/SkillIndex/hunting-for-process-injection-techniques',
-      'Gabox301/SkillIndex/hunting-for-persistence-mechanisms-in-windows',
-      'Gabox301/SkillIndex/hunting-advanced-persistent-threats',
-      'Gabox301/SkillIndex/hunting-for-living-off-the-land-binaries',
-      'Gabox301/SkillIndex/building-c2-infrastructure-with-sliver-framework',
-      'Gabox301/SkillIndex/building-c2-redirector-infrastructure',
-      'Gabox301/SkillIndex/building-red-team-c2-infrastructure-with-havoc',
-      'Gabox301/SkillIndex/building-adversary-infrastructure-tracking-system',
-      'Gabox301/SkillIndex/abusing-dpapi-for-credential-access',
-      'Gabox301/SkillIndex/abusing-shadow-credentials-for-privesc',
-      'Gabox301/SkillIndex/coercing-authentication-with-coercer-petitpotam'
-    ],
-  },
-  // Domain combo: Cloud Security & Posture — curates orphan-auditing/securing/configuring + cloud subset of orphan-implementing (always-suggested domain combo: requires: [] intentionally for visibility)
-  {
-    id: 'cloud-security',
-    name: 'Cloud Security & Posture',
-    requires: [],
-    skills: [
-      'Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions',
-      'Gabox301/SkillIndex/auditing-cloud-with-cis-benchmarks',
-      'Gabox301/SkillIndex/auditing-gcp-iam-permissions',
-      'Gabox301/SkillIndex/auditing-kubernetes-cluster-rbac',
-      'Gabox301/SkillIndex/auditing-azure-active-directory-configuration',
-      'Gabox301/SkillIndex/auditing-entra-id-with-aadinternals',
-      'Gabox301/SkillIndex/securing-aws-iam-permissions',
-      'Gabox301/SkillIndex/securing-azure-with-microsoft-defender',
-      'Gabox301/SkillIndex/securing-kubernetes-on-cloud',
-      'Gabox301/SkillIndex/securing-container-registry-images',
-      'Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna',
-      'Gabox301/SkillIndex/configuring-identity-aware-proxy-with-google-iap',
-      'Gabox301/SkillIndex/configuring-tls-1-3-for-secure-communications',
-      'Gabox301/SkillIndex/configuring-zscaler-private-access-for-ztna',
-      'Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance',
-      'Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries',
-      'Gabox301/SkillIndex/implementing-aws-macie-for-data-classification',
-      'Gabox301/SkillIndex/implementing-aws-security-hub',
-      'Gabox301/SkillIndex/implementing-aws-security-hub-compliance',
-      'Gabox301/SkillIndex/implementing-azure-ad-privileged-identity-management',
-      'Gabox301/SkillIndex/implementing-azure-defender-for-cloud',
-      'Gabox301/SkillIndex/implementing-gcp-binary-authorization',
-      'Gabox301/SkillIndex/implementing-gcp-organization-policy-constraints',
-      'Gabox301/SkillIndex/implementing-gcp-vpc-firewall-rules',
-      'Gabox301/SkillIndex/implementing-zero-trust-network-access'
-    ],
-  },
-  // Domain combo: Forensics & Incident Response — curates orphan-analyzing (forensic), orphan-extracting, orphan-performing (forensic), orphan-triaging (always-suggested domain combo: requires: [] intentionally for visibility)
-  {
-    id: 'forensics-ir',
-    name: 'Forensics & Incident Response',
-    requires: [],
-    skills: [
-      'Gabox301/SkillIndex/analyzing-browser-forensics-with-hindsight',
-      'Gabox301/SkillIndex/analyzing-disk-image-with-autopsy',
-      'Gabox301/SkillIndex/analyzing-memory-dumps-with-volatility',
-      'Gabox301/SkillIndex/analyzing-memory-forensics-with-lime-and-volatility',
-      'Gabox301/SkillIndex/analyzing-mft-for-deleted-file-recovery',
-      'Gabox301/SkillIndex/analyzing-windows-amcache-artifacts',
-      'Gabox301/SkillIndex/analyzing-windows-registry-for-artifacts',
-      'Gabox301/SkillIndex/analyzing-linux-system-artifacts',
-      'Gabox301/SkillIndex/extracting-browser-history-artifacts',
-      'Gabox301/SkillIndex/extracting-credentials-from-memory-dump',
-      'Gabox301/SkillIndex/extracting-iocs-from-malware-samples',
-      'Gabox301/SkillIndex/extracting-windows-event-logs-artifacts',
-      'Gabox301/SkillIndex/performing-disk-forensics-investigation',
-      'Gabox301/SkillIndex/performing-memory-forensics-with-volatility3',
-      'Gabox301/SkillIndex/performing-memory-forensics-with-volatility3-plugins',
-      'Gabox301/SkillIndex/performing-network-forensics-with-wireshark',
-      'Gabox301/SkillIndex/performing-cloud-forensics-investigation',
-      'Gabox301/SkillIndex/performing-timeline-reconstruction-with-plaso',
-      'Gabox301/SkillIndex/performing-log-analysis-for-forensic-investigation',
-      'Gabox301/SkillIndex/performing-file-carving-with-foremost',
-      'Gabox301/SkillIndex/performing-linux-log-forensics-investigation',
-      'Gabox301/SkillIndex/triaging-security-alerts-in-splunk',
-      'Gabox301/SkillIndex/triaging-security-incident',
-      'Gabox301/SkillIndex/triaging-windows-with-kape',
-      'Gabox301/SkillIndex/performing-network-packet-capture-analysis'
-    ],
-  },
+  securityOperationsCombo,
+  redTeamCombo,
+  cloudSecurityCombo,
+  forensicsIrCombo,
 ];
 // ── Frontend Detection ────────────────────────────────────────
 export const FRONTEND_PACKAGES: Set<string> = new Set([

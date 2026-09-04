@@ -1,0 +1,31 @@
+export const awsTech = {
+  id: 'aws',
+  name: 'AWS',
+  detect: {
+    packagePatterns: [/^@aws-sdk\//, /^aws-cdk/],
+  },
+  skills: [
+    'Gabox301/SkillIndex/auditing-aws-s3-bucket-permissions',
+    'Gabox301/SkillIndex/configuring-aws-verified-access-for-ztna',
+    'Gabox301/SkillIndex/detecting-aws-cloudtrail-anomalies',
+    'Gabox301/SkillIndex/detecting-aws-credential-exposure-with-trufflehog',
+    'Gabox301/SkillIndex/detecting-aws-guardduty-findings-automation',
+    'Gabox301/SkillIndex/detecting-aws-iam-privilege-escalation',
+    'Gabox301/SkillIndex/exploiting-aws-with-pacu',
+    'Gabox301/SkillIndex/implementing-aws-config-rules-for-compliance',
+    'Gabox301/SkillIndex/implementing-aws-iam-permission-boundaries',
+    'Gabox301/SkillIndex/implementing-aws-macie-for-data-classification',
+    'Gabox301/SkillIndex/implementing-aws-nitro-enclave-security',
+    'Gabox301/SkillIndex/implementing-aws-security-hub',
+    'Gabox301/SkillIndex/implementing-aws-security-hub-compliance',
+    'Gabox301/SkillIndex/implementing-envelope-encryption-with-aws-kms',
+    'Gabox301/SkillIndex/performing-aws-account-enumeration-with-scout-suite',
+    'Gabox301/SkillIndex/performing-aws-privilege-escalation-assessment',
+    'Gabox301/SkillIndex/performing-cloud-forensics-with-aws-cloudtrail',
+    'Gabox301/SkillIndex/performing-cloud-native-threat-hunting-with-aws-detective',
+    'Gabox301/SkillIndex/securing-api-gateway-with-aws-waf',
+    'Gabox301/SkillIndex/securing-aws-iam-permissions',
+    'Gabox301/SkillIndex/securing-aws-lambda-execution-roles',
+  ],
+};
+
