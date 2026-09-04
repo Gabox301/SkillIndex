@@ -31,4 +31,3 @@ export const redTeamCombo = {
     'Gabox301/SkillIndex/coercing-authentication-with-coercer-petitpotam',
   ],
 };
-

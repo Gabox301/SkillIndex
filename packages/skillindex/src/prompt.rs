@@ -141,11 +141,7 @@ enum Row {
 }
 
 /// Build the ordered navigable rows. Group headers precede their items.
-fn build_rows<T>(
-    items: &[T],
-    group_fn: Option<&GroupFn<T>>,
-    show_groups: bool,
-) -> Vec<Row> {
+fn build_rows<T>(items: &[T], group_fn: Option<&GroupFn<T>>, show_groups: bool) -> Vec<Row> {
     match (show_groups, group_fn) {
         (true, Some(gf)) => {
             let mut rows: Vec<Row> = Vec::new();

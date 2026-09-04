@@ -31,4 +31,3 @@ export const securityOperationsCombo = {
     'Gabox301/SkillIndex/analyzing-cyber-kill-chain',
   ],
 };
-

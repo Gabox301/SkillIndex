@@ -145,7 +145,9 @@ fn read_deno_json_workspaces(project_dir: &Path) -> Option<Vec<String>> {
 pub fn resolve_workspaces(project_dir: &Path) -> Vec<PathBuf> {
     // 1. pnpm-workspace.yaml
     let pnpm_path = project_dir.join("pnpm-workspace.yaml");
-    if pnpm_path.exists() && let Ok(content) = fs::read_to_string(&pnpm_path) {
+    if pnpm_path.exists()
+        && let Ok(content) = fs::read_to_string(&pnpm_path)
+    {
         let patterns = parse_pnpm_workspace_yaml(&content);
         if !patterns.is_empty() {
             return expand_workspace_patterns(project_dir, &patterns)

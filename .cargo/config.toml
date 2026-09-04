@@ -1,0 +1,5 @@
+[target.'cfg(windows)']
+# Suppress MSVC `link.exe` informational stdout ("Creando biblioteca ...lib
+# y objeto ...exp") that Rust otherwise re-emits as `warning: linker stdout:`
+# on every binary, test, and lib build. Toolchain noise only — not a code issue.
+rustflags = ["-A", "linker_messages"]

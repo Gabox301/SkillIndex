@@ -31,4 +31,3 @@ export const forensicsIrCombo = {
     'Gabox301/SkillIndex/performing-network-packet-capture-analysis',
   ],
 };
-

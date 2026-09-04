@@ -37,7 +37,7 @@ skillindex -y
 skillindex --dry-run
 
 # Elegir IDEs específicos
-skillindex -a cursor opencode
+skillindex -a kiro opencode
 skillindex -a claude-code --dry-run
 ```
 

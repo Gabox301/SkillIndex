@@ -23,6 +23,8 @@ pnpm-debug.log*
 # generated AI agent skills
 .agents/
 .claude/
+.kilo/
+.kiro/
 skills-lock.json
 
 # Rust build

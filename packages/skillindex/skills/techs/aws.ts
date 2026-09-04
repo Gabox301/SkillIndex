@@ -28,4 +28,3 @@ export const awsTech = {
     'Gabox301/SkillIndex/securing-aws-lambda-execution-roles',
   ],
 };
-

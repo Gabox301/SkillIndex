@@ -31,4 +31,3 @@ export const cloudSecurityCombo = {
     'Gabox301/SkillIndex/implementing-zero-trust-network-access',
   ],
 };
-

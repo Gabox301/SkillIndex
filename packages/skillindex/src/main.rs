@@ -279,29 +279,28 @@ fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry
     log("");
 
     // Build options
-    let label_fn: Box<SkillLabelFn> =
-        Box::new(move |item: &SkillEntry, _idx: usize| {
-            let (label, styled_label, has_warn) = label_cache.get(&item.skill).unwrap();
-            let installed_tag = if item.installed {
-                dim(INSTALLED_TAG)
+    let label_fn: Box<SkillLabelFn> = Box::new(move |item: &SkillEntry, _idx: usize| {
+        let (label, styled_label, has_warn) = label_cache.get(&item.skill).unwrap();
+        let installed_tag = if item.installed {
+            dim(INSTALLED_TAG)
+        } else {
+            String::new()
+        };
+        let security_tag = if *has_warn {
+            yellow(SECURITY_TAG)
+        } else {
+            String::new()
+        };
+        let effective_len = label.len()
+            + if item.installed {
+                INSTALLED_TAG.len()
             } else {
-                String::new()
-            };
-            let security_tag = if *has_warn {
-                yellow(SECURITY_TAG)
-            } else {
-                String::new()
-            };
-            let effective_len = label.len()
-                + if item.installed {
-                    INSTALLED_TAG.len()
-                } else {
-                    0
-                }
-                + if *has_warn { SECURITY_TAG.len() } else { 0 };
-            let pad = " ".repeat(max_effective.saturating_sub(effective_len));
-            format!("{styled_label}{installed_tag}{security_tag}{pad}")
-        });
+                0
+            }
+            + if *has_warn { SECURITY_TAG.len() } else { 0 };
+        let pad = " ".repeat(max_effective.saturating_sub(effective_len));
+        format!("{styled_label}{installed_tag}{security_tag}{pad}")
+    });
 
     let hint_fn: Box<SkillHintFn> = Box::new(|item: &SkillEntry, _| {
         let tech_sources: Vec<&String> =

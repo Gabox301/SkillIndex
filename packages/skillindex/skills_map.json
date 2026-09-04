@@ -4,28 +4,16 @@
       "id": "react",
       "name": "React",
       "detect": {
-        "packages": [
-          "react",
-          "react-dom"
-        ]
+        "packages": ["react", "react-dom"]
       },
-      "skills": [
-        "vercel-labs/agent-skills/react-best-practices",
-        "vercel-labs/agent-skills/composition-patterns"
-      ]
+      "skills": ["vercel-labs/agent-skills/react-best-practices", "vercel-labs/agent-skills/composition-patterns"]
     },
     {
       "id": "nextjs",
       "name": "Next.js",
       "detect": {
-        "packages": [
-          "next"
-        ],
-        "configFiles": [
-          "next.config.js",
-          "next.config.mjs",
-          "next.config.ts"
-        ]
+        "packages": ["next"],
+        "configFiles": ["next.config.js", "next.config.mjs", "next.config.ts"]
       },
       "skills": [
         "vercel-labs/next-skills/next-best-practices",
@@ -37,71 +25,42 @@
       "id": "vue",
       "name": "Vue",
       "detect": {
-        "packages": [
-          "vue"
-        ]
+        "packages": ["vue"]
       },
-      "skills": [
-        "hyf0/vue-skills/vue-debug-guides",
-        "antfu/skills/vue",
-        "antfu/skills/vue-best-practices"
-      ]
+      "skills": ["hyf0/vue-skills/vue-debug-guides", "antfu/skills/vue", "antfu/skills/vue-best-practices"]
     },
     {
       "id": "nuxt",
       "name": "Nuxt",
       "detect": {
-        "packages": [
-          "nuxt"
-        ],
-        "configFiles": [
-          "nuxt.config.js",
-          "nuxt.config.ts"
-        ]
+        "packages": ["nuxt"],
+        "configFiles": ["nuxt.config.js", "nuxt.config.ts"]
       },
-      "skills": [
-        "antfu/skills/nuxt"
-      ]
+      "skills": ["antfu/skills/nuxt"]
     },
     {
       "id": "pinia",
       "name": "Pinia",
       "detect": {
-        "packages": [
-          "pinia"
-        ]
+        "packages": ["pinia"]
       },
-      "skills": [
-        "vuejs-ai/skills/vue-pinia-best-practices"
-      ]
+      "skills": ["vuejs-ai/skills/vue-pinia-best-practices"]
     },
     {
       "id": "svelte",
       "name": "Svelte",
       "detect": {
-        "packages": [
-          "svelte",
-          "@sveltejs/kit"
-        ],
-        "configFiles": [
-          "svelte.config.js"
-        ]
+        "packages": ["svelte", "@sveltejs/kit"],
+        "configFiles": ["svelte.config.js"]
       },
-      "skills": [
-        "ejirocodes/agent-skills/svelte5-best-practices",
-        "sveltejs/ai-tools/svelte-code-writer"
-      ]
+      "skills": ["ejirocodes/agent-skills/svelte5-best-practices", "sveltejs/ai-tools/svelte-code-writer"]
     },
     {
       "id": "angular",
       "name": "Angular",
       "detect": {
-        "packages": [
-          "@angular/core"
-        ],
-        "configFiles": [
-          "angular.json"
-        ]
+        "packages": ["@angular/core"],
+        "configFiles": ["angular.json"]
       },
       "skills": [
         "angular/skills/angular-developer",
@@ -116,112 +75,68 @@
       "id": "astro",
       "name": "Astro",
       "detect": {
-        "packages": [
-          "astro"
-        ],
-        "configFiles": [
-          "astro.config.mjs",
-          "astro.config.js",
-          "astro.config.ts"
-        ]
+        "packages": ["astro"],
+        "configFiles": ["astro.config.mjs", "astro.config.js", "astro.config.ts"]
       },
-      "skills": [
-        "astrolicious/agent-skills/astro"
-      ]
+      "skills": ["astrolicious/agent-skills/astro"]
     },
     {
       "id": "tailwind",
       "name": "Tailwind CSS",
       "detect": {
-        "packages": [
-          "tailwindcss",
-          "@tailwindcss/vite"
-        ],
-        "configFiles": [
-          "tailwind.config.js",
-          "tailwind.config.ts",
-          "tailwind.config.cjs"
-        ]
+        "packages": ["tailwindcss", "@tailwindcss/vite"],
+        "configFiles": ["tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs"]
       },
-      "skills": [
-        "giuseppe-trisciuoglio/developer-kit/tailwind-css-patterns"
-      ]
+      "skills": ["giuseppe-trisciuoglio/developer-kit/tailwind-css-patterns"]
     },
     {
       "id": "shadcn",
       "name": "shadcn/ui",
       "detect": {
-        "configFiles": [
-          "components.json"
-        ]
+        "configFiles": ["components.json"]
       },
-      "skills": [
-        "shadcn/ui/shadcn"
-      ]
+      "skills": ["shadcn/ui/shadcn"]
     },
     {
       "id": "typescript",
       "name": "TypeScript",
       "detect": {
-        "packages": [
-          "typescript"
-        ],
-        "configFiles": [
-          "tsconfig.json"
-        ]
+        "packages": ["typescript"],
+        "configFiles": ["tsconfig.json"]
       },
-      "skills": [
-        "wshobson/agents/typescript-advanced-types"
-      ]
+      "skills": ["wshobson/agents/typescript-advanced-types"]
     },
     {
       "id": "react-hook-form",
       "name": "React Hook Form",
       "detect": {
-        "packages": [
-          "react-hook-form"
-        ]
+        "packages": ["react-hook-form"]
       },
-      "skills": [
-        "pproenca/dot-skills/react-hook-form"
-      ]
+      "skills": ["pproenca/dot-skills/react-hook-form"]
     },
     {
       "id": "zod",
       "name": "Zod",
       "detect": {
-        "packages": [
-          "zod"
-        ]
+        "packages": ["zod"]
       },
-      "skills": [
-        "pproenca/dot-skills/zod"
-      ]
+      "skills": ["pproenca/dot-skills/zod"]
     },
     {
       "id": "supabase",
       "name": "Supabase",
       "detect": {
-        "packages": [
-          "@supabase/supabase-js",
-          "@supabase/ssr"
-        ]
+        "packages": ["@supabase/supabase-js", "@supabase/ssr"]
       },
-      "skills": [
-        "supabase/agent-skills/supabase-postgres-best-practices"
-      ]
+      "skills": ["supabase/agent-skills/supabase-postgres-best-practices"]
     },
     {
       "id": "neon",
       "name": "Neon Postgres",
       "detect": {
-        "packages": [
-          "@neondatabase/serverless"
-        ]
+        "packages": ["@neondatabase/serverless"]
       },
-      "skills": [
-        "neondatabase/agent-skills/neon-postgres"
-      ]
+      "skills": ["neondatabase/agent-skills/neon-postgres"]
     },
     {
       "id": "instantdb",
@@ -234,39 +149,24 @@
           "@instantdb/react-native-mmkv",
           "@instantdb/admin"
         ],
-        "configFiles": [
-          "instant.schema.ts",
-          "instant.perms.ts"
-        ]
+        "configFiles": ["instant.schema.ts", "instant.perms.ts"]
       },
-      "skills": [
-        "instantdb/skills/instantdb"
-      ]
+      "skills": ["instantdb/skills/instantdb"]
     },
     {
       "id": "playwright",
       "name": "Playwright",
       "detect": {
-        "packages": [
-          "@playwright/test",
-          "playwright"
-        ],
-        "configFiles": [
-          "playwright.config.ts",
-          "playwright.config.js"
-        ]
+        "packages": ["@playwright/test", "playwright"],
+        "configFiles": ["playwright.config.ts", "playwright.config.js"]
       },
-      "skills": [
-        "currents-dev/playwright-best-practices-skill/playwright-best-practices"
-      ]
+      "skills": ["currents-dev/playwright-best-practices-skill/playwright-best-practices"]
     },
     {
       "id": "expo",
       "name": "Expo",
       "detect": {
-        "packages": [
-          "expo"
-        ]
+        "packages": ["expo"]
       },
       "skills": [
         "expo/skills/building-native-ui",
@@ -284,37 +184,25 @@
       "id": "react-native",
       "name": "React Native",
       "detect": {
-        "packages": [
-          "react-native"
-        ]
+        "packages": ["react-native"]
       },
-      "skills": [
-        "sleekdotdesign/agent-skills/design-mobile-apps"
-      ]
+      "skills": ["sleekdotdesign/agent-skills/design-mobile-apps"]
     },
     {
       "id": "dart",
       "name": "Dart",
       "detect": {
-        "configFiles": [
-          "pubspec.yaml"
-        ]
+        "configFiles": ["pubspec.yaml"]
       },
-      "skills": [
-        "kevmoo/dash_skills/dart-best-practices"
-      ]
+      "skills": ["kevmoo/dash_skills/dart-best-practices"]
     },
     {
       "id": "flutter",
       "name": "Flutter",
       "detect": {
         "configFileContent": {
-          "patterns": [
-            "flutter:"
-          ],
-          "files": [
-            "pubspec.yaml"
-          ]
+          "patterns": ["flutter:"],
+          "files": ["pubspec.yaml"]
         }
       },
       "skills": [
@@ -372,59 +260,36 @@
       "id": "remotion",
       "name": "Remotion",
       "detect": {
-        "packages": [
-          "remotion",
-          "@remotion/cli"
-        ]
+        "packages": ["remotion", "@remotion/cli"]
       },
-      "skills": [
-        "remotion-dev/skills/remotion"
-      ]
+      "skills": ["remotion-dev/skills/remotion"]
     },
     {
       "id": "react-router",
       "name": "React Router",
       "detect": {
-        "packages": [
-          "react-router",
-          "@react-router/node",
-          "@react-router/dev",
-          "@react-router/serve"
-        ]
+        "packages": ["react-router", "@react-router/node", "@react-router/dev", "@react-router/serve"]
       },
-      "skills": [
-        "clerk/skills/clerk-react-router-patterns"
-      ]
+      "skills": ["clerk/skills/clerk-react-router-patterns"]
     },
     {
       "id": "tanstack-start",
       "name": "TanStack Start",
       "detect": {
-        "packages": [
-          "@tanstack/react-start",
-          "@tanstack/start"
-        ]
+        "packages": ["@tanstack/react-start", "@tanstack/start"]
       },
-      "skills": [
-        "tanstack-skills/tanstack-skills/tanstack-start"
-      ]
+      "skills": ["tanstack-skills/tanstack-skills/tanstack-start"]
     },
     {
       "id": "chrome-extension",
       "name": "Chrome Extension",
       "detect": {
         "configFileContent": {
-          "files": [
-            "manifest.json"
-          ],
-          "patterns": [
-            "manifest_version"
-          ]
+          "files": ["manifest.json"],
+          "patterns": ["manifest_version"]
         }
       },
-      "skills": [
-        "mindrally/skills/chrome-extension-development"
-      ]
+      "skills": ["mindrally/skills/chrome-extension-development"]
     },
     {
       "id": "clerk",
@@ -453,19 +318,12 @@
         ],
         "configFileContent": [
           {
-            "files": [
-              "Package.swift"
-            ],
-            "patterns": [
-              "clerk/clerk-ios",
-              "ClerkSDK"
-            ]
+            "files": ["Package.swift"],
+            "patterns": ["clerk/clerk-ios", "ClerkSDK"]
           },
           {
             "scanGradleLayout": true,
-            "patterns": [
-              "com.clerk"
-            ]
+            "patterns": ["com.clerk"]
           }
         ]
       },
@@ -483,9 +341,7 @@
       "id": "better-auth",
       "name": "Better Auth",
       "detect": {
-        "packages": [
-          "better-auth"
-        ]
+        "packages": ["better-auth"]
       },
       "skills": [
         "better-auth/skills/best-practices",
@@ -498,33 +354,19 @@
       "id": "turborepo",
       "name": "Turborepo",
       "detect": {
-        "packages": [
-          "turbo"
-        ],
-        "configFiles": [
-          "turbo.json"
-        ]
+        "packages": ["turbo"],
+        "configFiles": ["turbo.json"]
       },
-      "skills": [
-        "vercel/turborepo/turborepo"
-      ]
+      "skills": ["vercel/turborepo/turborepo"]
     },
     {
       "id": "vite",
       "name": "Vite",
       "detect": {
-        "packages": [
-          "vite"
-        ],
-        "configFiles": [
-          "vite.config.js",
-          "vite.config.ts",
-          "vite.config.mjs"
-        ]
+        "packages": ["vite"],
+        "configFiles": ["vite.config.js", "vite.config.ts", "vite.config.mjs"]
       },
-      "skills": [
-        "antfu/skills/vite"
-      ]
+      "skills": ["antfu/skills/vite"]
     },
     {
       "id": "azure",
@@ -548,61 +390,33 @@
       "id": "vercel-ai",
       "name": "Vercel AI SDK",
       "detect": {
-        "packages": [
-          "ai",
-          "@ai-sdk/openai",
-          "@ai-sdk/anthropic",
-          "@ai-sdk/google"
-        ]
+        "packages": ["ai", "@ai-sdk/openai", "@ai-sdk/anthropic", "@ai-sdk/google"]
       },
-      "skills": [
-        "vercel/ai/use-ai-sdk"
-      ]
+      "skills": ["vercel/ai/use-ai-sdk"]
     },
     {
       "id": "elevenlabs",
       "name": "ElevenLabs",
       "detect": {
-        "packages": [
-          "elevenlabs"
-        ]
+        "packages": ["elevenlabs"]
       },
-      "skills": [
-        "inferen-sh/skills/elevenlabs-tts",
-        "inferen-sh/skills/elevenlabs-music"
-      ]
+      "skills": ["inferen-sh/skills/elevenlabs-tts", "inferen-sh/skills/elevenlabs-music"]
     },
     {
       "id": "vercel-deploy",
       "name": "Vercel",
       "detect": {
-        "configFiles": [
-          "vercel.json",
-          ".vercel"
-        ],
-        "packages": [
-          "vercel",
-          "@astrojs/vercel"
-        ]
+        "configFiles": ["vercel.json", ".vercel"],
+        "packages": ["vercel", "@astrojs/vercel"]
       },
-      "skills": [
-        "vercel-labs/agent-skills/deploy-to-vercel"
-      ]
+      "skills": ["vercel-labs/agent-skills/deploy-to-vercel"]
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare",
       "detect": {
-        "packages": [
-          "wrangler",
-          "@cloudflare/workers-types",
-          "@astrojs/cloudflare"
-        ],
-        "configFiles": [
-          "wrangler.toml",
-          "wrangler.json",
-          "wrangler.jsonc"
-        ]
+        "packages": ["wrangler", "@cloudflare/workers-types", "@astrojs/cloudflare"],
+        "configFiles": ["wrangler.toml", "wrangler.json", "wrangler.jsonc"]
       },
       "skills": [
         "cloudflare/skills/cloudflare",
@@ -617,65 +431,37 @@
       "name": "Durable Objects",
       "detect": {
         "configFileContent": {
-          "files": [
-            "wrangler.json",
-            "wrangler.jsonc",
-            "wrangler.toml"
-          ],
-          "patterns": [
-            "durable_objects"
-          ]
+          "files": ["wrangler.json", "wrangler.jsonc", "wrangler.toml"],
+          "patterns": ["durable_objects"]
         }
       },
-      "skills": [
-        "cloudflare/skills/durable-objects"
-      ]
+      "skills": ["cloudflare/skills/durable-objects"]
     },
     {
       "id": "cloudflare-agents",
       "name": "Cloudflare Agents",
       "detect": {
-        "packages": [
-          "agents"
-        ]
+        "packages": ["agents"]
       },
-      "skills": [
-        "cloudflare/skills/agents-sdk",
-        "cloudflare/skills/sandbox-sdk"
-      ]
+      "skills": ["cloudflare/skills/agents-sdk", "cloudflare/skills/sandbox-sdk"]
     },
     {
       "id": "cloudflare-ai",
       "name": "Cloudflare AI",
       "detect": {
-        "packages": [
-          "@cloudflare/ai"
-        ],
+        "packages": ["@cloudflare/ai"],
         "configFileContent": {
-          "files": [
-            "wrangler.json",
-            "wrangler.jsonc"
-          ],
-          "patterns": [
-            "\"ai\""
-          ]
+          "files": ["wrangler.json", "wrangler.jsonc"],
+          "patterns": ["\"ai\""]
         }
       },
-      "skills": [
-        "cloudflare/skills/agents-sdk"
-      ]
+      "skills": ["cloudflare/skills/agents-sdk"]
     },
     {
       "id": "terraform",
       "name": "Terraform",
       "detect": {
-        "configFiles": [
-          ".terraform.lock.hcl",
-          "terraform.tfvars",
-          "main.tf",
-          "variables.tf",
-          "outputs.tf"
-        ]
+        "configFiles": [".terraform.lock.hcl", "terraform.tfvars", "main.tf", "variables.tf", "outputs.tf"]
       },
       "skills": [
         "hashicorp/agent-skills/terraform-style-guide",
@@ -728,17 +514,8 @@
       "name": "Active Directory",
       "detect": {
         "configFileContent": {
-          "files": [
-            "ad.conf",
-            "ldap.conf",
-            "krb5.conf"
-          ],
-          "patterns": [
-            "active-directory",
-            "ldap",
-            "kerberos",
-            "domain controller"
-          ]
+          "files": ["ad.conf", "ldap.conf", "krb5.conf"],
+          "patterns": ["active-directory", "ldap", "kerberos", "domain controller"]
         }
       },
       "skills": [
@@ -754,15 +531,8 @@
       "name": "Threat Detection",
       "detect": {
         "configFileContent": {
-          "files": [
-            "threat-model.json",
-            "detection-rules.yml"
-          ],
-          "patterns": [
-            "detection",
-            "threat",
-            "anomaly"
-          ]
+          "files": ["threat-model.json", "detection-rules.yml"],
+          "patterns": ["detection", "threat", "anomaly"]
         }
       },
       "skills": [
@@ -865,15 +635,8 @@
       "name": "Security Implementation",
       "detect": {
         "configFileContent": {
-          "files": [
-            "SECURITY.md",
-            "hardening.json"
-          ],
-          "patterns": [
-            "security",
-            "hardening",
-            "compliance"
-          ]
+          "files": ["SECURITY.md", "hardening.json"],
+          "patterns": ["security", "hardening", "compliance"]
         }
       },
       "skills": [
@@ -1045,15 +808,8 @@
       "name": "Security Analysis",
       "detect": {
         "configFileContent": {
-          "files": [
-            "SECURITY.md",
-            "analysis.json"
-          ],
-          "patterns": [
-            "analysis",
-            "forensics",
-            "malware"
-          ]
+          "files": ["SECURITY.md", "analysis.json"],
+          "patterns": ["analysis", "forensics", "malware"]
         }
       },
       "skills": [
@@ -1140,15 +896,8 @@
       "name": "Threat Hunting",
       "detect": {
         "configFileContent": {
-          "files": [
-            "hunt.json",
-            "detection-rules.yml"
-          ],
-          "patterns": [
-            "hunt",
-            "threat",
-            "persistence"
-          ]
+          "files": ["hunt.json", "detection-rules.yml"],
+          "patterns": ["hunt", "threat", "persistence"]
         }
       },
       "skills": [
@@ -1195,10 +944,7 @@
       "id": "swiftui",
       "name": "SwiftUI",
       "detect": {
-        "configFiles": [
-          "Package.swift",
-          "Podfile"
-        ]
+        "configFiles": ["Package.swift", "Podfile"]
       },
       "skills": [
         "avdlee/swiftui-agent-skill/swiftui-expert-skill",
@@ -1212,25 +958,16 @@
       "id": "oxlint",
       "name": "oxlint",
       "detect": {
-        "packages": [
-          "oxlint"
-        ],
-        "configFiles": [
-          ".oxlintrc.json",
-          "oxlint.config.ts"
-        ]
+        "packages": ["oxlint"],
+        "configFiles": [".oxlintrc.json", "oxlint.config.ts"]
       },
-      "skills": [
-        "delexw/claude-code-misc/oxlint"
-      ]
+      "skills": ["delexw/claude-code-misc/oxlint"]
     },
     {
       "id": "gsap",
       "name": "GSAP",
       "detect": {
-        "packages": [
-          "gsap"
-        ]
+        "packages": ["gsap"]
       },
       "skills": [
         "greensock/gsap-skills/gsap-core",
@@ -1246,9 +983,7 @@
       "id": "threejs",
       "name": "Three.js",
       "detect": {
-        "packages": [
-          "three"
-        ]
+        "packages": ["three"]
       },
       "skills": [
         "cloudai-x/threejs-skills/threejs-animation",
@@ -1267,105 +1002,63 @@
       "id": "@react-three/fiber",
       "name": "React Three Fiber",
       "detect": {
-        "packages": [
-          "@react-three/fiber"
-        ]
+        "packages": ["@react-three/fiber"]
       },
-      "skills": [
-        "vercel-labs/json-render/react-three-fiber"
-      ]
+      "skills": ["vercel-labs/json-render/react-three-fiber"]
     },
     {
       "id": "bun",
       "name": "Bun",
       "detect": {
-        "configFiles": [
-          "bun.lockb",
-          "bun.lock",
-          "bunfig.toml"
-        ]
+        "configFiles": ["bun.lockb", "bun.lock", "bunfig.toml"]
       },
-      "skills": [
-        "Gabox301/SkillIndex/bun"
-      ]
+      "skills": ["Gabox301/SkillIndex/bun"]
     },
     {
       "id": "elysia",
       "name": "Elysia",
       "detect": {
-        "packages": [
-          "elysia"
-        ]
+        "packages": ["elysia"]
       },
-      "skills": [
-        "elysiajs/skills/elysiajs"
-      ]
+      "skills": ["elysiajs/skills/elysiajs"]
     },
     {
       "id": "node",
       "name": "Node.js",
       "detect": {
-        "configFiles": [
-          "package-lock.json",
-          "yarn.lock",
-          "pnpm-lock.yaml",
-          ".nvmrc",
-          ".node-version"
-        ]
+        "configFiles": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml", ".nvmrc", ".node-version"]
       },
-      "skills": [
-        "wshobson/agents/nodejs-backend-patterns",
-        "sickn33/antigravity-awesome-skills/nodejs-best-practices"
-      ]
+      "skills": ["wshobson/agents/nodejs-backend-patterns", "sickn33/antigravity-awesome-skills/nodejs-best-practices"]
     },
     {
       "id": "bash",
       "name": "Bash",
       "detect": {
-        "fileExtensions": [
-          ".sh",
-          ".bash"
-        ]
+        "fileExtensions": [".sh", ".bash"]
       },
-      "skills": [
-        "wshobson/agents/bash-defensive-patterns"
-      ]
+      "skills": ["wshobson/agents/bash-defensive-patterns"]
     },
     {
       "id": "express",
       "name": "Express",
       "detect": {
-        "packages": [
-          "express"
-        ]
+        "packages": ["express"]
       },
-      "skills": [
-        "aj-geddes/useful-ai-prompts/nodejs-express-server"
-      ]
+      "skills": ["aj-geddes/useful-ai-prompts/nodejs-express-server"]
     },
     {
       "id": "go",
       "name": "Go",
       "detect": {
-        "configFiles": [
-          "go.mod",
-          "go.work"
-        ]
+        "configFiles": ["go.mod", "go.work"]
       },
-      "skills": [
-        "affaan-m/everything-claude-code/golang-patterns",
-        "affaan-m/everything-claude-code/golang-testing"
-      ]
+      "skills": ["affaan-m/everything-claude-code/golang-patterns", "affaan-m/everything-claude-code/golang-testing"]
     },
     {
       "id": "deno",
       "name": "Deno",
       "detect": {
-        "configFiles": [
-          "deno.json",
-          "deno.jsonc",
-          "deno.lock"
-        ]
+        "configFiles": ["deno.json", "deno.jsonc", "deno.lock"]
       },
       "skills": [
         "denoland/skills/deno-expert",
@@ -1380,10 +1073,7 @@
       "id": "wordpress",
       "name": "WordPress",
       "detect": {
-        "configFiles": [
-          "wp-config.php",
-          "wp-login.php"
-        ],
+        "configFiles": ["wp-config.php", "wp-login.php"],
         "packagePatterns": [
           {
             "__regexp": "^@wordpress\\/",
@@ -1391,15 +1081,8 @@
           }
         ],
         "configFileContent": {
-          "files": [
-            "composer.json",
-            "style.css"
-          ],
-          "patterns": [
-            "johnpbloch/wordpress",
-            "wpackagist",
-            "Theme Name:"
-          ]
+          "files": ["composer.json", "style.css"],
+          "patterns": ["johnpbloch/wordpress", "wpackagist", "Theme Name:"]
         }
       },
       "skills": [
@@ -1417,9 +1100,7 @@
       "id": "java",
       "name": "Java",
       "detect": {
-        "configFiles": [
-          "pom.xml"
-        ],
+        "configFiles": ["pom.xml"],
         "configFileContent": {
           "scanGradleLayout": true,
           "patterns": [
@@ -1433,10 +1114,7 @@
           ]
         }
       },
-      "skills": [
-        "github/awesome-copilot/java-docs",
-        "affaan-m/everything-claude-code/java-coding-standards"
-      ]
+      "skills": ["github/awesome-copilot/java-docs", "affaan-m/everything-claude-code/java-coding-standards"]
     },
     {
       "id": "springboot",
@@ -1448,27 +1126,17 @@
           "src/main/resources/application.yaml"
         ],
         "configFileContent": {
-          "files": [
-            "pom.xml"
-          ],
-          "patterns": [
-            "spring-boot-starter",
-            "org.springframework.boot"
-          ]
+          "files": ["pom.xml"],
+          "patterns": ["spring-boot-starter", "org.springframework.boot"]
         }
       },
-      "skills": [
-        "github/awesome-copilot/java-springboot"
-      ]
+      "skills": ["github/awesome-copilot/java-springboot"]
     },
     {
       "id": "prisma",
       "name": "Prisma",
       "detect": {
-        "packages": [
-          "prisma",
-          "@prisma/client"
-        ]
+        "packages": ["prisma", "@prisma/client"]
       },
       "skills": [
         "prisma/skills/prisma-database-setup",
@@ -1481,94 +1149,57 @@
       "id": "stripe",
       "name": "Stripe",
       "detect": {
-        "packages": [
-          "stripe",
-          "@stripe/stripe-js",
-          "@stripe/react-stripe-js"
-        ]
+        "packages": ["stripe", "@stripe/stripe-js", "@stripe/react-stripe-js"]
       },
-      "skills": [
-        "stripe/ai/stripe-best-practices",
-        "stripe/ai/upgrade-stripe"
-      ]
+      "skills": ["stripe/ai/stripe-best-practices", "stripe/ai/upgrade-stripe"]
     },
     {
       "id": "hono",
       "name": "Hono",
       "detect": {
-        "packages": [
-          "hono"
-        ]
+        "packages": ["hono"]
       },
-      "skills": [
-        "yusukebe/hono-skill/hono"
-      ]
+      "skills": ["yusukebe/hono-skill/hono"]
     },
     {
       "id": "vitest",
       "name": "Vitest",
       "detect": {
-        "packages": [
-          "vitest"
-        ],
-        "configFiles": [
-          "vitest.config.ts",
-          "vitest.config.js",
-          "vitest.config.mts"
-        ]
+        "packages": ["vitest"],
+        "configFiles": ["vitest.config.ts", "vitest.config.js", "vitest.config.mts"]
       },
-      "skills": [
-        "antfu/skills/vitest"
-      ]
+      "skills": ["antfu/skills/vitest"]
     },
     {
       "id": "drizzle",
       "name": "Drizzle ORM",
       "detect": {
-        "packages": [
-          "drizzle-orm",
-          "drizzle-kit"
-        ]
+        "packages": ["drizzle-orm", "drizzle-kit"]
       },
-      "skills": [
-        "bobmatnyc/claude-mpm-skills/drizzle"
-      ]
+      "skills": ["bobmatnyc/claude-mpm-skills/drizzle"]
     },
     {
       "id": "nestjs",
       "name": "NestJS",
       "detect": {
-        "packages": [
-          "@nestjs/core"
-        ]
+        "packages": ["@nestjs/core"]
       },
-      "skills": [
-        "kadajett/agent-nestjs-skills/nestjs-best-practices"
-      ]
+      "skills": ["kadajett/agent-nestjs-skills/nestjs-best-practices"]
     },
     {
       "id": "tauri",
       "name": "Tauri",
       "detect": {
-        "packages": [
-          "@tauri-apps/api",
-          "@tauri-apps/cli"
-        ],
-        "configFiles": [
-          "src-tauri/tauri.conf.json"
-        ]
+        "packages": ["@tauri-apps/api", "@tauri-apps/cli"],
+        "configFiles": ["src-tauri/tauri.conf.json"]
       },
-      "skills": [
-        "nodnarbnitram/claude-code-extensions/tauri-v2"
-      ]
+      "skills": ["nodnarbnitram/claude-code-extensions/tauri-v2"]
     },
     {
       "id": "electron",
       "name": "Electron",
       "detect": {
-        "packages": [
-          "electron"
-        ],
+        "packages": ["electron"],
         "configFiles": [
           "electron-builder.yml",
           "electron-builder.json",
@@ -1593,17 +1224,10 @@
       "id": "dotnet",
       "name": ".NET",
       "detect": {
-        "configFiles": [
-          "global.json",
-          "NuGet.Config",
-          "Directory.Build.props",
-          "Directory.Packages.props"
-        ],
+        "configFiles": ["global.json", "NuGet.Config", "Directory.Build.props", "Directory.Packages.props"],
         "configFileContent": {
           "scanDotNetLayout": true,
-          "patterns": [
-            "<Project Sdk=\"Microsoft.NET.Sdk"
-          ]
+          "patterns": ["<Project Sdk=\"Microsoft.NET.Sdk"]
         }
       },
       "skills": [
@@ -1618,10 +1242,7 @@
       "detect": {
         "configFileContent": {
           "scanDotNetLayout": true,
-          "patterns": [
-            "<Project",
-            "Microsoft.NET.Sdk"
-          ]
+          "patterns": ["<Project", "Microsoft.NET.Sdk"]
         }
       },
       "skills": [
@@ -1637,21 +1258,13 @@
       "id": "aspnetcore",
       "name": "ASP.NET Core",
       "detect": {
-        "configFiles": [
-          "appsettings.json",
-          "appsettings.Development.json"
-        ],
+        "configFiles": ["appsettings.json", "appsettings.Development.json"],
         "configFileContent": {
           "scanDotNetLayout": true,
-          "patterns": [
-            "Microsoft.NET.Sdk.Web"
-          ]
+          "patterns": ["Microsoft.NET.Sdk.Web"]
         }
       },
-      "skills": [
-        "github/awesome-copilot/containerize-aspnetcore",
-        "openai/skills/aspnet-core"
-      ]
+      "skills": ["github/awesome-copilot/containerize-aspnetcore", "openai/skills/aspnet-core"]
     },
     {
       "id": "aspnet-blazor",
@@ -1659,75 +1272,45 @@
       "detect": {
         "configFileContent": {
           "scanDotNetLayout": true,
-          "patterns": [
-            "Microsoft.NET.Sdk.BlazorWebAssembly",
-            "Microsoft.AspNetCore.Components"
-          ]
+          "patterns": ["Microsoft.NET.Sdk.BlazorWebAssembly", "Microsoft.AspNetCore.Components"]
         }
       },
-      "skills": [
-        "github/awesome-copilot/fluentui-blazor"
-      ]
+      "skills": ["github/awesome-copilot/fluentui-blazor"]
     },
     {
       "id": "aspnet-minimal-api",
       "name": "ASP.NET Minimal API",
       "detect": {
-        "configFiles": [
-          "appsettings.json"
-        ],
+        "configFiles": ["appsettings.json"],
         "configFileContent": {
           "scanDotNetLayout": true,
-          "patterns": [
-            "Microsoft.AspNetCore.OpenApi",
-            "Swashbuckle.AspNetCore"
-          ]
+          "patterns": ["Microsoft.AspNetCore.OpenApi", "Swashbuckle.AspNetCore"]
         }
       },
-      "skills": [
-        "github/awesome-copilot/aspnet-minimal-api-openapi",
-        "dotnet/skills/minimal-api-file-upload"
-      ]
+      "skills": ["github/awesome-copilot/aspnet-minimal-api-openapi", "dotnet/skills/minimal-api-file-upload"]
     },
     {
       "id": "rust",
       "name": "Rust",
       "detect": {
-        "configFiles": [
-          "Cargo.toml"
-        ]
+        "configFiles": ["Cargo.toml"]
       },
-      "skills": [
-        "apollographql/skills/rust-best-practices"
-      ]
+      "skills": ["apollographql/skills/rust-best-practices"]
     },
     {
       "id": "ruby",
       "name": "Ruby",
       "detect": {
-        "configFiles": [
-          "Gemfile",
-          "Gemfile.lock",
-          ".ruby-version",
-          ".ruby-gemset"
-        ]
+        "configFiles": ["Gemfile", "Gemfile.lock", ".ruby-version", ".ruby-gemset"]
       },
-      "skills": [
-        "lucianghinda/superpowers-ruby/ruby"
-      ]
+      "skills": ["lucianghinda/superpowers-ruby/ruby"]
     },
     {
       "id": "rails",
       "name": "Ruby on Rails",
       "detect": {
-        "gems": [
-          "rails"
-        ],
-        "configFiles": [
-          "config/routes.rb",
-          "config/application.rb",
-          "bin/rails"
-        ]
+        "gems": ["rails"],
+        "configFiles": ["config/routes.rb", "config/application.rb", "bin/rails"]
       },
       "skills": [
         "sergiodxa/agent-skills/ruby-on-rails-best-practices",
@@ -1743,40 +1326,24 @@
       "id": "redis-ruby",
       "name": "Redis (Ruby)",
       "detect": {
-        "gems": [
-          "redis",
-          "sidekiq",
-          "resque",
-          "redis-rails"
-        ]
+        "gems": ["redis", "sidekiq", "resque", "redis-rails"]
       },
-      "skills": [
-        "redis/agent-skills/redis-development"
-      ]
+      "skills": ["redis/agent-skills/redis-development"]
     },
     {
       "id": "postgres-ruby",
       "name": "PostgreSQL",
       "detect": {
-        "gems": [
-          "pg"
-        ]
+        "gems": ["pg"]
       },
-      "skills": [
-        "igmarin/rails-agent-skills/rails-migration-safety"
-      ]
+      "skills": ["igmarin/rails-agent-skills/rails-migration-safety"]
     },
     {
       "id": "sorbet",
       "name": "Sorbet",
       "detect": {
-        "gems": [
-          "sorbet",
-          "sorbet-runtime"
-        ],
-        "configFiles": [
-          "sorbet/config"
-        ]
+        "gems": ["sorbet", "sorbet-runtime"],
+        "configFiles": ["sorbet/config"]
       },
       "skills": [
         "DmitryPogrebnoy/ruby-agent-skills/generating-sorbet",
@@ -1787,49 +1354,32 @@
       "id": "activeadmin",
       "name": "ActiveAdmin",
       "detect": {
-        "gems": [
-          "activeadmin"
-        ]
+        "gems": ["activeadmin"]
       },
-      "skills": [
-        "igmarin/rails-agent-skills/rails-stack-conventions"
-      ]
+      "skills": ["igmarin/rails-agent-skills/rails-stack-conventions"]
     },
     {
       "id": "devise",
       "name": "Devise",
       "detect": {
-        "gems": [
-          "devise"
-        ]
+        "gems": ["devise"]
       },
-      "skills": [
-        "igmarin/rails-agent-skills/rails-security-review"
-      ]
+      "skills": ["igmarin/rails-agent-skills/rails-security-review"]
     },
     {
       "id": "sidekiq",
       "name": "Sidekiq",
       "detect": {
-        "gems": [
-          "sidekiq"
-        ]
+        "gems": ["sidekiq"]
       },
-      "skills": [
-        "igmarin/rails-agent-skills/rails-background-jobs"
-      ]
+      "skills": ["igmarin/rails-agent-skills/rails-background-jobs"]
     },
     {
       "id": "rspec",
       "name": "RSpec",
       "detect": {
-        "gems": [
-          "rspec",
-          "rspec-rails"
-        ],
-        "configFiles": [
-          ".rspec"
-        ]
+        "gems": ["rspec", "rspec-rails"],
+        "configFiles": [".rspec"]
       },
       "skills": [
         "igmarin/rails-agent-skills/rspec-best-practices",
@@ -1841,13 +1391,8 @@
       "id": "rubocop",
       "name": "RuboCop",
       "detect": {
-        "gems": [
-          "rubocop",
-          "rubocop-rails"
-        ],
-        "configFiles": [
-          ".rubocop.yml"
-        ]
+        "gems": ["rubocop", "rubocop-rails"],
+        "configFiles": [".rubocop.yml"]
       },
       "skills": [
         "TheBushidoCollective/han/rubocop-configuration",
@@ -1859,112 +1404,59 @@
       "id": "php",
       "name": "PHP",
       "detect": {
-        "configFiles": [
-          "composer.json",
-          "composer.lock"
-        ]
+        "configFiles": ["composer.json", "composer.lock"]
       },
-      "skills": [
-        "jeffallan/claude-skills/php-pro"
-      ]
+      "skills": ["jeffallan/claude-skills/php-pro"]
     },
     {
       "id": "laravel",
       "name": "Laravel",
       "detect": {
-        "configFiles": [
-          "artisan",
-          "bootstrap/app.php"
-        ],
+        "configFiles": ["artisan", "bootstrap/app.php"],
         "configFileContent": {
-          "files": [
-            "composer.json"
-          ],
-          "patterns": [
-            "\"laravel/framework\"",
-            "\"illuminate/"
-          ]
+          "files": ["composer.json"],
+          "patterns": ["\"laravel/framework\"", "\"illuminate/"]
         }
       },
-      "skills": [
-        "jeffallan/claude-skills/laravel-specialist",
-        "affaan-m/everything-claude-code/laravel-patterns"
-      ]
+      "skills": ["jeffallan/claude-skills/laravel-specialist", "affaan-m/everything-claude-code/laravel-patterns"]
     },
     {
       "id": "python",
       "name": "Python",
       "detect": {
-        "configFiles": [
-          "pyproject.toml",
-          "requirements.txt",
-          "setup.py",
-          "Pipfile"
-        ]
+        "configFiles": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"]
       },
-      "skills": [
-        "inferen-sh/skills/python-executor",
-        "wshobson/agents/python-testing-patterns"
-      ]
+      "skills": ["inferen-sh/skills/python-executor", "wshobson/agents/python-testing-patterns"]
     },
     {
       "id": "fastapi",
       "name": "FastAPI",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "fastapi",
-            "FastAPI"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["fastapi", "FastAPI"]
         }
       },
-      "skills": [
-        "wshobson/agents/fastapi-templates",
-        "mindrally/skills/fastapi-python"
-      ]
+      "skills": ["wshobson/agents/fastapi-templates", "mindrally/skills/fastapi-python"]
     },
     {
       "id": "fastmcp",
       "name": "FastMCP",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "fastmcp",
-            "FastMCP"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["fastmcp", "FastMCP"]
         }
       },
-      "skills": [
-        "sharanharsoor/skills/fastmcp"
-      ]
+      "skills": ["sharanharsoor/skills/fastmcp"]
     },
     {
       "id": "django",
       "name": "Django",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "django",
-            "Django"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["django", "Django"]
         }
       },
       "skills": [
@@ -1978,59 +1470,30 @@
       "name": "Flask",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "setup.cfg",
-            "Pipfile"
-          ],
-          "patterns": [
-            "flask",
-            "Flask"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "setup.cfg", "Pipfile"],
+          "patterns": ["flask", "Flask"]
         }
       },
-      "skills": [
-        "aj-geddes/useful-ai-prompts/flask-api-development"
-      ]
+      "skills": ["aj-geddes/useful-ai-prompts/flask-api-development"]
     },
     {
       "id": "pydantic",
       "name": "Pydantic",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "pydantic",
-            "Pydantic"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["pydantic", "Pydantic"]
         }
       },
-      "skills": [
-        "bobmatnyc/claude-mpm-skills/pydantic"
-      ]
+      "skills": ["bobmatnyc/claude-mpm-skills/pydantic"]
     },
     {
       "id": "sqlalchemy",
       "name": "SQLAlchemy",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "sqlalchemy",
-            "SQLAlchemy"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["sqlalchemy", "SQLAlchemy"]
         }
       },
       "skills": [
@@ -2043,37 +1506,19 @@
       "name": "Pytest",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "pytest",
-            "Pytest"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["pytest", "Pytest"]
         }
       },
-      "skills": [
-        "wshobson/agents/python-testing-patterns"
-      ]
+      "skills": ["wshobson/agents/python-testing-patterns"]
     },
     {
       "id": "pandas",
       "name": "Pandas",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "pandas",
-            "Pandas"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["pandas", "Pandas"]
         }
       },
       "skills": [
@@ -2086,17 +1531,8 @@
       "name": "NumPy",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "numpy",
-            "NumPy",
-            "numpy"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["numpy", "NumPy", "numpy"]
         }
       },
       "skills": [
@@ -2109,81 +1545,41 @@
       "name": "Scikit-Learn",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "scikit-learn",
-            "scikit_learn",
-            "sklearn"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["scikit-learn", "scikit_learn", "sklearn"]
         }
       },
-      "skills": [
-        "davila7/claude-code-templates/scikit-learn",
-        "davila7/claude-code-templates/senior-data-scientist"
-      ]
+      "skills": ["davila7/claude-code-templates/scikit-learn", "davila7/claude-code-templates/senior-data-scientist"]
     },
     {
       "id": "celery",
       "name": "Celery",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "celery",
-            "Celery"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["celery", "Celery"]
         }
       },
-      "skills": [
-        "wshobson/agents/python-background-jobs"
-      ]
+      "skills": ["wshobson/agents/python-background-jobs"]
     },
     {
       "id": "requests",
       "name": "Requests",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pyproject.toml",
-            "requirements.txt",
-            "setup.py",
-            "Pipfile"
-          ],
-          "patterns": [
-            "requests",
-            "Requests"
-          ]
+          "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+          "patterns": ["requests", "Requests"]
         }
       },
-      "skills": [
-        "affaan-m/everything-claude-code/python-patterns"
-      ]
+      "skills": ["affaan-m/everything-claude-code/python-patterns"]
     },
     {
       "id": "security-assessments",
       "name": "Security Assessments",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pentest-report.md",
-            "pentest-scope.json",
-            "assessment-plan.md"
-          ],
-          "patterns": [
-            "penetration test",
-            "pentest",
-            "security assessment"
-          ]
+          "files": ["pentest-report.md", "pentest-scope.json", "assessment-plan.md"],
+          "patterns": ["penetration test", "pentest", "security assessment"]
         }
       },
       "skills": [
@@ -2357,15 +1753,8 @@
       "name": "Security Engineering",
       "detect": {
         "configFileContent": {
-          "files": [
-            "detection-engineering.md",
-            "soc-runbook.md"
-          ],
-          "patterns": [
-            "detection engineering",
-            "sigma rule",
-            "soc playbook"
-          ]
+          "files": ["detection-engineering.md", "soc-runbook.md"],
+          "patterns": ["detection engineering", "sigma rule", "soc playbook"]
         }
       },
       "skills": [
@@ -2412,15 +1801,8 @@
       "name": "Exploitation Techniques",
       "detect": {
         "configFileContent": {
-          "files": [
-            "exploits/README.md",
-            "poc/README.md"
-          ],
-          "patterns": [
-            "exploit",
-            "proof of concept",
-            "cve"
-          ]
+          "files": ["exploits/README.md", "poc/README.md"],
+          "patterns": ["exploit", "proof of concept", "cve"]
         }
       },
       "skills": [
@@ -2464,15 +1846,8 @@
       "name": "Security Testing",
       "detect": {
         "configFileContent": {
-          "files": [
-            "security-testing.md",
-            "owasp-test-plan.md"
-          ],
-          "patterns": [
-            "owasp",
-            "security testing",
-            "attack surface"
-          ]
+          "files": ["security-testing.md", "owasp-test-plan.md"],
+          "patterns": ["owasp", "security testing", "attack surface"]
         }
       },
       "skills": [
@@ -2507,16 +1882,8 @@
       "name": "Penetration Testing",
       "detect": {
         "configFileContent": {
-          "files": [
-            "pentest-report.md",
-            "engagement-plan.md",
-            "engagement-scope.json"
-          ],
-          "patterns": [
-            "penetration test",
-            "red team",
-            "engagement"
-          ]
+          "files": ["pentest-report.md", "engagement-plan.md", "engagement-scope.json"],
+          "patterns": ["penetration test", "red team", "engagement"]
         }
       },
       "skills": [
@@ -2548,15 +1915,8 @@
       "name": "Security Configuration",
       "detect": {
         "configFileContent": {
-          "files": [
-            "security-config.md",
-            "hardening-guide.md"
-          ],
-          "patterns": [
-            "hardening",
-            "tls",
-            "zero trust"
-          ]
+          "files": ["security-config.md", "hardening-guide.md"],
+          "patterns": ["hardening", "tls", "zero trust"]
         }
       },
       "skills": [
@@ -2584,14 +1944,8 @@
       "name": "Security Hardening",
       "detect": {
         "configFileContent": {
-          "files": [
-            "hardening-baseline.md",
-            "cis-benchmark.md"
-          ],
-          "patterns": [
-            "hardening",
-            "cis benchmark"
-          ]
+          "files": ["hardening-baseline.md", "cis-benchmark.md"],
+          "patterns": ["hardening", "cis benchmark"]
         }
       },
       "skills": [
@@ -2612,15 +1966,8 @@
       "name": "Security Auditing",
       "detect": {
         "configFileContent": {
-          "files": [
-            "audit-report.md",
-            "security-audit.md"
-          ],
-          "patterns": [
-            "audit",
-            "compliance",
-            "iam review"
-          ]
+          "files": ["audit-report.md", "security-audit.md"],
+          "patterns": ["audit", "compliance", "iam review"]
         }
       },
       "skills": [
@@ -2642,15 +1989,8 @@
       "name": "Security Deployment",
       "detect": {
         "configFileContent": {
-          "files": [
-            "deployment-plan-security.md",
-            "zero-trust-deployment.md"
-          ],
-          "patterns": [
-            "zero trust",
-            "honeytoken",
-            "canary"
-          ]
+          "files": ["deployment-plan-security.md", "zero-trust-deployment.md"],
+          "patterns": ["zero trust", "honeytoken", "canary"]
         }
       },
       "skills": [
@@ -2689,15 +2029,8 @@
       "name": "Vulnerability Scanning",
       "detect": {
         "configFileContent": {
-          "files": [
-            "vulnerability-scan.md",
-            "scan-results.md"
-          ],
-          "patterns": [
-            "vulnerability scanning",
-            "nessus",
-            "trivy"
-          ]
+          "files": ["vulnerability-scan.md", "scan-results.md"],
+          "patterns": ["vulnerability scanning", "nessus", "trivy"]
         }
       },
       "skills": [
@@ -2714,11 +2047,7 @@
       "id": "appwrite",
       "name": "Appwrite",
       "detect": {
-        "packages": [
-          "appwrite",
-          "node-appwrite",
-          "@appwrite.io/console"
-        ]
+        "packages": ["appwrite", "node-appwrite", "@appwrite.io/console"]
       },
       "skills": [
         "Gabox301/SkillIndex/appwrite-cli",
@@ -2734,15 +2063,8 @@
       "name": "Evidence Extraction",
       "detect": {
         "configFileContent": {
-          "files": [
-            "dfir-evidence.md",
-            "forensic-acquisition.md"
-          ],
-          "patterns": [
-            "forensic",
-            "evidence",
-            "acquisition"
-          ]
+          "files": ["dfir-evidence.md", "forensic-acquisition.md"],
+          "patterns": ["forensic", "evidence", "acquisition"]
         }
       },
       "skills": [
@@ -2759,15 +2081,8 @@
       "name": "Reverse Engineering",
       "detect": {
         "configFileContent": {
-          "files": [
-            "malware-analysis.md",
-            "reverse-engineering.md"
-          ],
-          "patterns": [
-            "reverse engineering",
-            "malware analysis",
-            "ghidra"
-          ]
+          "files": ["malware-analysis.md", "reverse-engineering.md"],
+          "patterns": ["reverse engineering", "malware analysis", "ghidra"]
         }
       },
       "skills": [
@@ -2784,15 +2099,8 @@
       "name": "Red Team Execution",
       "detect": {
         "configFileContent": {
-          "files": [
-            "red-team-plan.md",
-            "engagement-plan.json"
-          ],
-          "patterns": [
-            "red team",
-            "adversary simulation",
-            "engagement"
-          ]
+          "files": ["red-team-plan.md", "engagement-plan.json"],
+          "patterns": ["red team", "adversary simulation", "engagement"]
         }
       },
       "skills": [
@@ -2808,15 +2116,8 @@
       "name": "Incident Triage",
       "detect": {
         "configFileContent": {
-          "files": [
-            "incident-triage.md",
-            "ir-playbook.md"
-          ],
-          "patterns": [
-            "incident",
-            "triage",
-            "playbook"
-          ]
+          "files": ["incident-triage.md", "ir-playbook.md"],
+          "patterns": ["incident", "triage", "playbook"]
         }
       },
       "skills": [
@@ -2832,15 +2133,8 @@
       "name": "Security Tooling & Operations",
       "detect": {
         "configFileContent": {
-          "files": [
-            "security-tooling.md",
-            "security-ops.md"
-          ],
-          "patterns": [
-            "security operations",
-            "threat intelligence",
-            "siem"
-          ]
+          "files": ["security-tooling.md", "security-ops.md"],
+          "patterns": ["security operations", "threat intelligence", "siem"]
         }
       },
       "skills": [
@@ -2961,306 +2255,164 @@
       "id": "taste-skill",
       "name": "Taste Skill",
       "detect": {},
-      "skills": [
-        "Leonxlnx/taste-skill/taste-skill"
-      ]
+      "skills": ["Leonxlnx/taste-skill/taste-skill"]
     },
     {
       "id": "archify",
       "name": "Archify",
       "detect": {},
-      "skills": [
-        "tt-a1i/archify/archify"
-      ]
+      "skills": ["tt-a1i/archify/archify"]
     }
   ],
   "combos": [
     {
       "id": "expo-tailwind",
       "name": "Expo + Tailwind CSS",
-      "requires": [
-        "expo",
-        "tailwind"
-      ],
-      "skills": [
-        "expo/skills/expo-tailwind-setup"
-      ]
+      "requires": ["expo", "tailwind"],
+      "skills": ["expo/skills/expo-tailwind-setup"]
     },
     {
       "id": "react-hook-form-zod",
       "name": "React Hook Form + Zod",
-      "requires": [
-        "react-hook-form",
-        "zod"
-      ],
-      "skills": [
-        "pproenca/dot-skills/zod"
-      ]
+      "requires": ["react-hook-form", "zod"],
+      "skills": ["pproenca/dot-skills/zod"]
     },
     {
       "id": "nextjs-supabase",
       "name": "Next.js + Supabase",
-      "requires": [
-        "nextjs",
-        "supabase"
-      ],
-      "skills": [
-        "supabase/agent-skills/supabase-postgres-best-practices"
-      ]
+      "requires": ["nextjs", "supabase"],
+      "skills": ["supabase/agent-skills/supabase-postgres-best-practices"]
     },
     {
       "id": "react-native-expo",
       "name": "React Native + Expo",
-      "requires": [
-        "react-native",
-        "expo"
-      ],
-      "skills": [
-        "expo/skills/building-native-ui",
-        "sleekdotdesign/agent-skills/design-mobile-apps"
-      ]
+      "requires": ["react-native", "expo"],
+      "skills": ["expo/skills/building-native-ui", "sleekdotdesign/agent-skills/design-mobile-apps"]
     },
     {
       "id": "nextjs-vercel-ai",
       "name": "Next.js + Vercel AI SDK",
-      "requires": [
-        "nextjs",
-        "vercel-ai"
-      ],
-      "skills": [
-        "vercel/ai/use-ai-sdk",
-        "vercel-labs/next-skills/next-best-practices"
-      ]
+      "requires": ["nextjs", "vercel-ai"],
+      "skills": ["vercel/ai/use-ai-sdk", "vercel-labs/next-skills/next-best-practices"]
     },
     {
       "id": "nextjs-playwright",
       "name": "Next.js + Playwright",
-      "requires": [
-        "nextjs",
-        "playwright"
-      ],
-      "skills": [
-        "currents-dev/playwright-best-practices-skill/playwright-best-practices"
-      ]
+      "requires": ["nextjs", "playwright"],
+      "skills": ["currents-dev/playwright-best-practices-skill/playwright-best-practices"]
     },
     {
       "id": "react-shadcn",
       "name": "React + shadcn/ui",
-      "requires": [
-        "react",
-        "shadcn"
-      ],
-      "skills": [
-        "shadcn/ui/shadcn",
-        "vercel-labs/agent-skills/react-best-practices"
-      ]
+      "requires": ["react", "shadcn"],
+      "skills": ["shadcn/ui/shadcn", "vercel-labs/agent-skills/react-best-practices"]
     },
     {
       "id": "tailwind-shadcn",
       "name": "Tailwind CSS + shadcn/ui",
-      "requires": [
-        "tailwind",
-        "shadcn"
-      ],
-      "skills": [
-        "secondsky/claude-skills/tailwind-v4-shadcn"
-      ]
+      "requires": ["tailwind", "shadcn"],
+      "skills": ["secondsky/claude-skills/tailwind-v4-shadcn"]
     },
     {
       "id": "gsap-react",
       "name": "GSAP + React",
-      "requires": [
-        "gsap",
-        "react"
-      ],
-      "skills": [
-        "greensock/gsap-skills/gsap-react"
-      ]
+      "requires": ["gsap", "react"],
+      "skills": ["greensock/gsap-skills/gsap-react"]
     },
     {
       "id": "cloudflare-vite",
       "name": "Cloudflare + Vite",
-      "requires": [
-        "cloudflare",
-        "vite"
-      ],
-      "skills": [
-        "cloudflare/vinext/migrate-to-vinext"
-      ]
+      "requires": ["cloudflare", "vite"],
+      "skills": ["cloudflare/vinext/migrate-to-vinext"]
     },
     {
       "id": "node-express",
       "name": "Node.js + Express",
-      "requires": [
-        "node",
-        "express"
-      ],
-      "skills": [
-        "aj-geddes/useful-ai-prompts/nodejs-express-server"
-      ]
+      "requires": ["node", "express"],
+      "skills": ["aj-geddes/useful-ai-prompts/nodejs-express-server"]
     },
     {
       "id": "nextjs-clerk",
       "name": "Next.js + Clerk",
-      "requires": [
-        "nextjs",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-nextjs-patterns"
-      ]
+      "requires": ["nextjs", "clerk"],
+      "skills": ["clerk/skills/clerk-nextjs-patterns"]
     },
     {
       "id": "nuxt-clerk",
       "name": "Nuxt + Clerk",
-      "requires": [
-        "nuxt",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-nuxt-patterns"
-      ]
+      "requires": ["nuxt", "clerk"],
+      "skills": ["clerk/skills/clerk-nuxt-patterns"]
     },
     {
       "id": "vue-clerk",
       "name": "Vue + Clerk",
-      "requires": [
-        "vue",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-vue-patterns"
-      ]
+      "requires": ["vue", "clerk"],
+      "skills": ["clerk/skills/clerk-vue-patterns"]
     },
     {
       "id": "react-clerk",
       "name": "React + Clerk",
-      "requires": [
-        "react",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-react-patterns"
-      ]
+      "requires": ["react", "clerk"],
+      "skills": ["clerk/skills/clerk-react-patterns"]
     },
     {
       "id": "astro-clerk",
       "name": "Astro + Clerk",
-      "requires": [
-        "astro",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-astro-patterns"
-      ]
+      "requires": ["astro", "clerk"],
+      "skills": ["clerk/skills/clerk-astro-patterns"]
     },
     {
       "id": "expo-clerk",
       "name": "Expo + Clerk",
-      "requires": [
-        "expo",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-expo-patterns"
-      ]
+      "requires": ["expo", "clerk"],
+      "skills": ["clerk/skills/clerk-expo-patterns"]
     },
     {
       "id": "react-react-three-fiber",
       "name": "React + React Three Fiber",
-      "requires": [
-        "threejs",
-        "react",
-        "@react-three/fiber"
-      ],
-      "skills": [
-        "vercel-labs/json-render/react-three-fiber"
-      ]
+      "requires": ["threejs", "react", "@react-three/fiber"],
+      "skills": ["vercel-labs/json-render/react-three-fiber"]
     },
     {
       "id": "react-router-clerk",
       "name": "React Router + Clerk",
-      "requires": [
-        "react-router",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-react-router-patterns",
-        "clerk/skills/clerk-setup",
-        "clerk/skills/clerk"
-      ]
+      "requires": ["react-router", "clerk"],
+      "skills": ["clerk/skills/clerk-react-router-patterns", "clerk/skills/clerk-setup", "clerk/skills/clerk"]
     },
     {
       "id": "tanstack-clerk",
       "name": "TanStack Start + Clerk",
-      "requires": [
-        "tanstack-start",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-tanstack-patterns",
-        "clerk/skills/clerk-setup",
-        "clerk/skills/clerk"
-      ]
+      "requires": ["tanstack-start", "clerk"],
+      "skills": ["clerk/skills/clerk-tanstack-patterns", "clerk/skills/clerk-setup", "clerk/skills/clerk"]
     },
     {
       "id": "chrome-extension-clerk",
       "name": "Chrome Extension + Clerk",
-      "requires": [
-        "chrome-extension",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-chrome-extension-patterns",
-        "clerk/skills/clerk-setup",
-        "clerk/skills/clerk"
-      ]
+      "requires": ["chrome-extension", "clerk"],
+      "skills": ["clerk/skills/clerk-chrome-extension-patterns", "clerk/skills/clerk-setup", "clerk/skills/clerk"]
     },
     {
       "id": "swiftui-clerk",
       "name": "SwiftUI + Clerk",
-      "requires": [
-        "swiftui",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-swift",
-        "clerk/skills/clerk-setup",
-        "clerk/skills/clerk"
-      ]
+      "requires": ["swiftui", "clerk"],
+      "skills": ["clerk/skills/clerk-swift", "clerk/skills/clerk-setup", "clerk/skills/clerk"]
     },
     {
       "id": "android-clerk",
       "name": "Android + Clerk",
-      "requires": [
-        "android",
-        "clerk"
-      ],
-      "skills": [
-        "clerk/skills/clerk-android",
-        "clerk/skills/clerk-setup",
-        "clerk/skills/clerk"
-      ]
+      "requires": ["android", "clerk"],
+      "skills": ["clerk/skills/clerk-android", "clerk/skills/clerk-setup", "clerk/skills/clerk"]
     },
     {
       "id": "rails-rspec",
       "name": "Ruby on Rails + RSpec",
-      "requires": [
-        "rails",
-        "rspec"
-      ],
-      "skills": [
-        "igmarin/rails-agent-skills/rails-tdd-slices",
-        "igmarin/rails-agent-skills/rails-bug-triage"
-      ]
+      "requires": ["rails", "rspec"],
+      "skills": ["igmarin/rails-agent-skills/rails-tdd-slices", "igmarin/rails-agent-skills/rails-bug-triage"]
     },
     {
       "id": "rails-sidekiq",
       "name": "Ruby on Rails + Sidekiq",
-      "requires": [
-        "rails",
-        "sidekiq"
-      ],
+      "requires": ["rails", "sidekiq"],
       "skills": []
     },
     {
@@ -3434,6 +2586,7 @@
     ".junie": "junie",
     ".codebuddy": "codebuddy",
     ".continue": "continue",
+    ".kilo": "kilo-code",
     ".kiro": "kiro-cli",
     ".opencode": "opencode",
     ".cursor": "cursor"
