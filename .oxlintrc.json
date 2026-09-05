@@ -1,11 +1,4 @@
 {
   "$schema": "./packages/skillindex/node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": [
-    "**/skills-registry/**",
-    "**/dist/**",
-    "**/target/**",
-    "**/node_modules/**",
-    "**/.astro/**",
-    "**/Landing/dist/**"
-  ]
+  "ignorePatterns": ["**/skills-registry/**", "**/dist/**", "**/target/**", "**/node_modules/**"]
 }
