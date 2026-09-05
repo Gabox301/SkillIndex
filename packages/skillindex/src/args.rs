@@ -6,7 +6,7 @@ use clap::Parser;
 #[command(
     name = "skillindex",
     version = env!("CARGO_PKG_VERSION"),
-    about = "Instala automáticamente las mejores skills de IA para tu proyecto",
+    about = "Instala las mejores skills de IA para tu proyecto",
     disable_help_flag = false
 )]
 pub struct Args {

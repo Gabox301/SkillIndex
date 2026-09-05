@@ -1,6 +1,6 @@
 # SkillIndex
 
-Detecta e instala automáticamente las mejores skills de agentes IA para tu proyecto. Un comando, cero configuración.
+Detecta e instala las mejores skills de agentes IA para tu proyecto. Un comando, cero configuración.
 
 ```bash
 cargo install skillindex

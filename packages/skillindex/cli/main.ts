@@ -66,7 +66,7 @@ function parseArgs(): CliArgs {
 
 function showHelp(): void {
   log(`
-  ${bold('skillindex')} — Instala automáticamente las mejores skills de IA para tu proyecto
+  ${bold('skillindex')} — Instala las mejores skills de IA para tu proyecto
   ${bold('Uso:')}
     npx skillindex                   Detecta e instala skills
     npx skillindex ${dim('-y')}                   Omitir confirmación

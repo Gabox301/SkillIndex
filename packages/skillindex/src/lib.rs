@@ -15,5 +15,9 @@ pub mod ui;
 pub mod workspace;
 
 pub mod skills_map {
-    include!(concat!(env!("OUT_DIR"), "/skills_map.rs"));
+    pub const SKILLS_MAP_JSON: &str = include_str!("../skills_map.json");
+
+    pub fn skills_map_json() -> &'static str {
+        SKILLS_MAP_JSON
+    }
 }

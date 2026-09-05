@@ -63,21 +63,21 @@ static FRONTEND_BONUS_SKILLS: &[&str] = &[
 
 // ── Skills map loading ───────────────────────────────────────────
 
-fn load_skills_map_value() -> Value {
+static SKILLS_MAP_VALUE: LazyLock<Value> = LazyLock::new(|| {
     serde_json::from_str(crate::skills_map::SKILLS_MAP_JSON).unwrap_or(Value::Null)
-}
+});
 
 fn get_skills_array() -> Vec<Value> {
-    let v = load_skills_map_value();
-    v.get("skills")
+    SKILLS_MAP_VALUE
+        .get("skills")
         .and_then(|x| x.as_array())
         .cloned()
         .unwrap_or_default()
 }
 
 fn get_combos_array() -> Vec<Value> {
-    let v = load_skills_map_value();
-    v.get("combos")
+    SKILLS_MAP_VALUE
+        .get("combos")
         .and_then(|x| x.as_array())
         .cloned()
         .unwrap_or_default()
@@ -617,9 +617,8 @@ pub fn detect_agents_in_home(home: Option<&Path>) -> Vec<String> {
 }
 
 fn get_agent_folder_map() -> Vec<(String, String)> {
-    let v = load_skills_map_value();
     let mut out = Vec::new();
-    if let Some(map) = v.get("agent_folder_map").and_then(|x| x.as_object()) {
+    if let Some(map) = SKILLS_MAP_VALUE.get("agent_folder_map").and_then(|x| x.as_object()) {
         for (k, v) in map {
             if let Some(agent) = v.as_str() {
                 out.push((k.clone(), agent.to_string()));

@@ -25,6 +25,10 @@ pnpm-debug.log*
 .claude/
 .kilo/
 .kiro/
+.cline/
+.cursor/
+.junie/
+.opencode/
 skills-lock.json
 
 # Rust build
