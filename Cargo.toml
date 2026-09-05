@@ -16,11 +16,20 @@ exclude = ["skills-registry/*", "node_modules/*", "dist/*", ".env", "pnpm-lock.y
 name = "skillindex"
 path = "src/main.rs"
 
+[[bin]]
+name = "validate-registry"
+path = "src/bin/validate_registry.rs"
+
+[[bin]]
+name = "sync-skills"
+path = "src/bin/sync_skills.rs"
+
 [lib]
 name = "skillindex"
 path = "src/lib.rs"
 
 [dependencies]
+anyhow = "1.0"
 chrono = "0.4"
 clap = { version = "4.5.32", features = ["derive"] }
 crossterm = "0.29.0"

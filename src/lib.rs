@@ -11,6 +11,7 @@ pub mod hash;
 pub mod installer;
 pub mod prompt;
 pub mod registry;
+pub mod skills;
 pub mod ui;
 pub mod workspace;
 

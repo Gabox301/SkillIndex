@@ -38,49 +38,21 @@ pub fn is_skip_dir(name: &str) -> bool {
 }
 
 // ── Frontend constants ───────────────────────────────────────────
-
-static FRONTEND_PACKAGES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-    HashSet::from([
-        "react",
-        "vue",
-        "svelte",
-        "astro",
-        "next",
-        "@angular/core",
-        "solid-js",
-        "lit",
-        "preact",
-        "nuxt",
-        "@sveltejs/kit",
-    ])
+// Ahora vienen directo de Rust (generados desde skills_map.json) — single source en src/skills
+static FRONTEND_PACKAGES_SET: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    crate::skills::FRONTEND_PACKAGES.iter().copied().collect()
 });
+static FRONTEND_BONUS_SKILLS: &[&str] = crate::skills::FRONTEND_BONUS_SKILLS;
 
-static FRONTEND_BONUS_SKILLS: &[&str] = &[
-    "anthropics/skills/frontend-design",
-    "addyosmani/web-quality-skills/accessibility",
-    "addyosmani/web-quality-skills/seo",
-];
-
-// ── Skills map loading ───────────────────────────────────────────
-
-static SKILLS_MAP_VALUE: LazyLock<Value> = LazyLock::new(|| {
-    serde_json::from_str(crate::skills_map::SKILLS_MAP_JSON).unwrap_or(Value::Null)
-});
-
-fn get_skills_array() -> Vec<Value> {
-    SKILLS_MAP_VALUE
-        .get("skills")
-        .and_then(|x| x.as_array())
-        .cloned()
-        .unwrap_or_default()
+// ── Skills map — ahora Rust nativo, no JSON parse
+fn get_skills_slice() -> &'static [crate::skills::types::Technology] {
+    crate::skills::SKILLS
 }
-
-fn get_combos_array() -> Vec<Value> {
-    SKILLS_MAP_VALUE
-        .get("combos")
-        .and_then(|x| x.as_array())
-        .cloned()
-        .unwrap_or_default()
+fn get_combos_slice() -> &'static [crate::skills::types::ComboSkill] {
+    crate::skills::COMBO_SKILLS_MAP
+}
+fn get_agent_folder_map_slice() -> &'static [(&'static str, &'static str)] {
+    crate::skills::AGENT_FOLDER_MAP
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -237,43 +209,20 @@ fn detect_technologies_in_dir(
 
     let mut gems_cache: Option<Vec<String>> = None;
 
-    let skills = get_skills_array();
     let mut detected: Vec<DisplayTechnology> = Vec::new();
 
-    for tech_val in &skills {
-        let id = tech_val
-            .get("id")
-            .and_then(|x| x.as_str())
-            .unwrap_or("")
-            .to_string();
-        let name = tech_val
-            .get("name")
-            .and_then(|x| x.as_str())
-            .unwrap_or("")
-            .to_string();
-        let tech_skills: Vec<String> = tech_val
-            .get("skills")
-            .and_then(|x| x.as_array())
-            .map(|arr| {
-                arr.iter()
-                    .filter_map(|x| x.as_str().map(|s| s.to_string()))
-                    .collect()
-            })
-            .unwrap_or_default();
-        let detect = tech_val.get("detect");
+    for tech in get_skills_slice() {
+        let id = tech.id;
+        let name = tech.name;
+        let tech_skills: Vec<String> = tech.skills.iter().map(|s| s.to_string()).collect();
+        let detect = &tech.detect;
 
         let mut found = false;
 
         // packages
-        if !found
-            && let Some(pkgs) = detect
-                .and_then(|d| d.get("packages"))
-                .and_then(|x| x.as_array())
-        {
-            for p in pkgs {
-                if let Some(s) = p.as_str()
-                    && all_deps_set.contains(s)
-                {
+        if !found && !detect.packages.is_empty() {
+            for p in detect.packages {
+                if all_deps_set.contains(*p) {
                     found = true;
                     break;
                 }
@@ -281,16 +230,9 @@ fn detect_technologies_in_dir(
         }
 
         // packagePatterns - simple literal contains check (covers ^@clerk/ etc)
-        if !found
-            && let Some(patterns) = detect
-                .and_then(|d| d.get("packagePatterns"))
-                .and_then(|x| x.as_array())
-        {
-            'outer: for pat_val in patterns {
-                let source = pat_val
-                    .get("__regexp")
-                    .and_then(|x| x.as_str())
-                    .unwrap_or("");
+        if !found && !detect.package_patterns.is_empty() {
+            'outer: for pat in detect.package_patterns {
+                let source = *pat;
                 if source.is_empty() {
                     continue;
                 }
@@ -312,15 +254,9 @@ fn detect_technologies_in_dir(
         }
 
         // configFiles
-        if !found
-            && let Some(files) = detect
-                .and_then(|d| d.get("configFiles"))
-                .and_then(|x| x.as_array())
-        {
-            for f in files {
-                if let Some(s) = f.as_str()
-                    && dir.join(s).exists()
-                {
+        if !found && !detect.config_files.is_empty() {
+            for f in detect.config_files {
+                if dir.join(f).exists() {
                     found = true;
                     break;
                 }
@@ -328,34 +264,21 @@ fn detect_technologies_in_dir(
         }
 
         // fileExtensions
-        if !found
-            && let Some(exts) = detect
-                .and_then(|d| d.get("fileExtensions"))
-                .and_then(|x| x.as_array())
-        {
-            let ext_strs: Vec<String> = exts
-                .iter()
-                .filter_map(|x| x.as_str().map(|s| s.to_string()))
-                .collect();
+        if !found && !detect.file_extensions.is_empty() {
+            let ext_strs: Vec<String> = detect.file_extensions.iter().map(|s| s.to_string()).collect();
             if has_file_with_extension(dir, &ext_strs, 4) {
                 found = true;
             }
         }
 
         // gems
-        if !found
-            && let Some(gems) = detect
-                .and_then(|d| d.get("gems"))
-                .and_then(|x| x.as_array())
-        {
+        if !found && !detect.gems.is_empty() {
             if gems_cache.is_none() {
                 gems_cache = Some(read_gemfile(dir));
             }
             let gem_names = gems_cache.as_ref().unwrap();
-            for g in gems {
-                if let Some(s) = g.as_str()
-                    && gem_names.contains(&s.to_string())
-                {
+            for g in detect.gems {
+                if gem_names.contains(&g.to_string()) {
                     found = true;
                     break;
                 }
@@ -363,48 +286,18 @@ fn detect_technologies_in_dir(
         }
 
         // configFileContent
-        if !found && let Some(cfg) = detect.and_then(|d| d.get("configFileContent")) {
-            let blocks: Vec<&Value> = if cfg.is_array() {
-                cfg.as_array().unwrap().iter().collect()
-            } else {
-                vec![cfg]
-            };
-            for block in blocks {
-                let patterns: Vec<String> = block
-                    .get("patterns")
-                    .and_then(|x| x.as_array())
-                    .map(|arr| {
-                        arr.iter()
-                            .filter_map(|x| x.as_str().map(|s| s.to_string()))
-                            .collect()
-                    })
-                    .unwrap_or_default();
+        if !found && !detect.config_file_content.is_empty() {
+            for block in detect.config_file_content {
+                let patterns: Vec<String> = block.patterns.iter().map(|s| s.to_string()).collect();
                 if patterns.is_empty() {
                     continue;
                 }
-                let paths: Vec<PathBuf> = if block
-                    .get("scanGradleLayout")
-                    .and_then(|x| x.as_bool())
-                    .unwrap_or(false)
-                {
+                let paths: Vec<PathBuf> = if block.scan_gradle_layout {
                     crate::gradle::gradle_layout_candidate_paths(dir)
-                } else if block
-                    .get("scanDotNetLayout")
-                    .and_then(|x| x.as_bool())
-                    .unwrap_or(false)
-                {
+                } else if block.scan_dotnet_layout {
                     crate::dotnet::dotnet_layout_candidate_paths(dir)
                 } else {
-                    block
-                        .get("files")
-                        .and_then(|x| x.as_array())
-                        .map(|arr| {
-                            arr.iter()
-                                .filter_map(|x| x.as_str())
-                                .map(|s| dir.join(s))
-                                .collect()
-                        })
-                        .unwrap_or_default()
+                    block.files.iter().map(|s| dir.join(s)).collect()
                 };
 
                 for path in &paths {
@@ -423,8 +316,8 @@ fn detect_technologies_in_dir(
 
         if found {
             detected.push(DisplayTechnology {
-                id: id.clone(),
-                name,
+                id: id.to_string(),
+                name: name.to_string(),
                 skills: tech_skills,
             });
         }
@@ -432,7 +325,7 @@ fn detect_technologies_in_dir(
 
     let is_frontend_by_packages = all_deps_array
         .iter()
-        .any(|p| FRONTEND_PACKAGES.contains(p.as_str()));
+        .any(|p| FRONTEND_PACKAGES_SET.contains(p.as_str()));
     let is_frontend_by_files = if is_frontend_by_packages || skip_frontend_files {
         false
     } else {
@@ -492,30 +385,13 @@ pub fn detect_technologies(project_dir: &Path) -> DetectResult {
 
 pub fn detect_combos(detected_ids: &[String]) -> Vec<DisplayCombo> {
     let set: HashSet<&String> = detected_ids.iter().collect();
-    let combos = get_combos_array();
     let mut out = Vec::new();
-    for c in combos {
-        let requires: Vec<String> = c
-            .get("requires")
-            .and_then(|x| x.as_array())
-            .map(|arr| {
-                arr.iter()
-                    .filter_map(|x| x.as_str().map(|s| s.to_string()))
-                    .collect()
-            })
-            .unwrap_or_default();
-        if requires.iter().all(|id| set.contains(id)) {
-            let name = c
-                .get("name")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
-            let id = c
-                .get("id")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
-            out.push(DisplayCombo { name, id });
+    for c in get_combos_slice() {
+        if c.requires.iter().all(|id| set.contains(&id.to_string())) {
+            out.push(DisplayCombo {
+                name: c.name.to_string(),
+                id: c.id.to_string(),
+            });
         }
     }
     out
@@ -591,16 +467,9 @@ pub fn collect_skills(
     }
 
     for combo in combos {
-        let combo_val = get_combos_array()
-            .into_iter()
-            .find(|c| c.get("name").and_then(|x| x.as_str()) == Some(&combo.name));
-        if let Some(c) = combo_val
-            && let Some(arr) = c.get("skills").and_then(|x| x.as_array())
-        {
-            for s in arr {
-                if let Some(skill_str) = s.as_str() {
-                    add_skill(skill_str.to_string(), combo.name.clone());
-                }
+        if let Some(c) = get_combos_slice().iter().find(|c| c.name == combo.name) {
+            for skill in c.skills {
+                add_skill(skill.to_string(), combo.name.clone());
             }
         }
     }
@@ -632,28 +501,20 @@ pub fn detect_agents(project_dir: &Path) -> Vec<String> {
 }
 
 fn get_agent_folder_map() -> Vec<(String, String)> {
-    let mut out = Vec::new();
-    if let Some(map) = SKILLS_MAP_VALUE
-        .get("agent_folder_map")
-        .and_then(|x| x.as_object())
-    {
-        for (k, v) in map {
-            if let Some(agent) = v.as_str() {
-                out.push((k.clone(), agent.to_string()));
-            }
-        }
+    let slice = get_agent_folder_map_slice();
+    if slice.is_empty() {
+        return vec![
+            (".claude".into(), "claude-code".into()),
+            (".cline".into(), "cline".into()),
+            (".junie".into(), "junie".into()),
+            (".codebuddy".into(), "codebuddy".into()),
+            (".continue".into(), "continue".into()),
+            (".kiro".into(), "kiro-cli".into()),
+            (".opencode".into(), "opencode".into()),
+            (".cursor".into(), "cursor".into()),
+        ];
     }
-    if out.is_empty() {
-        out.push((".claude".into(), "claude-code".into()));
-        out.push((".cline".into(), "cline".into()));
-        out.push((".junie".into(), "junie".into()));
-        out.push((".codebuddy".into(), "codebuddy".into()));
-        out.push((".continue".into(), "continue".into()));
-        out.push((".kiro".into(), "kiro-cli".into()));
-        out.push((".opencode".into(), "opencode".into()));
-        out.push((".cursor".into(), "cursor".into()));
-    }
-    out
+    slice.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
 }
 
 // ── Installed skills ─────────────────────────────────────────────
