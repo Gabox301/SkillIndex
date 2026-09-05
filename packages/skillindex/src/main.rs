@@ -265,10 +265,40 @@ fn ask_include_security_sync(
     log("");
     write(&dim("   ¿Incluir? [y/N]: "));
     let _ = std::io::stdout().flush();
-    let mut input = String::new();
-    let _ = std::io::stdin().read_line(&mut input);
-    let ans = input.trim().to_lowercase();
-    let include = ans == "y" || ans == "yes" || ans == "s" || ans == "si";
+    let _ = crossterm::terminal::enable_raw_mode();
+    let mut include = false;
+    loop {
+        if let Ok(crossterm::event::Event::Key(key)) = crossterm::event::read() {
+            match key.code {
+                crossterm::event::KeyCode::Char('y')
+                | crossterm::event::KeyCode::Char('Y')
+                | crossterm::event::KeyCode::Char('s')
+                | crossterm::event::KeyCode::Char('S') => {
+                    include = true;
+                    break;
+                }
+                crossterm::event::KeyCode::Char('n')
+                | crossterm::event::KeyCode::Char('N')
+                | crossterm::event::KeyCode::Enter
+                | crossterm::event::KeyCode::Esc => {
+                    include = false;
+                    break;
+                }
+                crossterm::event::KeyCode::Char('q')
+                | crossterm::event::KeyCode::Char('Q') => {
+                    include = false;
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    let _ = crossterm::terminal::disable_raw_mode();
+    if include {
+        log(&dim("   → y"));
+    } else {
+        log(&dim("   → n"));
+    }
     log("");
     include
 }
