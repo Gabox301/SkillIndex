@@ -283,11 +283,8 @@ fn ask_include_security_sync(
         initial_selected: Some(vec![false]),
         shortcuts: Vec::new(),
     };
-    let selected = multi_select(
-        vec!["Seguridad (opcionales)".to_string()],
-        opts,
-    )
-    .unwrap_or_default();
+    let selected =
+        multi_select(vec!["Seguridad (opcionales)".to_string()], opts).unwrap_or_default();
     !selected.is_empty()
 }
 
@@ -450,18 +447,8 @@ async fn main() {
     let detect_result = detect_technologies(&project_dir);
     write("\x1b[K");
 
-    if detect_result.detected.is_empty() && !detect_result.is_frontend {
-        log(&yellow("   ⚠ No se detectaron tecnologías compatibles."));
-        log(&dim(
-            "   Asegúrate de ejecutar esto en el directorio de un proyecto.",
-        ));
-        log("");
-        std::process::exit(0);
-    }
-
     let (regular_combos, security_combos) = partition_combos(detect_result.combos);
-    let include_security =
-        ask_include_security_sync(&security_combos, args.security, args.yes);
+    let include_security = ask_include_security_sync(&security_combos, args.security, args.yes);
     let final_combos = if include_security {
         let mut v = regular_combos.clone();
         v.extend(security_combos.clone());
@@ -479,6 +466,18 @@ async fn main() {
                 .join(", ")
         )));
         log("");
+    }
+
+    if detect_result.detected.is_empty() && !detect_result.is_frontend && final_combos.is_empty() {
+        log(&yellow("   ⚠ No se detectaron tecnologías compatibles."));
+        log(&dim(
+            "   Asegúrate de ejecutar esto en el directorio de un proyecto.",
+        ));
+        log(&dim(
+            "   Tip: activa Seguridad (opcionales) con --security si quieres skills de seguridad.",
+        ));
+        log("");
+        std::process::exit(0);
     }
 
     // Convert to display types

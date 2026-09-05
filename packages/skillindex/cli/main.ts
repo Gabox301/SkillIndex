@@ -11,13 +11,7 @@ import {
   securityCheckForSkillPath,
 } from './installer.ts';
 import type { ComboSkill, SkillEntry, Technology } from './lib.ts';
-import {
-  collectSkills,
-  detectAgents,
-  detectTechnologies,
-  getInstalledSkillNames,
-  partitionCombos,
-} from './lib.ts';
+import { collectSkills, detectAgents, detectTechnologies, getInstalledSkillNames, partitionCombos } from './lib.ts';
 import { formatTime, multiSelect, printBanner } from './ui.ts';
 
 const __dirname = import.meta.dirname;
@@ -515,18 +509,19 @@ async function main(): Promise<void> {
   write(dim('   Analizando proyecto...\r'));
   const { detected, isFrontend, combos: allCombos } = detectTechnologies(projectDir);
   write('\x1b[K');
-  if (detected.length === 0 && !isFrontend) {
-    log(yellow('   ⚠ No se detectaron tecnologías compatibles.'));
-    log(dim('   Asegúrate de ejecutar esto en el directorio de un proyecto.'));
-    log();
-    process.exit(0);
-  }
   const { regular: regularCombos, security: securityCombos } = partitionCombos(allCombos);
   const includeSecurity = await askIncludeSecurity(securityCombos, autoYes, security);
   const combos = includeSecurity ? [...regularCombos, ...securityCombos] : regularCombos;
   if (includeSecurity && securityCombos.length > 0) {
     log(dim(`   ↳ Seguridad incluida: ${securityCombos.map((c) => c.name).join(', ')}`));
     log('');
+  }
+  if (detected.length === 0 && !isFrontend && combos.length === 0) {
+    log(yellow('   ⚠ No se detectaron tecnologías compatibles.'));
+    log(dim('   Asegúrate de ejecutar esto en el directorio de un proyecto.'));
+    log(dim('   Tip: activa Seguridad (opcionales) con --security si quieres skills de seguridad.'));
+    log();
+    process.exit(0);
   }
   printDetected(detected, combos, isFrontend);
   const installedNames = getInstalledSkillNames(projectDir);
