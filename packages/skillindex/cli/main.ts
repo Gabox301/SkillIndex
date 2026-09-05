@@ -372,7 +372,7 @@ async function askIncludeSecurity(
 ): Promise<boolean> {
   if (securityCombos.length === 0) return false;
   if (forceSecurity) return true;
-  if (autoYes || !process.stdin.isTTY) return false;
+  if (autoYes) return false;
 
   log(cyan('   ◆ ') + bold('Seguridad (opcionales)') + dim(` — ${securityCombos.length} combos`));
   log(dim(`   ${securityCombos.map((c) => c.name).join(' · ')}`));
@@ -380,13 +380,14 @@ async function askIncludeSecurity(
   log('');
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const answer: string = await new Promise((resolve) => {
-    rl.question(dim('   ¿Incluir? [y/N]: '), (ans) => {
+  const rawAns: string = await new Promise((resolve) => {
+    rl.question(dim('   ¿Incluir? [y/N] (espacio para sí): '), (ans) => {
       rl.close();
-      resolve(ans.trim().toLowerCase());
+      resolve(ans);
     });
   });
-  const include = answer === 'y' || answer === 'yes' || answer === 's' || answer === 'si';
+  const trimmed = rawAns.trim().toLowerCase();
+  const include = rawAns === ' ' || trimmed === 'y' || trimmed === 'yes' || trimmed === 's' || trimmed === 'si';
   log('');
   return include;
 }

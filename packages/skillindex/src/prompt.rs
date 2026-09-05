@@ -2,7 +2,7 @@ use std::io::{self, IsTerminal, Write};
 
 use crossterm::{
     cursor::{Hide, Show},
-    event::{self, Event, KeyCode, KeyModifiers},
+    event::{self, Event, KeyCode, KeyEventKind, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode},
 };
@@ -392,6 +392,10 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
     loop {
         let event = event::read()?;
         if let Event::Key(key) = event {
+            // Solo procesar Press para evitar doble toggle en Release
+            if key.kind != KeyEventKind::Press {
+                continue;
+            }
             // Ctrl+C
             if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('c') {
                 disable_raw_mode()?;

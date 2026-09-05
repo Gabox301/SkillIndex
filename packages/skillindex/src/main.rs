@@ -242,9 +242,10 @@ fn ask_include_security_sync(
     if force_security {
         return true;
     }
-    if auto_yes || !std::io::stdin().is_terminal() {
+    if auto_yes || !is_tty() {
         return false;
     }
+    // puede no reportar is_terminal pero sí hay interacción real.
     log(&format!(
         "{}{} {}",
         cyan("   ◆ "),
@@ -273,7 +274,8 @@ fn ask_include_security_sync(
                 crossterm::event::KeyCode::Char('y')
                 | crossterm::event::KeyCode::Char('Y')
                 | crossterm::event::KeyCode::Char('s')
-                | crossterm::event::KeyCode::Char('S') => {
+                | crossterm::event::KeyCode::Char('S')
+                | crossterm::event::KeyCode::Char(' ') => {
                     include = true;
                     break;
                 }
