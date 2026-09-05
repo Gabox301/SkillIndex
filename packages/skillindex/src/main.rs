@@ -242,10 +242,9 @@ fn ask_include_security_sync(
     if force_security {
         return true;
     }
-    if auto_yes || !is_tty() {
+    if auto_yes {
         return false;
     }
-    // puede no reportar is_terminal pero sí hay interacción real.
     log(&format!(
         "{}{} {}",
         cyan("   ◆ "),
@@ -266,32 +265,43 @@ fn ask_include_security_sync(
     log("");
     write(&dim("   ¿Incluir? [y/N]: "));
     let _ = std::io::stdout().flush();
-    let _ = crossterm::terminal::enable_raw_mode();
+    if crossterm::terminal::enable_raw_mode().is_err() {
+        log("");
+        return false;
+    }
     let mut include = false;
-    loop {
-        if let Ok(crossterm::event::Event::Key(key)) = crossterm::event::read() {
-            match key.code {
-                crossterm::event::KeyCode::Char('y')
-                | crossterm::event::KeyCode::Char('Y')
-                | crossterm::event::KeyCode::Char('s')
-                | crossterm::event::KeyCode::Char('S')
-                | crossterm::event::KeyCode::Char(' ') => {
-                    include = true;
-                    break;
+    let mut decided = false;
+    while !decided {
+        match crossterm::event::read() {
+            Ok(crossterm::event::Event::Key(key)) => {
+                if key.kind != crossterm::event::KeyEventKind::Press {
+                    continue;
                 }
-                crossterm::event::KeyCode::Char('n')
-                | crossterm::event::KeyCode::Char('N')
-                | crossterm::event::KeyCode::Enter
-                | crossterm::event::KeyCode::Esc => {
-                    include = false;
-                    break;
+                match key.code {
+                    crossterm::event::KeyCode::Char('y')
+                    | crossterm::event::KeyCode::Char('Y')
+                    | crossterm::event::KeyCode::Char('s')
+                    | crossterm::event::KeyCode::Char('S')
+                    | crossterm::event::KeyCode::Char(' ') => {
+                        include = true;
+                        decided = true;
+                    }
+                    crossterm::event::KeyCode::Char('n')
+                    | crossterm::event::KeyCode::Char('N')
+                    | crossterm::event::KeyCode::Enter
+                    | crossterm::event::KeyCode::Esc
+                    | crossterm::event::KeyCode::Char('q')
+                    | crossterm::event::KeyCode::Char('Q') => {
+                        include = false;
+                        decided = true;
+                    }
+                    _ => {}
                 }
-                crossterm::event::KeyCode::Char('q')
-                | crossterm::event::KeyCode::Char('Q') => {
-                    include = false;
-                    break;
-                }
-                _ => {}
+            }
+            Ok(_) => continue,
+            Err(_) => {
+                include = false;
+                break;
             }
         }
     }
