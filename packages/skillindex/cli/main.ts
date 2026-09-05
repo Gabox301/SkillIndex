@@ -490,7 +490,7 @@ async function main(): Promise<void> {
   printDetected(detected, combos, isFrontend);
   const installedNames = getInstalledSkillNames(projectDir);
   const skills = collectSkills({ detected, isFrontend, combos, installedNames });
-  let resolvedAgents = agents.length > 0 ? agents : detectAgents();
+  let resolvedAgents = agents.length > 0 ? agents : detectAgents(projectDir);
   if (agents.length === 0) {
     resolvedAgents = await selectAgents(resolvedAgents, autoYes);
   }

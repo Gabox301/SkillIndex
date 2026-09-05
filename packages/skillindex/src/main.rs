@@ -432,7 +432,7 @@ async fn main() {
     );
 
     let mut resolved_agents = if args.agent.is_empty() {
-        detect_agents()
+        detect_agents(&project_dir)
     } else {
         args.agent.clone()
     };

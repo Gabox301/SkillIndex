@@ -1,5 +1,4 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { ComboSkill, ConfigFileContentBlock, Technology } from '../skills-map.ts';
 
@@ -515,11 +514,12 @@ export function detectCombos(detectedIds: string[]): ComboSkill[] {
 }
 
 // ── Agent Detection ─────────────────────────────────────────
+// Detección 100% local por proyecto: solo mira `<project>/.claude`, `.cursor`, etc.
 
-export function detectAgents(home: string = homedir()): string[] {
+export function detectAgents(projectDir: string = process.cwd()): string[] {
   const agents = ['universal'];
   for (const [folder, agentName] of AGENT_FOLDER_ENTRIES) {
-    if (existsSync(join(home, folder)) || existsSync(join(home, folder, 'skills'))) {
+    if (existsSync(join(projectDir, folder)) || existsSync(join(projectDir, folder, 'skills'))) {
       agents.push(agentName);
     }
   }

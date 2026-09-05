@@ -590,25 +590,15 @@ pub fn collect_skills(
 }
 
 // ── Agent detection ──────────────────────────────────────────────
+// Detección 100% local por proyecto: solo mira `<project>/.claude`, `.cursor`, etc.
+// Sin fallback a `$HOME` — la precisión por proyecto aprovecha mejor los combos.
 
-pub fn detect_agents() -> Vec<String> {
-    detect_agents_in_home(None)
-}
-
-pub fn detect_agents_in_home(home: Option<&Path>) -> Vec<String> {
-    let home_path = if let Some(p) = home {
-        p.to_path_buf()
-    } else {
-        dirs::home_dir().unwrap_or_else(|| PathBuf::from("."))
-    };
+pub fn detect_agents(project_dir: &Path) -> Vec<String> {
     let mut agents = vec!["universal".to_string()];
     let map = get_agent_folder_map();
     for (folder, agent) in map {
-        let folder_path = home_path.join(&folder);
+        let folder_path = project_dir.join(&folder);
         let skills_path = folder_path.join("skills");
-        // Detecta si el agente está instalado: basta que exista la carpeta base
-        // (ej. ~/.cursor) o su subcarpeta skills. Antes solo miraba skills/,
-        // por lo que cursor/opencode recién instalados sin skills no se detectaban.
         if folder_path.exists() || skills_path.exists() {
             agents.push(agent);
         }
@@ -618,7 +608,10 @@ pub fn detect_agents_in_home(home: Option<&Path>) -> Vec<String> {
 
 fn get_agent_folder_map() -> Vec<(String, String)> {
     let mut out = Vec::new();
-    if let Some(map) = SKILLS_MAP_VALUE.get("agent_folder_map").and_then(|x| x.as_object()) {
+    if let Some(map) = SKILLS_MAP_VALUE
+        .get("agent_folder_map")
+        .and_then(|x| x.as_object())
+    {
         for (k, v) in map {
             if let Some(agent) = v.as_str() {
                 out.push((k.clone(), agent.to_string()));
@@ -795,7 +788,8 @@ mod tests {
 
     #[test]
     fn detect_agents_returns_universal() {
-        let agents = detect_agents();
+        let dir = tempdir().unwrap();
+        let agents = detect_agents(dir.path());
         assert!(agents.contains(&"universal".to_string()));
     }
 }
