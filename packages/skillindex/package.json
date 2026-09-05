@@ -35,12 +35,13 @@
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
-    "test": "bun test",
+    "test": "cargo test --manifest-path Cargo.toml",
+    "test:node": "bun test",
     "check": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "validate:registry": "bun run scripts/validate-registry.ts",
-    "prepublish": "bun run check && bun run lint && bun run test && bun run build && bun run validate:registry",
+    "prepublish": "bun run check && bun run lint && cargo test --manifest-path Cargo.toml && bun run build && bun run validate:registry",
     "sync:skills": "bun run scripts/sync-skills.ts",
     "fendo:check": "bun run scripts/fendo.ts"
   },
