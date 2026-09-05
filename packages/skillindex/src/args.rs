@@ -29,6 +29,10 @@ pub struct Args {
     /// Mostrar traza de instalación y detalles de error
     #[arg(short = 'v', long = "verbose")]
     pub verbose: bool,
+
+    /// Incluir combos de seguridad opcionales (SOC, Red Team, Cloud, Forensics)
+    #[arg(long = "security")]
+    pub security: bool,
 }
 
 impl Args {

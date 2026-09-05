@@ -11,7 +11,13 @@ import {
   securityCheckForSkillPath,
 } from './installer.ts';
 import type { ComboSkill, SkillEntry, Technology } from './lib.ts';
-import { collectSkills, detectAgents, detectTechnologies, getInstalledSkillNames } from './lib.ts';
+import {
+  collectSkills,
+  detectAgents,
+  detectTechnologies,
+  getInstalledSkillNames,
+  partitionCombos,
+} from './lib.ts';
 import { formatTime, multiSelect, printBanner } from './ui.ts';
 
 const __dirname = import.meta.dirname;
@@ -42,6 +48,7 @@ interface CliArgs {
   help: boolean;
   clearCache: boolean;
   agents: string[];
+  security: boolean;
 }
 
 function parseArgs(): CliArgs {
@@ -61,6 +68,7 @@ function parseArgs(): CliArgs {
     help: args.includes('--help') || args.includes('-h'),
     clearCache: args.includes('--clear-cache'),
     agents,
+    security: args.includes('--security'),
   };
 }
 
@@ -73,14 +81,16 @@ function showHelp(): void {
     npx skillindex ${dim('--dry-run')}            Mostrar qué se instalaría sin instalar
     npx skillindex ${dim('--clear-cache')}        Limpiar caché de skills descargadas
     npx skillindex ${dim('-a cursor claude-code')} Instalar solo para IDEs específicos
+    npx skillindex ${dim('--security')}            Incluir combos de seguridad opcionales
   ${bold('Opciones:')}
     -y, --yes       Omitir confirmación
     --dry-run       Mostrar qué se instalaría sin instalar
     --clear-cache   Limpiar caché de skills descargadas
+    --security      Incluir combos de seguridad opcionales (sin preguntar)
     -v, --verbose   Mostrar traza de instalación y detalles de error
     -a, --agent     Instalar solo para IDEs específicos (ej. cursor, claude-code)
     -h, --help      Mostrar esta ayuda
-`);
+ `);
 }
 
 // ── Display ──────────────────────────────────────────────────
@@ -358,6 +368,30 @@ function printSummary({ installed, failed, errors, elapsed, verbose }: SummaryOp
   log();
 }
 
+// ── Security Optional ────────────────────────────────────────
+
+async function askIncludeSecurity(
+  securityCombos: ComboSkill[],
+  autoYes: boolean,
+  forceSecurity: boolean,
+): Promise<boolean> {
+  if (securityCombos.length === 0) return false;
+  if (forceSecurity) return true;
+  if (autoYes || !process.stdout.isTTY) return false;
+
+  log(cyan('   ◆ ') + bold('Seguridad (opcionales)') + dim(` — ${securityCombos.length} combos`));
+  log(dim(`   ${securityCombos.map((c) => c.name).join(' · ')}`));
+  log(dim('   Activa el check para incluirlos. Por defecto no se instalan.'));
+  log('');
+
+  type SecurityItem = { label: string };
+  const selected = await multiSelect<SecurityItem>([{ label: 'Seguridad (opcionales)' }], {
+    labelFn: (item) => `${bold(item.label)} ${dim(`— ${securityCombos.map((c) => c.name).join(', ')}`)}`,
+    initialSelected: [false],
+  });
+  return selected.length > 0;
+}
+
 // ── Agent Selection ──────────────────────────────────────────
 
 async function selectAgents(agents: string[], autoYes: boolean): Promise<string[]> {
@@ -461,7 +495,7 @@ async function selectSkills(skills: SkillEntry[], autoYes: boolean): Promise<Ski
 // ── Main ─────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const { autoYes, dryRun, verbose, help, clearCache, agents } = parseArgs();
+  const { autoYes, dryRun, verbose, help, clearCache, agents, security } = parseArgs();
   if (help) {
     showHelp();
     process.exit(0);
@@ -479,13 +513,20 @@ async function main(): Promise<void> {
   await printBanner(VERSION);
   const projectDir = resolve('.');
   write(dim('   Analizando proyecto...\r'));
-  const { detected, isFrontend, combos } = detectTechnologies(projectDir);
+  const { detected, isFrontend, combos: allCombos } = detectTechnologies(projectDir);
   write('\x1b[K');
   if (detected.length === 0 && !isFrontend) {
     log(yellow('   ⚠ No se detectaron tecnologías compatibles.'));
     log(dim('   Asegúrate de ejecutar esto en el directorio de un proyecto.'));
     log();
     process.exit(0);
+  }
+  const { regular: regularCombos, security: securityCombos } = partitionCombos(allCombos);
+  const includeSecurity = await askIncludeSecurity(securityCombos, autoYes, security);
+  const combos = includeSecurity ? [...regularCombos, ...securityCombos] : regularCombos;
+  if (includeSecurity && securityCombos.length > 0) {
+    log(dim(`   ↳ Seguridad incluida: ${securityCombos.map((c) => c.name).join(', ')}`));
+    log('');
   }
   printDetected(detected, combos, isFrontend);
   const installedNames = getInstalledSkillNames(projectDir);

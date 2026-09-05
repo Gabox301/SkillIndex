@@ -521,6 +521,31 @@ pub fn detect_combos(detected_ids: &[String]) -> Vec<DisplayCombo> {
     out
 }
 
+/// IDs de combos de seguridad que son opcionales (requieren opt-in vía checkbox)
+pub const OPTIONAL_SECURITY_COMBO_IDS: &[&str] = &[
+    "security-operations",
+    "red-team",
+    "cloud-security",
+    "forensics-ir",
+];
+
+pub fn is_optional_security_combo(id: &str) -> bool {
+    OPTIONAL_SECURITY_COMBO_IDS.contains(&id)
+}
+
+pub fn partition_combos(combos: Vec<DisplayCombo>) -> (Vec<DisplayCombo>, Vec<DisplayCombo>) {
+    let mut regular = Vec::new();
+    let mut security = Vec::new();
+    for c in combos {
+        if is_optional_security_combo(&c.id) {
+            security.push(c);
+        } else {
+            regular.push(c);
+        }
+    }
+    (regular, security)
+}
+
 // ── Skill collection ─────────────────────────────────────────────
 
 pub fn collect_skills(

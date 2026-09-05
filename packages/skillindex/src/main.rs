@@ -10,7 +10,7 @@ use skillindex::banner::print_banner;
 use skillindex::cache::clear_skillindex_cache;
 use skillindex::claude::cleanup_claude_md;
 use skillindex::detect::{
-    collect_skills, detect_agents, detect_technologies, get_installed_skill_names,
+    collect_skills, detect_agents, detect_technologies, get_installed_skill_names, partition_combos,
 };
 use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_skill_label, print_detected, print_security_checks,
@@ -230,6 +230,67 @@ fn select_agents_sync(agents: Vec<String>, auto_yes: bool) -> Vec<String> {
     selected_real
 }
 
+fn ask_include_security_sync(
+    security_combos: &[DisplayCombo],
+    force_security: bool,
+    auto_yes: bool,
+) -> bool {
+    if security_combos.is_empty() {
+        return false;
+    }
+    if force_security {
+        return true;
+    }
+    if auto_yes || !is_tty() {
+        return false;
+    }
+    log(&format!(
+        "{}{} {}",
+        cyan("   ◆ "),
+        bold("Seguridad (opcionales)"),
+        dim(&format!("— {} combos", security_combos.len()))
+    ));
+    log(&dim(&format!(
+        "   {}",
+        security_combos
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<Vec<_>>()
+            .join(" · ")
+    )));
+    log(&dim(
+        "   Activa el check para incluirlos. Por defecto no se instalan.",
+    ));
+    log("");
+
+    let combo_names = security_combos
+        .iter()
+        .map(|c| c.name.clone())
+        .collect::<Vec<_>>()
+        .join(", ");
+    type SecurityLabelFn = dyn Fn(&String, usize) -> String;
+    let label_fn: Box<SecurityLabelFn> = Box::new(move |_item: &String, _| {
+        format!(
+            "{} {}",
+            bold("Seguridad (opcionales)"),
+            dim(&format!("— {combo_names}"))
+        )
+    });
+    let opts = MultiSelectOptions {
+        label_fn,
+        hint_fn: None,
+        group_fn: None,
+        initial_selected: Some(vec![false]),
+        shortcuts: Vec::new(),
+    };
+    let selected = multi_select(
+        vec!["Seguridad (opcionales)".to_string()],
+        opts,
+    )
+    .unwrap_or_default();
+    !selected.is_empty()
+}
+
 fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry> {
     if auto_yes {
         print_skills_list(&skills);
@@ -398,6 +459,28 @@ async fn main() {
         std::process::exit(0);
     }
 
+    let (regular_combos, security_combos) = partition_combos(detect_result.combos);
+    let include_security =
+        ask_include_security_sync(&security_combos, args.security, args.yes);
+    let final_combos = if include_security {
+        let mut v = regular_combos.clone();
+        v.extend(security_combos.clone());
+        v
+    } else {
+        regular_combos.clone()
+    };
+    if include_security && !security_combos.is_empty() {
+        log(&dim(&format!(
+            "   ↳ Seguridad incluida: {}",
+            security_combos
+                .iter()
+                .map(|c| c.name.clone())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )));
+        log("");
+    }
+
     // Convert to display types
     let detected_display: Vec<DisplayTechnology> = detect_result
         .detected
@@ -408,8 +491,7 @@ async fn main() {
             skills: t.skills.clone(),
         })
         .collect();
-    let combos_display: Vec<DisplayCombo> = detect_result
-        .combos
+    let combos_display: Vec<DisplayCombo> = final_combos
         .iter()
         .map(|c| DisplayCombo {
             id: c.id.clone(),
@@ -427,7 +509,7 @@ async fn main() {
     let skills = collect_skills(
         &detect_result.detected,
         detect_result.is_frontend,
-        &detect_result.combos,
+        &final_combos,
         Some(&installed_names),
     );
 

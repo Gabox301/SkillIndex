@@ -513,6 +513,30 @@ export function detectCombos(detectedIds: string[]): ComboSkill[] {
   return COMBO_SKILLS_MAP.filter((combo) => combo.requires.every((id) => idSet.has(id)));
 }
 
+export const OPTIONAL_SECURITY_COMBO_IDS = new Set<string>([
+  'security-operations',
+  'red-team',
+  'cloud-security',
+  'forensics-ir',
+]);
+
+export function isOptionalSecurityCombo(id: string): boolean {
+  return OPTIONAL_SECURITY_COMBO_IDS.has(id);
+}
+
+export function partitionCombos(combos: ComboSkill[]): {
+  regular: ComboSkill[];
+  security: ComboSkill[];
+} {
+  const regular: ComboSkill[] = [];
+  const security: ComboSkill[] = [];
+  for (const c of combos) {
+    if (isOptionalSecurityCombo(c.id)) security.push(c);
+    else regular.push(c);
+  }
+  return { regular, security };
+}
+
 // ── Agent Detection ─────────────────────────────────────────
 // Detección 100% local por proyecto: solo mira `<project>/.claude`, `.cursor`, etc.
 
