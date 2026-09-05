@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{IsTerminal, Write};
+use std::io::Write;
 use std::path::PathBuf;
 use std::time::Instant;
 
