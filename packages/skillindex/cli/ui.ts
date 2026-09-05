@@ -42,7 +42,7 @@ function renderAnimatedLogo(frame: number, speed: number): string[] {
 
 export async function printBanner(version: string): Promise<void> {
   const ver = `v${version}`;
-  const subtitle = `Instala automáticamente las mejores skills de IA para tu proyecto · ${ver}`;
+  const subtitle = `Instala las mejores skills de IA para tu proyecto · ${ver}`;
   if (!process.stdout.isTTY || 'NO_COLOR' in process.env) {
     log();
     for (const line of LOGO_LINES) log(bold(cyan(line)));

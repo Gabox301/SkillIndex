@@ -1,4 +1,5 @@
 use std::env;
+use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -241,7 +242,7 @@ fn ask_include_security_sync(
     if force_security {
         return true;
     }
-    if auto_yes || !is_tty() {
+    if auto_yes || !std::io::stdin().is_terminal() {
         return false;
     }
     log(&format!(
@@ -259,33 +260,17 @@ fn ask_include_security_sync(
             .join(" · ")
     )));
     log(&dim(
-        "   Activa el check para incluirlos. Por defecto no se instalan.",
+        "   ¿Incluir skills de seguridad? Por defecto no. [y/N]",
     ));
     log("");
-
-    let combo_names = security_combos
-        .iter()
-        .map(|c| c.name.clone())
-        .collect::<Vec<_>>()
-        .join(", ");
-    type SecurityLabelFn = dyn Fn(&String, usize) -> String;
-    let label_fn: Box<SecurityLabelFn> = Box::new(move |_item: &String, _| {
-        format!(
-            "{} {}",
-            bold("Seguridad (opcionales)"),
-            dim(&format!("— {combo_names}"))
-        )
-    });
-    let opts = MultiSelectOptions {
-        label_fn,
-        hint_fn: None,
-        group_fn: None,
-        initial_selected: Some(vec![false]),
-        shortcuts: Vec::new(),
-    };
-    let selected =
-        multi_select(vec!["Seguridad (opcionales)".to_string()], opts).unwrap_or_default();
-    !selected.is_empty()
+    write(&dim("   ¿Incluir? [y/N]: "));
+    let _ = std::io::stdout().flush();
+    let mut input = String::new();
+    let _ = std::io::stdin().read_line(&mut input);
+    let ans = input.trim().to_lowercase();
+    let include = ans == "y" || ans == "yes" || ans == "s" || ans == "si";
+    log("");
+    include
 }
 
 fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry> {
@@ -448,6 +433,43 @@ async fn main() {
     write("\x1b[K");
 
     let (regular_combos, security_combos) = partition_combos(detect_result.combos);
+
+    // 1. Tecnologías detectadas (sin seguridad — se ofrece después)
+    let detected_display: Vec<DisplayTechnology> = detect_result
+        .detected
+        .iter()
+        .map(|t| DisplayTechnology {
+            id: t.id.clone(),
+            name: t.name.clone(),
+            skills: t.skills.clone(),
+        })
+        .collect();
+    let combos_display_regular: Vec<DisplayCombo> = regular_combos
+        .iter()
+        .map(|c| DisplayCombo {
+            id: c.id.clone(),
+            name: c.name.clone(),
+        })
+        .collect();
+
+    print_detected(
+        &detected_display,
+        &combos_display_regular,
+        detect_result.is_frontend,
+    );
+
+    // 2. Agentes — decidir dónde instalar
+    let mut resolved_agents = if args.agent.is_empty() {
+        detect_agents(&project_dir)
+    } else {
+        args.agent.clone()
+    };
+
+    if args.agent.is_empty() {
+        resolved_agents = select_agents_sync(resolved_agents, args.yes);
+    }
+
+    // 3. Seguridad (opcionales) — checkbox y/n
     let include_security = ask_include_security_sync(&security_combos, args.security, args.yes);
     let final_combos = if include_security {
         let mut v = regular_combos.clone();
@@ -480,30 +502,7 @@ async fn main() {
         std::process::exit(0);
     }
 
-    // Convert to display types
-    let detected_display: Vec<DisplayTechnology> = detect_result
-        .detected
-        .iter()
-        .map(|t| DisplayTechnology {
-            id: t.id.clone(),
-            name: t.name.clone(),
-            skills: t.skills.clone(),
-        })
-        .collect();
-    let combos_display: Vec<DisplayCombo> = final_combos
-        .iter()
-        .map(|c| DisplayCombo {
-            id: c.id.clone(),
-            name: c.name.clone(),
-        })
-        .collect();
-
-    print_detected(
-        &detected_display,
-        &combos_display,
-        detect_result.is_frontend,
-    );
-
+    // 4. Skills — con o sin seguridad según el check
     let installed_names = get_installed_skill_names(&project_dir);
     let skills = collect_skills(
         &detect_result.detected,
@@ -511,17 +510,6 @@ async fn main() {
         &final_combos,
         Some(&installed_names),
     );
-
-    let mut resolved_agents = if args.agent.is_empty() {
-        detect_agents(&project_dir)
-    } else {
-        args.agent.clone()
-    };
-
-    // Delegar al usuario si hay múltiples destinos detectados y no hay -a / -y
-    if args.agent.is_empty() {
-        resolved_agents = select_agents_sync(resolved_agents, args.yes);
-    }
 
     if skills.is_empty() {
         log(&yellow("   Aún no hay skills disponibles para tu stack."));

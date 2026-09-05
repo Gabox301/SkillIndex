@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { createInterface } from 'node:readline';
 import { cleanupClaudeMd } from './claude.ts';
 import { bold, cyan, dim, gray, green, log, magenta, muted, red, SHOW_CURSOR, write, yellow } from './colors.ts';
 import type { InstallSecurityCheck } from './installer.ts';
@@ -371,19 +372,23 @@ async function askIncludeSecurity(
 ): Promise<boolean> {
   if (securityCombos.length === 0) return false;
   if (forceSecurity) return true;
-  if (autoYes || !process.stdout.isTTY) return false;
+  if (autoYes || !process.stdin.isTTY) return false;
 
   log(cyan('   ◆ ') + bold('Seguridad (opcionales)') + dim(` — ${securityCombos.length} combos`));
   log(dim(`   ${securityCombos.map((c) => c.name).join(' · ')}`));
-  log(dim('   Activa el check para incluirlos. Por defecto no se instalan.'));
+  log(dim('   ¿Incluir skills de seguridad? Por defecto no. [y/N]'));
   log('');
 
-  type SecurityItem = { label: string };
-  const selected = await multiSelect<SecurityItem>([{ label: 'Seguridad (opcionales)' }], {
-    labelFn: (item) => `${bold(item.label)} ${dim(`— ${securityCombos.map((c) => c.name).join(', ')}`)}`,
-    initialSelected: [false],
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const answer: string = await new Promise((resolve) => {
+    rl.question(dim('   ¿Incluir? [y/N]: '), (ans) => {
+      rl.close();
+      resolve(ans.trim().toLowerCase());
+    });
   });
-  return selected.length > 0;
+  const include = answer === 'y' || answer === 'yes' || answer === 's' || answer === 'si';
+  log('');
+  return include;
 }
 
 // ── Agent Selection ──────────────────────────────────────────
@@ -510,12 +515,24 @@ async function main(): Promise<void> {
   const { detected, isFrontend, combos: allCombos } = detectTechnologies(projectDir);
   write('\x1b[K');
   const { regular: regularCombos, security: securityCombos } = partitionCombos(allCombos);
+
+  // 1. Tecnologías detectadas (sin seguridad)
+  printDetected(detected, regularCombos, isFrontend);
+
+  // 2. Agentes — decidir dónde instalar
+  let resolvedAgents = agents.length > 0 ? agents : detectAgents(projectDir);
+  if (agents.length === 0) {
+    resolvedAgents = await selectAgents(resolvedAgents, autoYes);
+  }
+
+  // 3. Seguridad (opcionales) — checkbox y/n
   const includeSecurity = await askIncludeSecurity(securityCombos, autoYes, security);
   const combos = includeSecurity ? [...regularCombos, ...securityCombos] : regularCombos;
   if (includeSecurity && securityCombos.length > 0) {
     log(dim(`   ↳ Seguridad incluida: ${securityCombos.map((c) => c.name).join(', ')}`));
     log('');
   }
+
   if (detected.length === 0 && !isFrontend && combos.length === 0) {
     log(yellow('   ⚠ No se detectaron tecnologías compatibles.'));
     log(dim('   Asegúrate de ejecutar esto en el directorio de un proyecto.'));
@@ -523,13 +540,10 @@ async function main(): Promise<void> {
     log();
     process.exit(0);
   }
-  printDetected(detected, combos, isFrontend);
+
+  // 4. Skills — con o sin seguridad según el check
   const installedNames = getInstalledSkillNames(projectDir);
   const skills = collectSkills({ detected, isFrontend, combos, installedNames });
-  let resolvedAgents = agents.length > 0 ? agents : detectAgents(projectDir);
-  if (agents.length === 0) {
-    resolvedAgents = await selectAgents(resolvedAgents, autoYes);
-  }
   if (skills.length === 0) {
     log(yellow('   Aún no hay skills disponibles para tu stack.'));
     log(dim('   Consulta https://skillindex.netlify.app para las últimas novedades.'));
