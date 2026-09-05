@@ -1,9 +1,0 @@
-[test]
-# Exclude build output from test discovery. `target/` holds Cargo build
-# artifacts, including packaged snapshots (target/package/<name>-<version>/)
-# that ship their own stale *.test.ts copies. Without this, `bun test` would
-# traverse those directories and run outdated tests against outdated source.
-# `skills-registry/` embeds third-party skills (e.g. archify) whose own test
-# suites target Unix-only tooling (unzip, git --template=:, repo layout) and
-# are not part of this package's contract.
-pathIgnorePatterns = ["target/**", "dist/**", "node_modules/**", "skills-registry/**"]

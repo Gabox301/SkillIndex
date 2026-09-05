@@ -1,9 +1,6 @@
 # build output
 dist/
 
-# generated types
-.astro/
-
 # dependencies
 node_modules/
 
@@ -34,6 +31,7 @@ skills-lock.json
 # Rust build
 target/
 packages/skillindex/target/
+scripts/sync-skills.report.json
 
 # SDD working directory (local registry, not shared)
 .atl/
@@ -41,6 +39,3 @@ packages/skillindex/target/
 openspec
 sdd
 docs
-
-# Landing is separate repo
-Landing/
