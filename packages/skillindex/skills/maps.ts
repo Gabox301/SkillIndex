@@ -7,6 +7,7 @@ import { redTeamCombo } from './combos/red-team.ts';
 import { securityOperationsCombo } from './combos/security-operations.ts';
 import { agentWorkflows } from './domains/agent-workflows.ts';
 import { archify } from './domains/archify.ts';
+import { bookToSkill } from './domains/book-to-skill.ts';
 import { mattPocockSkills } from './domains/matt-pocock.ts';
 import { sddWorkflow } from './domains/sdd-workflow.ts';
 import { tasteSkill } from './domains/taste-skill.ts';
@@ -249,6 +250,7 @@ export const SKILLS_MAP: Technology[] = [
   mattPocockSkills,
   tasteSkill,
   archify,
+  bookToSkill,
 ];
 
 export const COMBO_SKILLS_MAP: ComboSkill[] = [

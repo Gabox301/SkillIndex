@@ -2262,6 +2262,12 @@
       "name": "Archify",
       "detect": {},
       "skills": ["tt-a1i/archify/archify"]
+    },
+    {
+      "id": "book-to-skill",
+      "name": "Book to Skill",
+      "detect": {},
+      "skills": ["virgiliojr94/book-to-skill/book-to-skill"]
     }
   ],
   "combos": [
