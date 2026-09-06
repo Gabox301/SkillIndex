@@ -33,6 +33,10 @@ pub struct Args {
     /// Incluir combos de seguridad opcionales (SOC, Red Team, Cloud, Forensics)
     #[arg(long = "security")]
     pub security: bool,
+
+    /// Instalar una skill directamente por su path (ej. virgiliojr94/book-to-skill/book-to-skill)
+    #[arg(value_name = "SKILL")]
+    pub skill: Option<String>,
 }
 
 impl Args {

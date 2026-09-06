@@ -17,7 +17,7 @@ use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_skill_label, print_detected, print_security_checks,
     print_skills_list,
 };
-use skillindex::installer::{InstallOptions, SkillEntry, install_all};
+use skillindex::installer::{InstallError, InstallOptions, SkillEntry, install_all, install_skill};
 use skillindex::prompt::{MultiSelectOptions, Shortcut, multi_select};
 use skillindex::registry::{load_registry, security_check_for_entry};
 use skillindex::ui::{bold, brand_cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
@@ -463,6 +463,45 @@ async fn main() {
         }
         log("");
         std::process::exit(0);
+    }
+
+    // Instalación directa de una skill por path (ej. virgiliojr94/book-to-skill)
+    if let Some(skill_path) = args.skill.clone() {
+        let project_dir = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        let mut resolved_agents = if args.agent.is_empty() {
+            detect_agents(&project_dir)
+        } else {
+            args.agent.clone()
+        };
+        if args.agent.is_empty() {
+            resolved_agents = select_agents_sync(resolved_agents, args.yes);
+        }
+        let start = Instant::now();
+        let opts = InstallOptions {
+            project_dir: Some(project_dir.clone()),
+            ..Default::default()
+        };
+        let result = install_skill(&skill_path, &resolved_agents, opts).await;
+        let elapsed = start.elapsed().as_millis() as u64;
+        if result.success {
+            print_security_checks(&result.security_check.into_iter().collect::<Vec<_>>());
+            print_summary(1, 0, &[], elapsed, args.verbose);
+        } else {
+            print_summary(
+                0,
+                1,
+                &[InstallError {
+                    name: skill_path.clone(),
+                    output: result.output.clone(),
+                    stderr: result.stderr.clone(),
+                    exit_code: result.exit_code,
+                    command: result.command.clone(),
+                }],
+                elapsed,
+                args.verbose,
+            );
+        }
+        std::process::exit(if result.success { 0 } else { 1 });
     }
 
     let version = env!("CARGO_PKG_VERSION");
