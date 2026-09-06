@@ -50,9 +50,6 @@ fn get_skills_slice() -> &'static [crate::skills::types::Technology] {
 fn get_combos_slice() -> &'static [crate::skills::types::ComboSkill] {
     crate::skills::COMBO_SKILLS_MAP.as_slice()
 }
-fn get_agent_folder_map_slice() -> &'static [(&'static str, &'static str)] {
-    crate::skills::AGENT_FOLDER_MAP
-}
 
 // ── Helpers ──────────────────────────────────────────────────────
 
@@ -503,21 +500,15 @@ pub fn detect_agents(project_dir: &Path) -> Vec<String> {
     agents
 }
 
+pub fn get_all_possible_agents() -> Vec<String> {
+    get_agent_folder_map()
+        .into_iter()
+        .map(|(_, agent)| agent)
+        .collect()
+}
+
 fn get_agent_folder_map() -> Vec<(String, String)> {
-    let slice = get_agent_folder_map_slice();
-    if slice.is_empty() {
-        return vec![
-            (".claude".into(), "claude-code".into()),
-            (".cline".into(), "cline".into()),
-            (".junie".into(), "junie".into()),
-            (".codebuddy".into(), "codebuddy".into()),
-            (".continue".into(), "continue".into()),
-            (".kiro".into(), "kiro-cli".into()),
-            (".opencode".into(), "opencode".into()),
-            (".cursor".into(), "cursor".into()),
-        ];
-    }
-    slice
+    crate::skills::AGENT_FOLDER_MAP
         .iter()
         .map(|(k, v)| (k.to_string(), v.to_string()))
         .collect()

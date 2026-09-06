@@ -175,13 +175,54 @@ fn print_summary(
 }
 
 fn select_agents_sync(agents: Vec<String>, auto_yes: bool) -> Vec<String> {
-    // Solo delega si hay ambigüedad real: más de un agente concreto detectado.
-    // Si el usuario pasó -a/--agent o --yes, se respeta sin preguntar.
     let real_agents: Vec<String> = agents
         .iter()
         .filter(|a| a.as_str() != "universal")
         .cloned()
         .collect();
+    if real_agents.is_empty() {
+        // Proyecto nuevo sin directorios de agente: dar control al usuario en vez de ir directo a universal
+        if auto_yes || !is_tty() {
+            return agents;
+        }
+        let all_possible = skillindex::detect::get_all_possible_agents();
+        log(&format!(
+            "{}{} {}",
+            brand_cyan("   ◆ "),
+            bold("No se detectó ningún agente en el proyecto"),
+            dim(&format!("({} disponibles)", all_possible.len()))
+        ));
+        log(&dim(
+            "   Selecciona dónde instalar. Crea el/los directorios si aún no existen.",
+        ));
+        log("");
+
+        let styled_label_fn: Box<AgentLabelFn> = Box::new(|item: &String, _| {
+            let folder = skillindex::registry::agent_folder_for(item).unwrap_or(".agents");
+            format!("{} {}", bold(item), dim(&format!("({folder})")))
+        });
+
+        let opts = MultiSelectOptions {
+            label_fn: styled_label_fn,
+            hint_fn: None,
+            group_fn: None,
+            initial_selected: Some(vec![false; all_possible.len()]),
+            shortcuts: Vec::new(),
+        };
+
+        let selected = multi_select(all_possible.clone(), opts).unwrap_or_default();
+
+        if selected.is_empty() {
+            log("");
+            log(&dim(
+                "   Ningún agente seleccionado — se usará .agents (universal).",
+            ));
+            log("");
+            return vec!["universal".to_string()];
+        }
+
+        return selected;
+    }
     if real_agents.len() <= 1 {
         return agents;
     }
@@ -242,7 +283,7 @@ fn ask_include_security_sync(
     if force_security {
         return true;
     }
-    if auto_yes {
+    if auto_yes || !is_tty() {
         return false;
     }
     log(&format!(
