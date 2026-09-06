@@ -1,4 +1,4 @@
-use crate::ui::{bold, cyan, dim, is_tty, use_color, write};
+use crate::ui::{bold, brand_cyan, dim, is_tty, use_color, write};
 
 const LOGO_LINES: &[&str] = &[
     " ███████╗██╗  ██╗██╗██╗     ██╗     ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗",
@@ -9,8 +9,12 @@ const LOGO_LINES: &[&str] = &[
     " ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝",
 ];
 
-fn rgb(gray_value: u8, text: &str) -> String {
-    format!("\x1b[38;2;{gray_value};{gray_value};{gray_value}m{text}\x1b[39m")
+fn brand_gradient(progress: f64, text: &str) -> String {
+    // Interpola entre brand_cyan #38bdf8 (56,189,248) y brand_orange #fb923c (251,146,60)
+    let r = (56.0 + progress * (251.0 - 56.0)).round() as u8;
+    let g = (189.0 + progress * (146.0 - 189.0)).round() as u8;
+    let b = (248.0 + progress * (60.0 - 248.0)).round() as u8;
+    format!("\x1b[38;2;{r};{g};{b}m{text}\x1b[39m")
 }
 
 fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
@@ -27,8 +31,7 @@ fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
                     } else {
                         let distance = col as f64 + row as f64 * 2.0;
                         let progress = ((wave_front - distance) / 10.0).clamp(0.0, 1.0);
-                        let gray_value = (63.0 + progress * (244.0 - 63.0)).round() as u8;
-                        rgb(gray_value, &ch.to_string())
+                        brand_gradient(progress, &ch.to_string())
                     }
                 })
                 .collect::<String>()
@@ -49,7 +52,7 @@ pub async fn print_banner(version: &str) {
     if !is_tty() || is_no_color() || !use_color() {
         println!();
         for line in LOGO_LINES {
-            println!("{}", bold(&cyan(line)));
+            println!("{}", bold(&brand_cyan(line)));
         }
         println!("{}", dim(&subtitle));
         println!();
@@ -95,7 +98,7 @@ pub fn format_banner_static(version: &str) -> String {
     let mut out = String::new();
     out.push('\n');
     for line in LOGO_LINES {
-        out.push_str(&format!("{}\n", bold(&cyan(line))));
+        out.push_str(&format!("{}\n", bold(&brand_cyan(line))));
     }
     out.push_str(&format!("{}\n", dim(&subtitle)));
     out.push('\n');

@@ -69,6 +69,20 @@ pub fn pink(s: &str) -> String {
     style("\x1b[38;5;218m", s, "\x1b[39m")
 }
 
+// ── Brand colors ─────────────────────────────────────────────────────
+pub fn brand_blue(s: &str) -> String {
+    style("\x1b[38;2;59;130;246m", s, "\x1b[39m") // #3b82f6
+}
+pub fn brand_teal(s: &str) -> String {
+    style("\x1b[38;2;45;212;191m", s, "\x1b[39m") // #2dd4bf
+}
+pub fn brand_cyan(s: &str) -> String {
+    style("\x1b[38;2;56;189;248m", s, "\x1b[39m") // #38bdf8
+}
+pub fn brand_orange(s: &str) -> String {
+    style("\x1b[38;2;251;146;60m", s, "\x1b[39m") // #fb923c
+}
+
 // ── Output helpers — mirrors `log`/`write` from colors.ts ─────────
 
 /// Like `console.log` — prints with newline

@@ -20,7 +20,7 @@ use skillindex::display::{
 use skillindex::installer::{InstallOptions, SkillEntry, install_all};
 use skillindex::prompt::{MultiSelectOptions, Shortcut, multi_select};
 use skillindex::registry::{load_registry, security_check_for_entry};
-use skillindex::ui::{bold, cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
+use skillindex::ui::{bold, brand_cyan, dim, green, is_tty, log, red, show_cursor, write, yellow};
 
 const ISSUES_URL: &str = "https://github.com/Gabox301/SkillIndex/issues";
 
@@ -191,7 +191,7 @@ fn select_agents_sync(agents: Vec<String>, auto_yes: bool) -> Vec<String> {
 
     log(&format!(
         "{}{} {}",
-        cyan("   ◆ "),
+        brand_cyan("   ◆ "),
         bold("Selecciona dónde instalar"),
         dim(&format!("({} agentes detectados)", real_agents.len()))
     ));
@@ -247,7 +247,7 @@ fn ask_include_security_sync(
     }
     log(&format!(
         "{}{} {}",
-        cyan("   ◆ "),
+        brand_cyan("   ◆ "),
         bold("Seguridad (opcionales)"),
         dim(&format!("— {} combos", security_combos.len()))
     ));
@@ -357,7 +357,7 @@ fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillEntry
     };
     log(&format!(
         "{}{} {}",
-        cyan("   ◆ "),
+        brand_cyan("   ◆ "),
         bold("Selecciona las skills a instalar"),
         dim(&format!("({count_label})"))
     ));
@@ -578,7 +578,7 @@ async fn main() {
     let selected_skills = select_skills_sync(skills.clone(), args.yes);
 
     log("");
-    log(&(cyan("   ◆ ") + &bold("Instalando skills...")));
+    log(&(brand_cyan("   ◆ ") + &bold("Instalando skills...")));
     log(&dim(&format!("   Agentes: {}", resolved_agents.join(", "))));
     log("");
 

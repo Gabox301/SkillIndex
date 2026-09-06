@@ -1,6 +1,6 @@
 use crate::installer::SkillEntry;
 use crate::registry::InstallSecurityCheck;
-use crate::ui::{bold, cyan, dim, green, magenta, strip_ansi, yellow};
+use crate::ui::{bold, brand_cyan, dim, green, magenta, strip_ansi, yellow};
 
 // ── Types for display ──────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ pub struct DisplayCombo {
 pub fn format_skill_label(skill: &str, styled: bool) -> String {
     if skill.to_lowercase().starts_with("http://") || skill.to_lowercase().starts_with("https://") {
         if styled {
-            return cyan(skill);
+            return brand_cyan(skill);
         } else {
             return skill.to_string();
         }
@@ -30,7 +30,7 @@ pub fn format_skill_label(skill: &str, styled: bool) -> String {
     let parts: Vec<&str> = skill.split('/').collect();
     if parts.len() != 3 {
         if styled {
-            return cyan(skill);
+            return brand_cyan(skill);
         } else {
             return skill.to_string();
         }
@@ -40,12 +40,12 @@ pub fn format_skill_label(skill: &str, styled: bool) -> String {
     if !styled {
         return format!("{author} › {skill_name}");
     }
-    // styled: muted(author) + gray("›") + cyan(bold(skillName))
+    // styled: muted(author) + gray("›") + brand_cyan(bold(skillName))
     format!(
         "{} {} {}",
         crate::ui::muted(author),
         crate::ui::gray("›"),
-        cyan(&bold(skill_name))
+        brand_cyan(&bold(skill_name))
     )
 }
 
@@ -135,7 +135,7 @@ pub fn format_detected(
 
         out.push_str(&format!(
             "{}\n",
-            cyan("   ◆ ") + &bold("Tecnologías detectadas:")
+            brand_cyan("   ◆ ") + &bold("Tecnologías detectadas:")
         ));
         out.push('\n');
 
@@ -188,7 +188,7 @@ pub fn format_detected(
     if is_frontend && detected.is_empty() {
         out.push_str(&format!(
             "{}\n",
-            cyan("   ◆ ")
+            brand_cyan("   ◆ ")
                 + &bold("Frontend web detectado ")
                 + &dim("(a partir de archivos del proyecto)")
         ));
@@ -240,7 +240,7 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
     let mut out = String::new();
     out.push_str(&format!(
         "{}\n",
-        cyan("   ◆ ") + &bold("Skills por instalar ") + &dim(&count_label)
+        brand_cyan("   ◆ ") + &bold("Skills por instalar ") + &dim(&count_label)
     ));
     out.push('\n');
 
@@ -346,7 +346,7 @@ pub fn format_security_checks(checks: &[InstallSecurityCheck]) -> String {
     out.push('\n');
     out.push_str(&format!(
         "{}\n",
-        cyan("   ◆ ") + &bold("Verificaciones de seguridad")
+        brand_cyan("   ◆ ") + &bold("Verificaciones de seguridad")
     ));
     out.push('\n');
     out.push_str(&format!(

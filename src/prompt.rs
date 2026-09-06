@@ -7,7 +7,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 
-use crate::ui::{bold, cyan, dim, green, white, yellow};
+use crate::ui::{bold, brand_cyan, dim, green, white, yellow};
 
 // ── Options ────────────────────────────────────────────────────────
 
@@ -275,7 +275,7 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
 
         for (r, row) in rows.iter().enumerate().take(end).skip(view_start) {
             let pointer = if r == cursor {
-                cyan("❯")
+                brand_cyan("❯")
             } else {
                 " ".to_string()
             };
