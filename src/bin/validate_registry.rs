@@ -52,17 +52,17 @@ fn main() -> anyhow::Result<()> {
         entry.1.insert(source.to_string());
     };
 
-    for tech in SKILLS_MAP {
-        for skill in tech.skills {
+    for tech in SKILLS_MAP.iter() {
+        for &skill in tech.skills {
             add(skill, tech.id);
         }
     }
-    for combo in COMBO_SKILLS_MAP {
-        for skill in combo.skills {
+    for combo in COMBO_SKILLS_MAP.iter() {
+        for &skill in combo.skills {
             add(skill, combo.id);
         }
     }
-    for skill in FRONTEND_BONUS_SKILLS {
+    for &skill in FRONTEND_BONUS_SKILLS {
         add(skill, "frontend-bonus");
     }
 
