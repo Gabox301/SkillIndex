@@ -45,10 +45,10 @@ static FRONTEND_BONUS_SKILLS: &[&str] = crate::skills::FRONTEND_BONUS_SKILLS;
 
 // ── Skills map — ahora Rust nativo, no JSON parse
 fn get_skills_slice() -> &'static [crate::skills::types::Technology] {
-    crate::skills::SKILLS
+    crate::skills::SKILLS.as_slice()
 }
 fn get_combos_slice() -> &'static [crate::skills::types::ComboSkill] {
-    crate::skills::COMBO_SKILLS_MAP
+    crate::skills::COMBO_SKILLS_MAP.as_slice()
 }
 fn get_agent_folder_map_slice() -> &'static [(&'static str, &'static str)] {
     crate::skills::AGENT_FOLDER_MAP
