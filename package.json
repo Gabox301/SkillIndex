@@ -40,10 +40,11 @@
     "check": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "validate:registry": "bun run scripts/validate-registry.ts",
-    "prepublish": "bun run check && bun run lint && cargo test --manifest-path Cargo.toml && bun run build && bun run validate:registry",
-    "sync:skills": "bun run scripts/sync-skills.ts",
-    "fendo:check": "bun run scripts/fendo.ts"
+    "validate:registry": "cargo run --bin validate-registry",
+    "regenerate:index": "cargo run --bin regenerate-index",
+    "prepublish": "bun run check && bun run lint && cargo test --manifest-path Cargo.toml && bun run build && cargo run --bin validate-registry",
+    "sync:skills": "cargo run --bin sync-skills --",
+    "fendo:check": "cargo run --bin fendo"
   },
   "packageManager": "bun@1.4.0",
   "devDependencies": {

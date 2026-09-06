@@ -24,6 +24,14 @@ path = "src/bin/validate_registry.rs"
 name = "sync-skills"
 path = "src/bin/sync_skills.rs"
 
+[[bin]]
+name = "fendo"
+path = "src/bin/fendo.rs"
+
+[[bin]]
+name = "regenerate-index"
+path = "src/bin/regenerate_index.rs"
+
 [lib]
 name = "skillindex"
 path = "src/lib.rs"
