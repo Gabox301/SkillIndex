@@ -14,11 +14,3 @@ pub mod registry;
 pub mod skills;
 pub mod ui;
 pub mod workspace;
-
-pub mod skills_map {
-    pub const SKILLS_MAP_JSON: &str = include_str!("../skills_map.json");
-
-    pub fn skills_map_json() -> &'static str {
-        SKILLS_MAP_JSON
-    }
-}
