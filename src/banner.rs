@@ -9,16 +9,37 @@ const LOGO_LINES: &[&str] = &[
     " ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝",
 ];
 
-fn brand_gradient(progress: f64, text: &str) -> String {
-    // Interpola entre brand_cyan #38bdf8 (56,189,248) y brand_orange #fb923c (251,146,60)
+/// Cuántas "unidades de distancia" tarda un carácter en pasar de negro (sombra,
+/// no revelado) a su color de marca pleno. Sin blanco de por medio.
+const REVEAL_WIDTH: f64 = 5.0;
+
+/// Color de marca final (asentado) para una posición dada, 0.0 = cian, 1.0 = naranja.
+fn brand_rgb(progress: f64) -> (u8, u8, u8) {
+    let progress = progress.clamp(0.0, 1.0);
     let r = (56.0 + progress * (251.0 - 56.0)).round() as u8;
     let g = (189.0 + progress * (146.0 - 189.0)).round() as u8;
     let b = (248.0 + progress * (60.0 - 248.0)).round() as u8;
+    (r, g, b)
+}
+
+fn ansi_rgb(r: u8, g: u8, b: u8, text: &str) -> String {
     format!("\x1b[38;2;{r};{g};{b}m{text}\x1b[39m")
+}
+
+fn max_wave_distance() -> f64 {
+    let cols = LOGO_LINES
+        .iter()
+        .map(|l| l.chars().count())
+        .max()
+        .unwrap_or(0) as f64;
+    let rows = LOGO_LINES.len() as f64;
+    cols + (rows - 1.0) * 2.0
 }
 
 fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
     let wave_front = frame as f64 * speed;
+    let max_distance = max_wave_distance();
+
     LOGO_LINES
         .iter()
         .enumerate()
@@ -27,12 +48,33 @@ fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
                 .enumerate()
                 .map(|(col, ch)| {
                     if ch == ' ' {
-                        ch.to_string()
-                    } else {
-                        let distance = col as f64 + row as f64 * 2.0;
-                        let progress = ((wave_front - distance) / 10.0).clamp(0.0, 1.0);
-                        brand_gradient(progress, &ch.to_string())
+                        return ch.to_string();
                     }
+
+                    let distance = col as f64 + row as f64 * 2.0;
+                    let delta = wave_front - distance;
+
+                    // Todavía no llegó la ola: sombra negra pura, sin color.
+                    if delta <= 0.0 {
+                        return ansi_rgb(0, 0, 0, &ch.to_string());
+                    }
+
+                    let hue_progress = distance / max_distance;
+                    let (br, bg, bb) = brand_rgb(hue_progress);
+
+                    // La ola ya asentó del todo: color de marca pleno.
+                    if delta >= REVEAL_WIDTH {
+                        return ansi_rgb(br, bg, bb, &ch.to_string());
+                    }
+
+                    // En tránsito: interpolación directa negro -> color de marca.
+                    // Nunca pasa por blanco.
+                    let t = delta / REVEAL_WIDTH;
+                    let r = (t * br as f64).round() as u8;
+                    let g = (t * bg as f64).round() as u8;
+                    let b = (t * bb as f64).round() as u8;
+
+                    ansi_rgb(r, g, b, &ch.to_string())
                 })
                 .collect::<String>()
         })
@@ -44,10 +86,11 @@ fn is_no_color() -> bool {
 }
 
 /// Print the SkillIndex banner — wave animation if TTY and colors enabled, else static.
-/// Mirrors `printBanner` in ui.ts (grayscale wave 28ms, totalFrames = ceil((cols+rows*2+10)/speed)).
 pub async fn print_banner(version: &str) {
     let ver = format!("v{version}");
-    let subtitle = format!("Instala las mejores skills de IA para tu proyecto · {ver}");
+    let subtitle = format!(
+        "Instala las mejores skills de IA para tu proyecto · {ver} · Desarrollado por Gabriel Ortega"
+    );
 
     if !is_tty() || is_no_color() || !use_color() {
         println!();
@@ -59,15 +102,11 @@ pub async fn print_banner(version: &str) {
         return;
     }
 
-    let cols = LOGO_LINES
-        .iter()
-        .map(|l| l.chars().count())
-        .max()
-        .unwrap_or(0);
-    let rows = LOGO_LINES.len();
     let speed = 2.5_f64;
     let frame_delay_ms = 28_u64;
-    let total_frames = ((cols + rows * 2 + 10) as f64 / speed).ceil() as usize;
+    let rows = LOGO_LINES.len();
+    // Sumamos REVEAL_WIDTH para que el último carácter llegue a asentarse en color pleno.
+    let total_frames = ((max_wave_distance() + REVEAL_WIDTH) / speed).ceil() as usize;
 
     write(&format!("{}\n", crate::ui::hide_cursor()));
     for frame in 0..=total_frames {
@@ -94,7 +133,9 @@ pub async fn print_banner(version: &str) {
 /// Synchronous version for tests (no animation, no async)
 pub fn format_banner_static(version: &str) -> String {
     let ver = format!("v{version}");
-    let subtitle = format!("Instala las mejores skills de IA para tu proyecto · {ver}");
+    let subtitle = format!(
+        "Instala las mejores skills de IA para tu proyecto · {ver} · Desarrollado por Gabriel Ortega"
+    );
     let mut out = String::new();
     out.push('\n');
     for line in LOGO_LINES {
@@ -110,23 +151,43 @@ mod tests {
     use super::*;
 
     #[test]
-    fn render_animated_logo_first_frame_is_dim() {
+    fn render_animated_logo_first_frame_is_black_shadow() {
+        // frame 0: la mayoría de las columnas todavía no fueron alcanzadas por la ola.
         let lines = render_animated_logo(0, 2.5);
         assert_eq!(lines.len(), 6);
-        // first frame should be mostly dark (gray 63) — check contains ansi
-        assert!(lines[0].contains("\x1b[38;2;"));
+        assert!(
+            lines[0].contains("\x1b[38;2;0;0;0m"),
+            "el primer frame debería mostrar sombra negra, no blanco ni color"
+        );
     }
 
     #[test]
-    fn render_animated_logo_last_frame_is_bright() {
-        // large frame -> wave has passed, all chars bright 244
-        let lines = render_animated_logo(100, 2.5);
-        for line in lines {
-            // Each non-space char should be 244
-            if line.contains("\x1b[38;2;244;244;244m") {
-                // at least one bright
+    fn render_animated_logo_never_shows_white() {
+        // Recorremos varios frames y nos aseguramos de que nunca aparezca blanco puro
+        // ni nada cercano (255,255,255) — el problema que estábamos corrigiendo.
+        for frame in 0..40 {
+            let lines = render_animated_logo(frame, 2.5);
+            for line in &lines {
+                assert!(
+                    !line.contains("\x1b[38;2;255;255;255m"),
+                    "no debería aparecer blanco puro en el frame {frame}"
+                );
             }
         }
+    }
+
+    #[test]
+    fn render_animated_logo_settles_to_brand_color() {
+        // Frame muy alto: la ola ya pasó por todo el logo, sin blanco de por medio.
+        let max_distance = max_wave_distance();
+        let speed = 2.5;
+        let settled_frame = ((max_distance + REVEAL_WIDTH * 2.0) / speed).ceil() as usize;
+        let lines = render_animated_logo(settled_frame, speed);
+        // Debe contener colores de marca (cian → naranja), no negro ni blanco
+        assert!(lines[0].contains("\x1b[38;2;"));
+        assert!(!lines[0].contains("\x1b[38;2;0;0;0m"));
+        assert!(!lines[0].contains("\x1b[38;2;255;255;255m"));
+        assert!(lines[5].contains("\x1b[38;2;"));
     }
 
     #[test]
@@ -134,21 +195,19 @@ mod tests {
         let s = format_banner_static("0.3.6");
         assert!(s.contains("v0.3.6"));
         assert!(s.contains("Instala las mejores skills de IA para tu proyecto"));
-        // should contain logo chars
+        assert!(s.contains("Desarrollado por Gabriel Ortega"));
         assert!(s.contains("█████"));
     }
 
     #[test]
     fn static_banner_line_count() {
         let s = format_banner_static("1.0.0");
-        // 1 blank + 6 logo + 1 subtitle + 1 blank = 9 lines (with \n)
         let lines: Vec<&str> = s.split('\n').collect();
         assert!(lines.len() >= 9);
     }
 
     #[tokio::test]
     async fn print_banner_does_not_panic_no_color() {
-        // Set NO_COLOR to force static path
         let prev = std::env::var("NO_COLOR").ok();
         unsafe { std::env::set_var("NO_COLOR", "1") };
         print_banner("0.3.6").await;
