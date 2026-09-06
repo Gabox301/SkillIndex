@@ -73,7 +73,10 @@ fn main() -> anyhow::Result<()> {
 
     for (skill_name, (full, sources)) in &declared {
         if let Some(entry) = registry_skills.get(skill_name) {
-            let skill_path = entry.get("skillPath").and_then(|v| v.as_str()).unwrap_or("");
+            let skill_path = entry
+                .get("skillPath")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
             if skill_path != full {
                 errors.push(format!(
                     "{}: registry skillPath is {}, expected {}",

@@ -39,9 +39,8 @@ pub fn is_skip_dir(name: &str) -> bool {
 
 // ── Frontend constants ───────────────────────────────────────────
 // Ahora vienen directo de Rust (generados desde skills_map.json) — single source en src/skills
-static FRONTEND_PACKAGES_SET: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-    crate::skills::FRONTEND_PACKAGES.iter().copied().collect()
-});
+static FRONTEND_PACKAGES_SET: LazyLock<HashSet<&'static str>> =
+    LazyLock::new(|| crate::skills::FRONTEND_PACKAGES.iter().copied().collect());
 static FRONTEND_BONUS_SKILLS: &[&str] = crate::skills::FRONTEND_BONUS_SKILLS;
 
 // ── Skills map — ahora Rust nativo, no JSON parse
@@ -265,7 +264,11 @@ fn detect_technologies_in_dir(
 
         // fileExtensions
         if !found && !detect.file_extensions.is_empty() {
-            let ext_strs: Vec<String> = detect.file_extensions.iter().map(|s| s.to_string()).collect();
+            let ext_strs: Vec<String> = detect
+                .file_extensions
+                .iter()
+                .map(|s| s.to_string())
+                .collect();
             if has_file_with_extension(dir, &ext_strs, 4) {
                 found = true;
             }
@@ -514,7 +517,10 @@ fn get_agent_folder_map() -> Vec<(String, String)> {
             (".cursor".into(), "cursor".into()),
         ];
     }
-    slice.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
+    slice
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect()
 }
 
 // ── Installed skills ─────────────────────────────────────────────
