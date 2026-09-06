@@ -100,8 +100,8 @@ pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String
     let version = get_package_version();
     let base = "https://raw.githubusercontent.com/Gabox301/SkillIndex";
     vec![
-        format!("{base}/v{version}/packages/skillindex/skills-registry"),
-        format!("{base}/main/packages/skillindex/skills-registry"),
+        format!("{base}/v{version}/skills-registry"),
+        format!("{base}/main/skills-registry"),
     ]
 }
 
@@ -263,20 +263,14 @@ pub fn security_check_for_entry(skill_name: &str, entry: &RegistryEntry) -> Inst
     }
 }
 
-/// Agent folder lookup — mirrors `agentFolderFor` in installer.ts
-/// Maps agent name → folder (inverse of AGENT_FOLDER_MAP)
+/// Agent folder lookup — single source en src/skills/agents.rs
 pub fn agent_folder_for(agent: &str) -> Option<&'static str> {
-    match agent {
-        "claude-code" => Some(".claude"),
-        "cline" => Some(".cline"),
-        "junie" => Some(".junie"),
-        "codebuddy" => Some(".codebuddy"),
-        "continue" => Some(".continue"),
-        "kiro-cli" => Some(".kiro"),
-        "opencode" => Some(".opencode"),
-        "cursor" => Some(".cursor"),
-        _ => None,
+    for (folder, name) in crate::skills::AGENT_FOLDER_MAP {
+        if *name == agent {
+            return Some(folder);
+        }
     }
+    None
 }
 
 /// Parsed skill path — mirrors `parseSkillPath` in lib.ts
@@ -505,8 +499,10 @@ mod tests {
         assert_eq!(agent_folder_for("junie"), Some(".junie"));
         assert_eq!(agent_folder_for("codebuddy"), Some(".codebuddy"));
         assert_eq!(agent_folder_for("opencode"), Some(".opencode"));
+        assert_eq!(agent_folder_for("antigravity"), Some(".antigravity"));
+        assert_eq!(agent_folder_for("codex"), Some(".codex"));
+        assert_eq!(agent_folder_for("crush"), Some(".crush"));
         assert_eq!(agent_folder_for("unknown"), None);
-        assert_eq!(agent_folder_for("codex"), None);
     }
 
     #[test]
@@ -534,7 +530,7 @@ mod tests {
         let urls = get_registry_raw_base_urls(None);
         assert_eq!(urls.len(), 2);
         assert!(urls[0].contains(&format!("/v{}/", env!("CARGO_PKG_VERSION"))));
-        assert!(urls[1].ends_with("/main/packages/skillindex/skills-registry"));
+        assert!(urls[1].ends_with("/main/skills-registry"));
         if let Some(v) = prev1 {
             unsafe { env::set_var("SKILLINDEX_REGISTRY_BASE_URL", v) };
         }
