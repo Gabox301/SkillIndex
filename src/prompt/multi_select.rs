@@ -9,174 +9,11 @@ use crossterm::{
 
 use crate::ui::{bold, brand_cyan, dim, green, white, yellow};
 
-// ── Options ────────────────────────────────────────────────────────
+use super::helpers::{
+    build_rows, compute_viewport_start, group_selection_state, toggle_group_selection,
+};
+use super::types::{GroupState, MultiSelectOptions, Row};
 
-// Type aliases para evitar `type_complexity` inline y hacer explícitos los contratos
-// de los closures del prompt. Cada alias representa un `dyn Fn` sin `Box`; el `Box`
-// se aplica en el punto de uso (`Box<LabelFn<T>>`), factorizando la complejidad.
-pub type LabelFn<T> = dyn Fn(&T, usize) -> String;
-pub type HintFn<T> = dyn Fn(&T, usize) -> String;
-pub type GroupFn<T> = dyn Fn(&T) -> String;
-pub type ShortcutFn<T> = dyn Fn(&[T]) -> Vec<bool>;
-
-pub struct MultiSelectOptions<T> {
-    pub label_fn: Box<LabelFn<T>>,
-    pub hint_fn: Option<Box<HintFn<T>>>,
-    pub group_fn: Option<Box<GroupFn<T>>>,
-    pub initial_selected: Option<Vec<bool>>,
-    pub shortcuts: Vec<Shortcut<T>>,
-}
-
-pub struct Shortcut<T> {
-    pub key: char,
-    pub label: String,
-    pub func: Box<ShortcutFn<T>>,
-}
-
-impl<T> Default for MultiSelectOptions<T> {
-    fn default() -> Self {
-        Self {
-            label_fn: Box::new(|_, _| String::new()),
-            hint_fn: None,
-            group_fn: None,
-            initial_selected: None,
-            shortcuts: Vec::new(),
-        }
-    }
-}
-
-// ── Helpers ────────────────────────────────────────────────────────
-
-fn group_count<T>(items: &[T], group_fn: Option<&GroupFn<T>>) -> usize {
-    let Some(f) = group_fn else { return 0 };
-    let mut count = 0usize;
-    let mut last: Option<String> = None;
-    for item in items {
-        let g = f(item);
-        if last.as_ref() != Some(&g) {
-            count += 1;
-            last = Some(g);
-        }
-    }
-    count
-}
-
-/// Selection state of a group given the selected flags of its member indices.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GroupState {
-    All,
-    None,
-    Partial,
-}
-
-pub fn group_selection_state(selected: &[bool], member_indices: &[usize]) -> GroupState {
-    if member_indices.is_empty() {
-        return GroupState::None;
-    }
-    let mut any_on = false;
-    let mut any_off = false;
-    for &i in member_indices {
-        if selected[i] {
-            any_on = true;
-        } else {
-            any_off = true;
-        }
-    }
-    if any_on && any_off {
-        GroupState::Partial
-    } else if any_on {
-        GroupState::All
-    } else {
-        GroupState::None
-    }
-}
-
-/// Smart group toggle: if every member is selected, clear them all; otherwise
-/// select them all. Mutates `selected` in place for the given member indices.
-pub fn toggle_group_selection(selected: &mut [bool], member_indices: &[usize]) {
-    let next = group_selection_state(selected, member_indices) != GroupState::All;
-    for &i in member_indices {
-        selected[i] = next;
-    }
-}
-
-/// Compute the new viewport start offset so the cursor stays visible with a
-/// margin of context rows above/below. The window slides minimally: it only
-/// moves when the cursor gets within `margin` rows of an edge, keeping prior
-/// scroll position stable otherwise. The result is clamped to a valid start.
-pub fn compute_viewport_start(
-    cursor: usize,
-    total: usize,
-    height: usize,
-    margin: usize,
-    prev_start: usize,
-) -> usize {
-    // Everything fits: no scrolling.
-    if height >= total {
-        return 0;
-    }
-    let max_start = total - height;
-    // Effective margin cannot exceed what the window can show on each side.
-    let m = margin.min((height - 1) / 2);
-    // Work in signed space to avoid usize underflow, then clamp.
-    let cursor = cursor as isize;
-    let height = height as isize;
-    let m = m as isize;
-    let mut start = prev_start as isize;
-    if cursor - m < start {
-        start = cursor - m;
-    }
-    if cursor + m > start + height - 1 {
-        start = cursor - height + 1 + m;
-    }
-    start = start.clamp(0, max_start as isize);
-    start as usize
-}
-
-/// A navigable row: either a group header (with its member item indices) or an item.
-#[derive(Debug, Clone)]
-enum Row {
-    Group { group: String, members: Vec<usize> },
-    Item { index: usize },
-}
-
-/// Build the ordered navigable rows. Group headers precede their items.
-fn build_rows<T>(items: &[T], group_fn: Option<&GroupFn<T>>, show_groups: bool) -> Vec<Row> {
-    match (show_groups, group_fn) {
-        (true, Some(gf)) => {
-            let mut rows: Vec<Row> = Vec::new();
-            let mut last_group: Option<String> = None;
-            let mut current_header: Option<usize> = None;
-            for (i, item) in items.iter().enumerate() {
-                let group = gf(item);
-                if last_group.as_ref() != Some(&group) {
-                    last_group = Some(group.clone());
-                    rows.push(Row::Group {
-                        group,
-                        members: Vec::new(),
-                    });
-                    current_header = Some(rows.len() - 1);
-                }
-                if let Some(h) = current_header
-                    && let Row::Group { members, .. } = &mut rows[h]
-                {
-                    members.push(i);
-                }
-                rows.push(Row::Item { index: i });
-            }
-            rows
-        }
-        _ => (0..items.len()).map(|index| Row::Item { index }).collect(),
-    }
-}
-
-// ── Core multiSelect ───────────────────────────────────────────────
-
-/// Interactive multi-select — mirrors `multiSelect` in ui.ts
-/// - TTY raw mode, `❯` pointer, `◼/◻` checkboxes, grouped headers
-/// - Shortcuts: `a` (all), plus custom `n`/`i` via `shortcuts`
-/// - Navigation: ↑/↓, j/k, space toggle, enter confirm, Ctrl+C exit
-/// - Non-TTY: returns all items
 pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io::Result<Vec<T>> {
     if items.is_empty() {
         return Ok(Vec::new());
@@ -204,17 +41,11 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         .unwrap_or_else(|| vec![true; items.len()]);
     let mut cursor: usize = 0;
 
-    let g_count = group_count(&items, opts.group_fn.as_deref());
+    let g_count = crate::prompt::helpers::group_count(&items, opts.group_fn.as_deref());
     let show_groups = g_count > 1;
-    // Navigable rows: group headers interleaved with their items (when grouping),
-    // otherwise one row per item. The cursor walks rows, not raw item indices.
     let rows = build_rows(&items, opts.group_fn.as_deref(), show_groups);
 
-    // Viewport: when the list is taller than the terminal, only a sliding window
-    // of rows is drawn so the block always fits and the cursor stays visible.
     const VIEWPORT_MARGIN: usize = 1;
-    // Reserve lines for surrounding chrome (hint line + up/down indicators + some
-    // breathing room already printed above the list).
     const RESERVED_ROWS: usize = 6;
     let terminal_rows = crossterm::terminal::size()
         .map(|(_, h)| h as usize)
@@ -224,8 +55,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         .min(terminal_rows.saturating_sub(RESERVED_ROWS))
         .max(3);
     let mut view_start: usize = 0;
-    // Number of terminal lines the last draw() produced above the hint line.
-    // Derived from the actual render so the rewind count can never drift.
     let mut last_drawn_lines: usize = 0;
 
     let mut stdout = io::stdout();
@@ -252,9 +81,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         }
     };
 
-    // Draws the visible window plus overflow indicators and the hint line.
-    // Returns the number of lines written above the hint line, so the caller can
-    // rewind exactly that many on the next redraw.
     let draw = |stdout: &mut io::Stdout,
                 selected: &[bool],
                 cursor: usize,
@@ -267,7 +93,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         let end = rows.len().min(view_start + viewport_height);
         let mut lines: usize = 0;
 
-        // Overflow indicator: rows hidden above the window.
         if view_start > 0 {
             writeln!(stdout, "{}", dim(&format!("   ↑ {view_start} más")))?;
             lines += 1;
@@ -314,7 +139,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
             lines += 1;
         }
 
-        // Overflow indicator: rows hidden below the window.
         let below_count = rows.len() - end;
         if below_count > 0 {
             writeln!(stdout, "{}", dim(&format!("   ↓ {below_count} más")))?;
@@ -361,8 +185,6 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
 
     let row_count = rows.len();
 
-    // Recompute the viewport, clear the previous block, and redraw. Centralizes
-    // the slide/clear/draw/line-count bookkeeping used on every key.
     macro_rules! redraw {
         () => {{
             view_start = compute_viewport_start(
@@ -386,17 +208,14 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         }};
     }
 
-    // Initial render
     redraw!();
 
     loop {
         let event = event::read()?;
         if let Event::Key(key) = event {
-            // Solo procesar Press para evitar doble toggle en Release
             if key.kind != KeyEventKind::Press {
                 continue;
             }
-            // Ctrl+C
             if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('c') {
                 disable_raw_mode()?;
                 execute!(stdout, Show)?;
@@ -466,65 +285,5 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                 _ => {}
             }
         }
-    }
-}
-
-/// Helper for tests: simulate shortcut `n` — select new-only (not installed)
-pub fn shortcut_new_only<T, F>(items: &[T], is_installed: F) -> Vec<bool>
-where
-    F: Fn(&T) -> bool,
-{
-    items.iter().map(|it| !is_installed(it)).collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // Tests for the public API (multi_select, group_selection_state,
-    // toggle_group_selection, shortcut_new_only) live in tests/prompt.rs,
-    // mirroring prompt.test.ts. Only tests for private helpers stay here.
-
-    #[derive(Clone, Debug, PartialEq, Eq)]
-    struct Dummy {
-        name: String,
-        installed: bool,
-    }
-
-    #[test]
-    fn group_count_computes_correctly() {
-        let items = vec!["a", "b", "c"];
-        let f: Box<dyn Fn(&&str) -> String> =
-            Box::new(|s| if *s == "c" { "g2".into() } else { "g1".into() });
-        let c = group_count(&items, Some(&f));
-        assert_eq!(c, 2);
-        let c0 = group_count(&items, None);
-        assert_eq!(c0, 0);
-    }
-
-    // `shortcut_new_only` is a Rust-only helper with no TS mirror, so its test
-    // stays as an internal unit test rather than in the mirrored tests/prompt.rs.
-    #[test]
-    fn shortcut_new_only_selects_new() {
-        let items = vec![
-            Dummy {
-                name: "a".into(),
-                installed: true,
-            },
-            Dummy {
-                name: "b".into(),
-                installed: false,
-            },
-            Dummy {
-                name: "c".into(),
-                installed: true,
-            },
-            Dummy {
-                name: "d".into(),
-                installed: false,
-            },
-        ];
-        let sel = shortcut_new_only(&items, |d| d.installed);
-        assert_eq!(sel, vec![false, true, false, true]);
     }
 }
