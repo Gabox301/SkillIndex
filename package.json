@@ -6,10 +6,7 @@
     "agent",
     "ai",
     "auto",
-    "claude",
     "cli",
-    "copilot",
-    "cursor",
     "detect",
     "skills"
   ],
@@ -29,6 +26,7 @@
   "files": [
     "index.mjs",
     "index.ts",
+    "postinstall.mjs",
     "dist/",
     "skills-registry/index.json"
   ],
@@ -44,7 +42,8 @@
     "regenerate:index": "cargo run --bin regenerate-index",
     "prepublish": "bun run check && bun run lint && cargo test --manifest-path Cargo.toml && bun run build && cargo run --bin validate-registry",
     "sync:skills": "cargo run --bin sync-skills --",
-    "fendo:check": "cargo run --bin fendo"
+    "fendo:check": "cargo run --bin fendo",
+    "postinstall": "node postinstall.mjs"
   },
   "packageManager": "bun@1.4.0",
   "devDependencies": {
