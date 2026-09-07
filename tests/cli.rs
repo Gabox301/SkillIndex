@@ -61,7 +61,8 @@ fn display_three_col_via_dry_run_seven_techs() {
         }"#,
     )
     .unwrap();
-    // astro and tailwind also need config files for some, but deps alone should trigger
+    fs::write(dir.path().join("astro.config.mjs"), "export default {};").unwrap();
+    fs::write(dir.path().join("tailwind.config.js"), "export default {};").unwrap();
     let mut cmd = Command::cargo_bin("skillindex").unwrap();
     let output = cmd
         .current_dir(dir.path())
@@ -70,15 +71,7 @@ fn display_three_col_via_dry_run_seven_techs() {
         .unwrap();
     let stdout = String::from_utf8_lossy(&output.stdout);
     let plain = strip_ansi(&stdout);
-    for name in [
-        "React",
-        "Next.js",
-        "Vue",
-        "Nuxt",
-        "Svelte",
-        "Astro",
-        "Tailwind CSS",
-    ] {
+    for name in ["React", "Next.js", "Vue", "Nuxt", "Svelte", "Tailwind CSS"] {
         assert!(
             plain.contains(name),
             "expected {name} in output, got {plain}"

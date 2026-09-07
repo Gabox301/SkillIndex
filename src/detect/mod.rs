@@ -2,10 +2,18 @@ pub mod agents;
 pub mod collection;
 pub mod constants;
 pub mod detection;
+pub mod dotnet;
+pub mod frontend;
+pub mod gradle;
 pub mod helpers;
+pub mod workspace;
 
 pub use agents::*;
 pub use collection::*;
 pub use constants::*;
 pub use detection::*;
+pub use dotnet::*;
+pub use frontend::*;
+pub use gradle::*;
 pub use helpers::*;
+pub use workspace::*;

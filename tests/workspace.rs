@@ -1,7 +1,7 @@
 //! Integration tests for workspace resolution.
 //! Mirrors workspace.test.ts — one test per `it(...)` block.
 
-use skillindex::workspace::resolve_workspaces;
+use skillindex::detect::workspace::resolve_workspaces;
 use std::fs;
 use std::path::Path;
 use tempfile::tempdir;

@@ -1,13 +1,13 @@
 use clap::Parser;
 use skillindex::args::Args;
 use skillindex::cache::get_cache_registry_dir;
+use skillindex::detect::dotnet::dotnet_layout_candidate_paths;
+use skillindex::detect::frontend::has_web_frontend_files;
+use skillindex::detect::gradle::{gradle_layout_candidate_paths, parse_settings_gradle_modules};
 use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_detected, format_security_checks, format_skill_label,
     truncate_visible, visible_pad, wrap_text,
 };
-use skillindex::dotnet::dotnet_layout_candidate_paths;
-use skillindex::frontend::has_web_frontend_files;
-use skillindex::gradle::{gradle_layout_candidate_paths, parse_settings_gradle_modules};
 use skillindex::hash::{
     bundle_hash, is_disallowed_skill_file, normalize_registry_rel_path, sha256_buffer,
 };

@@ -127,9 +127,9 @@ fn detect_technologies_in_dir(
                     continue;
                 }
                 let paths: Vec<PathBuf> = if block.scan_gradle_layout {
-                    crate::gradle::gradle_layout_candidate_paths(dir)
+                    super::gradle::gradle_layout_candidate_paths(dir)
                 } else if block.scan_dotnet_layout {
-                    crate::dotnet::dotnet_layout_candidate_paths(dir)
+                    super::dotnet::dotnet_layout_candidate_paths(dir)
                 } else {
                     block.files.iter().map(|s| dir.join(s)).collect()
                 };
@@ -163,7 +163,7 @@ fn detect_technologies_in_dir(
     let is_frontend_by_files = if is_frontend_by_packages || skip_frontend_files {
         false
     } else {
-        crate::frontend::has_web_frontend_files(dir, 3)
+        super::frontend::has_web_frontend_files(dir, 3)
     };
 
     DetectInDirResult {
@@ -193,7 +193,7 @@ pub fn detect_technologies(project_dir: &Path) -> DetectResult {
     }
     let mut is_frontend = root.is_frontend_by_packages || root.is_frontend_by_files;
 
-    let workspace_dirs = crate::workspace::resolve_workspaces(project_dir);
+    let workspace_dirs = super::workspace::resolve_workspaces(project_dir);
     for ws_dir in workspace_dirs {
         let ws = detect_technologies_in_dir(&ws_dir, None, None, is_frontend);
         for tech in ws.detected {
