@@ -1,12 +1,21 @@
-# SkillIndex
+<pre align="center">
+ ███████╗██╗  ██╗██╗██╗     ██╗     ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗
+ ██╔════╝██║ ██╔╝██║██║     ██║     ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝
+ ███████╗█████╔╝ ██║██║     ██║     ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝
+ ╚════██║██╔═██╗ ██║██║     ██║     ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗
+ ███████║██║  ██╗██║███████╗███████╗██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗
+ ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
+</pre>
 
-[![npm version](https://img.shields.io/npm/v/skillindex?color=CB3837&label=npm)](https://www.npmjs.com/package/skillindex)
-[![npm downloads](https://img.shields.io/npm/dm/skillindex?color=CB3837&label=descargas)](https://www.npmjs.com/package/skillindex)
-[![crates.io version](https://img.shields.io/crates/v/skillindex?color=CE412B&label=cargo)](https://crates.io/crates/skillindex)
-[![crates.io downloads](https://img.shields.io/crates/d/skillindex?color=CE412B&label=descargas)](https://crates.io/crates/skillindex)
-[![GitHub Release](https://img.shields.io/github/v/release/Gabox301/SkillIndex?label=release)](https://github.com/Gabox301/SkillIndex/releases)
+<p align="center">
+  <a href="https://www.npmjs.com/package/skillindex"><img src="https://img.shields.io/npm/v/skillindex?color=CB3837&label=npm" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/skillindex"><img src="https://img.shields.io/npm/dm/skillindex?color=CB3837&label=descargas" alt="npm downloads" /></a>
+  <a href="https://crates.io/crates/skillindex"><img src="https://img.shields.io/crates/v/skillindex?color=CE412B&label=cargo" alt="crates.io version" /></a>
+  <a href="https://crates.io/crates/skillindex"><img src="https://img.shields.io/crates/d/skillindex?color=CE412B&label=descargas" alt="crates.io downloads" /></a>
+  <a href="https://github.com/Gabox301/SkillIndex/releases"><img src="https://img.shields.io/github/v/release/Gabox301/SkillIndex?label=release" alt="GitHub Release" /></a>
+</p>
 
-Detecta e instala las mejores skills de agentes IA para tu proyecto. Un comando, cero configuración.
+<p align="center">Detecta e instala las mejores skills de agentes IA para tu proyecto. Un comando, cero configuración.</p>
 
 > **Construido en Rust 🦀** — binario nativo, rápido y sin runtime. Escaneo 100% local, detección sin red.
 
