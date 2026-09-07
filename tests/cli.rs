@@ -6,32 +6,32 @@ use tempfile::tempdir;
 
 #[test]
 fn cli_help_exits_zero() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
     cmd.arg("--help").assert().success();
 }
 
 #[test]
 fn cli_version_exits_zero() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
     cmd.arg("--version").assert().success();
 }
 
 #[test]
 fn cli_agents_flag() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     fs::write(
         dir.path().join("package.json"),
         r#"{"dependencies":{"react":"^18"}}"#,
     )
     .unwrap();
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
+    let output: std::process::Output = cmd
         .current_dir(dir.path())
         .args(["-a", "cursor", "claude-code", "--dry-run"])
         .output()
         .unwrap();
     assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains("cursor"),
         "expected cursor in stdout, got {stdout}"
@@ -43,7 +43,7 @@ fn cli_agents_flag() {
 #[test]
 fn display_three_col_via_dry_run_seven_techs() {
     // Create a project that triggers 7 technologies
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     // Need 7 techs: react, next, vue, nuxt, svelte, astro, tailwind
     // We'll fake by having package.json with those deps
     fs::write(
@@ -63,14 +63,14 @@ fn display_three_col_via_dry_run_seven_techs() {
     .unwrap();
     fs::write(dir.path().join("astro.config.mjs"), "export default {};").unwrap();
     fs::write(dir.path().join("tailwind.config.js"), "export default {};").unwrap();
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
+    let output: std::process::Output = cmd
         .current_dir(dir.path())
         .args(["--dry-run"])
         .output()
         .unwrap();
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let plain = strip_ansi(&stdout);
+    let stdout: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&output.stdout);
+    let plain: String = strip_ansi(&stdout);
     for name in ["React", "Next.js", "Vue", "Nuxt", "Svelte", "Tailwind CSS"] {
         assert!(
             plain.contains(name),
@@ -80,8 +80,8 @@ fn display_three_col_via_dry_run_seven_techs() {
 }
 
 fn strip_ansi(s: &str) -> String {
-    let mut out = String::new();
-    let mut chars = s.chars().peekable();
+    let mut out: String = String::new();
+    let mut chars: std::iter::Peekable<std::str::Chars<'_>> = s.chars().peekable();
     while let Some(c) = chars.next() {
         if c == '\x1b' && chars.peek() == Some(&'[') {
             chars.next();
@@ -101,26 +101,26 @@ fn strip_ansi(s: &str) -> String {
 
 #[test]
 fn clear_cache_flag() {
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
     cmd.arg("--clear-cache").assert().success();
 }
 
 #[test]
 fn dry_run_does_not_prompt() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     fs::write(
         dir.path().join("package.json"),
         r#"{"dependencies":{"react":"^18"}}"#,
     )
     .unwrap();
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
+    let output: std::process::Output = cmd
         .current_dir(dir.path())
         .arg("--dry-run")
         .output()
         .unwrap();
     assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains("--dry-run: no se instaló nada")
             || stdout.contains("--dry-run: nothing was installed")
@@ -133,10 +133,10 @@ fn dry_run_does_not_prompt() {
 
 #[test]
 fn main_shows_no_tech_when_empty() {
-    let dir = tempdir().unwrap();
-    let mut cmd = Command::cargo_bin("skillindex").unwrap();
-    let output = cmd.current_dir(dir.path()).output().unwrap();
-    let combined = format!(
+    let dir: tempfile::TempDir = tempdir().unwrap();
+    let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
+    let output: std::process::Output = cmd.current_dir(dir.path()).output().unwrap();
+    let combined: String = format!(
         "{}{}",
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
@@ -157,10 +157,10 @@ fn install_all_concurrency_via_installer() {
     // This is a placeholder that ensures the binary's installer module respects concurrency 6
     // Real concurrency is tested in src/installer.rs with semaphore 6
     // Here we just verify binary handles --help without panic under concurrent run
-    let mut handles = Vec::new();
+    let mut handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
     for _ in 0..6 {
         handles.push(std::thread::spawn(|| {
-            let mut cmd = Command::cargo_bin("skillindex").unwrap();
+            let mut cmd: Command = Command::cargo_bin("skillindex").unwrap();
             cmd.arg("--help").assert().success();
         }));
     }

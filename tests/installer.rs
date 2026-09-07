@@ -15,7 +15,7 @@ use tempfile::tempdir;
 // ── Helpers ────────────────────────────────────────────────────────
 
 fn write_file(base: &Path, rel: &str, content: &str) {
-    let p = base.join(rel);
+    let p: std::path::PathBuf = base.join(rel);
     if let Some(parent) = p.parent() {
         fs::create_dir_all(parent).unwrap();
     }
@@ -23,7 +23,7 @@ fn write_file(base: &Path, rel: &str, content: &str) {
 }
 
 fn make_entry(name: &str, source: &str, files: &[(&str, &str)]) -> RegistryEntry {
-    let mut sha_map = HashMap::new();
+    let mut sha_map: HashMap<String, String> = HashMap::new();
     for (rel, content) in files {
         sha_map.insert(rel.to_string(), sha256_buffer(content.as_bytes()));
     }
@@ -31,8 +31,8 @@ fn make_entry(name: &str, source: &str, files: &[(&str, &str)]) -> RegistryEntry
         .iter()
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
-    sorted.sort_by(|a, b| a.0.cmp(&b.0));
-    let bh = bundle_hash(&sorted);
+    sorted.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
+    let bh: String = bundle_hash(&sorted);
     RegistryEntry {
         source: source.to_string(),
         skill_path: format!("{source}/{name}"),
@@ -54,16 +54,16 @@ fn make_entry(name: &str, source: &str, files: &[(&str, &str)]) -> RegistryEntry
 
 fn build_registry(reg_dir: &Path, entries: Vec<(String, RegistryEntry)>) {
     fs::create_dir_all(reg_dir).unwrap();
-    let mut skills = HashMap::new();
+    let mut skills: HashMap<String, RegistryEntry> = HashMap::new();
     for (name, entry) in &entries {
         // Write actual skill files
         for rel_path in &entry.files {
-            let content = entry.sha256.get(rel_path).map(|_| "").unwrap_or("");
+            let content: &str = entry.sha256.get(rel_path).map(|_| "").unwrap_or("");
             write_file(reg_dir, &format!("{name}/{rel_path}"), content);
         }
         skills.insert(name.clone(), entry.clone());
     }
-    let reg = Registry {
+    let reg: Registry = Registry {
         version: 1,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         reviewer: Reviewer {
@@ -82,11 +82,11 @@ fn build_registry(reg_dir: &Path, entries: Vec<(String, RegistryEntry)>) {
 fn registry_content(reg_dir: &Path, skill_name: &str, rel: &str, content: &str) {
     write_file(reg_dir, &format!("{skill_name}/{rel}"), content);
     // Update sha256 in index.json
-    let index_path = reg_dir.join("index.json");
+    let index_path: std::path::PathBuf = reg_dir.join("index.json");
     let mut reg: Registry =
         serde_json::from_str(&fs::read_to_string(&index_path).unwrap()).unwrap();
     if let Some(entry) = reg.skills.get_mut(skill_name) {
-        let hash = sha256_buffer(content.as_bytes());
+        let hash: String = sha256_buffer(content.as_bytes());
         entry.sha256.insert(rel.to_string(), hash.clone());
         if !entry.files.contains(&rel.to_string()) {
             entry.files.push(rel.to_string());
@@ -96,7 +96,7 @@ fn registry_content(reg_dir: &Path, skill_name: &str, rel: &str, content: &str) 
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect();
-        sorted.sort_by(|a, b| a.0.cmp(&b.0));
+        sorted.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
         entry.bundle_hash = bundle_hash(&sorted);
     }
     fs::write(index_path, serde_json::to_string_pretty(&reg).unwrap()).unwrap();
@@ -128,12 +128,12 @@ fn agent_folder_for_unknown_returns_none() {
 
 #[test]
 fn copy_dir_copies_files_and_subdirs() {
-    let src = tempdir().unwrap();
-    let dest = tempdir().unwrap();
+    let src: tempfile::TempDir = tempdir().unwrap();
+    let dest: tempfile::TempDir = tempdir().unwrap();
     fs::create_dir_all(src.path().join("sub")).unwrap();
     fs::write(src.path().join("a.txt"), b"hello").unwrap();
     fs::write(src.path().join("sub/b.txt"), b"world").unwrap();
-    let out = dest.path().join("out");
+    let out: std::path::PathBuf = dest.path().join("out");
     copy_dir(src.path(), &out).unwrap();
     assert_eq!(fs::read_to_string(out.join("a.txt")).unwrap(), "hello");
     assert_eq!(fs::read_to_string(out.join("sub/b.txt")).unwrap(), "world");
@@ -143,11 +143,11 @@ fn copy_dir_copies_files_and_subdirs() {
 
 #[test]
 fn ensure_symlink_creates_link_or_copy_fallback() {
-    let tmp = tempdir().unwrap();
-    let target = tmp.path().join("target");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let target: std::path::PathBuf = tmp.path().join("target");
     fs::create_dir_all(&target).unwrap();
     fs::write(target.join("file.txt"), b"data").unwrap();
-    let link = tmp.path().join("link/skill");
+    let link: std::path::PathBuf = tmp.path().join("link/skill");
     ensure_symlink_to(&target, &link).unwrap();
     assert!(link.exists() || link.is_symlink());
     assert_eq!(fs::read_to_string(link.join("file.txt")).unwrap(), "data");
@@ -183,8 +183,8 @@ fn rel_path_same_dir() {
 
 #[test]
 fn lock_preserves_existing_entries_and_sorts_keys() {
-    let tmp = tempdir().unwrap();
-    let project = tmp.path();
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let project: &Path = tmp.path();
     fs::write(
         project.join("skills-lock.json"),
         serde_json::to_string(&serde_json::json!({
@@ -196,10 +196,10 @@ fn lock_preserves_existing_entries_and_sorts_keys() {
         .unwrap(),
     )
     .unwrap();
-    let entry = make_entry("alpha", "owner/repo", &[("SKILL.md", "# a")]);
+    let entry: RegistryEntry = make_entry("alpha", "owner/repo", &[("SKILL.md", "# a")]);
     update_skills_lock(project, "alpha", &entry).unwrap();
 
-    let content = fs::read_to_string(project.join("skills-lock.json")).unwrap();
+    let content: String = fs::read_to_string(project.join("skills-lock.json")).unwrap();
     assert!(content.ends_with('\n'));
     let v: serde_json::Value = serde_json::from_str(&content).unwrap();
     let keys: Vec<String> = v["skills"].as_object().unwrap().keys().cloned().collect();
@@ -211,12 +211,12 @@ fn lock_preserves_existing_entries_and_sorts_keys() {
 
 #[tokio::test]
 async fn install_skill_copies_files_to_agents_and_updates_lock() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry(
+    let entry: RegistryEntry = make_entry(
         "hello-skill",
         "owner/repo",
         &[("SKILL.md", "# hello"), ("references/notes.md", "notes")],
@@ -225,12 +225,13 @@ async fn install_skill_copies_files_to_agents_and_updates_lock() {
     registry_content(&reg_dir, "hello-skill", "SKILL.md", "# hello");
     registry_content(&reg_dir, "hello-skill", "references/notes.md", "notes");
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill("owner/repo/hello-skill", &[], opts).await;
+    let result: skillindex::installer::InstallResult =
+        install_skill("owner/repo/hello-skill", &[], opts).await;
     assert!(result.success, "install failed: {}", result.output);
 
     assert!(
@@ -256,32 +257,33 @@ async fn install_skill_copies_files_to_agents_and_updates_lock() {
 
 #[tokio::test]
 async fn install_skill_rejects_when_skill_not_in_registry() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry("known", "owner/repo", &[("SKILL.md", "# known")]);
+    let entry: RegistryEntry = make_entry("known", "owner/repo", &[("SKILL.md", "# known")]);
     build_registry(&reg_dir, vec![("known".into(), entry)]);
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill("owner/repo/unknown", &[], opts).await;
+    let result: skillindex::installer::InstallResult =
+        install_skill("owner/repo/unknown", &[], opts).await;
     assert!(!result.success);
     assert!(result.output.contains("no encontrada") || result.output.contains("not found"));
 }
 
 #[tokio::test]
 async fn install_skill_rejects_disallowed_zip_files() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry(
+    let entry: RegistryEntry = make_entry(
         "archive-skill",
         "owner/repo",
         &[("downloads/tool.ZIP", "zip")],
@@ -290,12 +292,13 @@ async fn install_skill_rejects_disallowed_zip_files() {
     // Remove the file so it must be downloaded — and .ZIP check fires before download
     fs::remove_dir_all(reg_dir.join("archive-skill")).ok();
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill("owner/repo/archive-skill", &[], opts).await;
+    let result: skillindex::installer::InstallResult =
+        install_skill("owner/repo/archive-skill", &[], opts).await;
     assert!(!result.success);
     assert!(
         result.output.contains("no permitido") || result.output.contains("not allowed"),
@@ -306,21 +309,21 @@ async fn install_skill_rejects_disallowed_zip_files() {
 
 #[tokio::test]
 async fn install_skill_copies_directly_into_each_mapped_agent_folder() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    let entry: RegistryEntry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
     build_registry(&reg_dir, vec![("s1".into(), entry)]);
     registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill(
+    let result: skillindex::installer::InstallResult = install_skill(
         "owner/repo/s1",
         &["claude-code".to_string(), "junie".to_string()],
         opts,
@@ -329,8 +332,8 @@ async fn install_skill_copies_directly_into_each_mapped_agent_folder() {
     assert!(result.success, "install failed: {}", result.output);
 
     // Each mapped agent gets its own real copy — no symlinks, no canonical dir.
-    let claude_skill = project_dir.join(".claude/skills/s1");
-    let junie_skill = project_dir.join(".junie/skills/s1");
+    let claude_skill: std::path::PathBuf = project_dir.join(".claude/skills/s1");
+    let junie_skill: std::path::PathBuf = project_dir.join(".junie/skills/s1");
     assert!(claude_skill.join("SKILL.md").exists());
     assert!(junie_skill.join("SKILL.md").exists());
     assert_eq!(
@@ -353,22 +356,22 @@ async fn install_skill_copies_directly_into_each_mapped_agent_folder() {
 
 #[tokio::test]
 async fn install_skill_does_not_create_agents_when_mapped_agent_present() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    let entry: RegistryEntry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
     build_registry(&reg_dir, vec![("s1".into(), entry)]);
     registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
     // `universal` alongside a mapped agent must not spawn a second `.agents` path.
-    let result = install_skill(
+    let result: skillindex::installer::InstallResult = install_skill(
         "owner/repo/s1",
         &["universal".to_string(), "kiro-cli".to_string()],
         opts,
@@ -381,21 +384,22 @@ async fn install_skill_does_not_create_agents_when_mapped_agent_present() {
 
 #[tokio::test]
 async fn install_skill_uses_agents_only_when_universal_is_explicit() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    let entry: RegistryEntry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
     build_registry(&reg_dir, vec![("s1".into(), entry)]);
     registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
 
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_skill("owner/repo/s1", &["universal".to_string()], opts).await;
+    let result: skillindex::installer::InstallResult =
+        install_skill("owner/repo/s1", &["universal".to_string()], opts).await;
     assert!(result.success, "install failed: {}", result.output);
     assert!(project_dir.join(".agents/skills/s1/SKILL.md").exists());
     assert!(!project_dir.join(".kiro/skills/s1").exists());
@@ -403,17 +407,17 @@ async fn install_skill_uses_agents_only_when_universal_is_explicit() {
 
 #[tokio::test]
 async fn install_skill_reinstalls_only_the_missing_target() {
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let entry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
+    let entry: RegistryEntry = make_entry("s1", "owner/repo", &[("SKILL.md", "# s1")]);
     build_registry(&reg_dir, vec![("s1".into(), entry)]);
     registry_content(&reg_dir, "s1", "SKILL.md", "# s1");
 
-    let agents = ["claude-code".to_string(), "junie".to_string()];
-    let first = install_skill(
+    let agents: [String; 2] = ["claude-code".to_string(), "junie".to_string()];
+    let first: skillindex::installer::InstallResult = install_skill(
         "owner/repo/s1",
         &agents,
         InstallOptions {
@@ -427,7 +431,7 @@ async fn install_skill_reinstalls_only_the_missing_target() {
 
     // Remove one target; a second install must restore just that one.
     fs::remove_dir_all(project_dir.join(".junie/skills/s1")).unwrap();
-    let second = install_skill(
+    let second: skillindex::installer::InstallResult = install_skill(
         "owner/repo/s1",
         &agents,
         InstallOptions {
@@ -448,13 +452,14 @@ async fn install_skill_reinstalls_only_the_missing_target() {
 async fn install_all_collects_security_checks() {
     use skillindex::installer::SkillEntry;
 
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: std::path::PathBuf = tmp.path().join("registry");
+    let project_dir: std::path::PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
 
-    let e1 = make_entry("first-skill", "owner/repo", &[("SKILL.md", "# first")]);
-    let mut e2 = make_entry("second-skill", "owner/repo", &[("SKILL.md", "# second")]);
+    let e1: RegistryEntry = make_entry("first-skill", "owner/repo", &[("SKILL.md", "# first")]);
+    let mut e2: RegistryEntry =
+        make_entry("second-skill", "owner/repo", &[("SKILL.md", "# second")]);
     e2.security_check = Some(skillindex::registry::SecurityCheck {
         status: "warning".to_string(),
         findings: vec!["manual review".to_string()],
@@ -469,7 +474,7 @@ async fn install_all_collects_security_checks() {
     registry_content(&reg_dir, "first-skill", "SKILL.md", "# first");
     registry_content(&reg_dir, "second-skill", "SKILL.md", "# second");
 
-    let skill_entries = vec![
+    let skill_entries: Vec<skillindex::installer::SkillEntry> = vec![
         SkillEntry {
             skill: "owner/repo/first-skill".to_string(),
             sources: vec![],
@@ -481,17 +486,18 @@ async fn install_all_collects_security_checks() {
             installed: false,
         },
     ];
-    let opts = InstallOptions {
+    let opts: InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         ..Default::default()
     };
-    let result = install_all(skill_entries, vec![], opts).await;
+    let result: skillindex::installer::InstallAllResult =
+        install_all(skill_entries, vec![], opts).await;
     assert_eq!(result.installed, 2);
     let mut names: Vec<&str> = result
         .security_checks
         .iter()
-        .map(|c| c.name.as_str())
+        .map(|c: &skillindex::registry::InstallSecurityCheck| c.name.as_str())
         .collect();
     names.sort();
     assert_eq!(names, vec!["first-skill", "second-skill"]);

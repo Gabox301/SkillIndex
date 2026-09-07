@@ -13,7 +13,7 @@ pub use types::{ComboSkill, Technology};
 use std::sync::LazyLock;
 
 pub static SKILLS: LazyLock<Vec<Technology>> = LazyLock::new(|| {
-    let mut v = Vec::new();
+    let mut v: Vec<Technology> = Vec::new();
     v.extend_from_slice(techs::TECHS);
     v.extend_from_slice(security::SECURITY_TECHS);
     v.extend_from_slice(domains::DOMAINS);
@@ -22,7 +22,7 @@ pub static SKILLS: LazyLock<Vec<Technology>> = LazyLock::new(|| {
 pub static SKILLS_MAP: LazyLock<Vec<Technology>> = LazyLock::new(|| SKILLS.clone());
 
 pub static COMBO_SKILLS_MAP: LazyLock<Vec<ComboSkill>> = LazyLock::new(|| {
-    let mut v = Vec::new();
+    let mut v: Vec<ComboSkill> = Vec::new();
     v.extend_from_slice(combos::FRAMEWORK_COMBOS);
     v.push(combos::security_operations::SECURITY_OPERATIONS_COMBO);
     v.push(combos::red_team::RED_TEAM_COMBO);

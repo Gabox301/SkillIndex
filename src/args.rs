@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn flags_scenario() {
-        let args = parse([
+        let args: Args = parse([
             "skillindex",
             "-y",
             "--dry-run",
@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     fn long_forms() {
-        let args = parse([
+        let args: Args = parse([
             "skillindex",
             "--yes",
             "--dry-run",
@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn clear_cache_flag() {
-        let args = parse(["skillindex", "--clear-cache"]);
+        let args: Args = parse(["skillindex", "--clear-cache"]);
         assert!(args.clear_cache);
         assert!(!args.yes);
         assert!(!args.dry_run);
@@ -103,19 +103,19 @@ mod tests {
     #[test]
     fn agent_multiple_values_after_single_flag() {
         // `-a cursor claude-code` should collect both after one -a (num_args=1..)
-        let args = parse(["skillindex", "-a", "cursor", "claude-code"]);
+        let args: Args = parse(["skillindex", "-a", "cursor", "claude-code"]);
         assert_eq!(args.agent, vec!["cursor", "claude-code"]);
     }
 
     #[test]
     fn agent_repeated_flag() {
-        let args = parse(["skillindex", "-a", "cursor", "-a", "claude-code"]);
+        let args: Args = parse(["skillindex", "-a", "cursor", "-a", "claude-code"]);
         assert_eq!(args.agent, vec!["cursor", "claude-code"]);
     }
 
     #[test]
     fn agent_mixed_with_other_flags() {
-        let args = parse([
+        let args: Args = parse([
             "skillindex",
             "-a",
             "cursor",
@@ -130,32 +130,33 @@ mod tests {
 
     #[test]
     fn no_agents_empty_vec() {
-        let args = parse(["skillindex"]);
+        let args: Args = parse(["skillindex"]);
         assert!(args.agent.is_empty());
     }
 
     #[test]
     fn help_flag_generates_help() {
-        let cmd = Args::command();
-        let matches = cmd.try_get_matches_from(["skillindex", "--help"]);
+        let cmd: clap::Command = Args::command();
+        let matches: Result<clap::ArgMatches, clap::error::Error> =
+            cmd.try_get_matches_from(["skillindex", "--help"]);
         // Clap returns Err with DisplayHelp on --help
         assert!(matches.is_err());
-        let err = matches.unwrap_err();
+        let err: clap::error::Error = matches.unwrap_err();
         assert_eq!(err.kind(), clap::error::ErrorKind::DisplayHelp);
     }
 
     #[test]
     fn short_help_flag() {
-        let cmd = Args::command();
-        let err = cmd.try_get_matches_from(["skillindex", "-h"]).unwrap_err();
+        let cmd: clap::Command = Args::command();
+        let err: clap::error::Error = cmd.try_get_matches_from(["skillindex", "-h"]).unwrap_err();
         assert_eq!(err.kind(), clap::error::ErrorKind::DisplayHelp);
     }
 
     #[test]
     fn verbose_short_long() {
-        let a = parse(["skillindex", "-v"]);
+        let a: Args = parse(["skillindex", "-v"]);
         assert!(a.verbose);
-        let b = parse(["skillindex", "--verbose"]);
+        let b: Args = parse(["skillindex", "--verbose"]);
         assert!(b.verbose);
     }
 }

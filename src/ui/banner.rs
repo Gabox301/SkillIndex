@@ -1,4 +1,4 @@
-use crate::ui::{bold, brand_cyan, dim, is_tty, use_color, write};
+use super::{bold, brand_cyan, dim, is_tty, use_color, write};
 
 const LOGO_LINES: &[&str] = &[
     " ███████╗██╗  ██╗██╗██╗     ██╗     ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗",
@@ -15,10 +15,10 @@ const REVEAL_WIDTH: f64 = 5.0;
 
 /// Color de marca final (asentado) para una posición dada, 0.0 = cian, 1.0 = naranja.
 fn brand_rgb(progress: f64) -> (u8, u8, u8) {
-    let progress = progress.clamp(0.0, 1.0);
-    let r = (56.0 + progress * (251.0 - 56.0)).round() as u8;
-    let g = (189.0 + progress * (146.0 - 189.0)).round() as u8;
-    let b = (248.0 + progress * (60.0 - 248.0)).round() as u8;
+    let progress: f64 = progress.clamp(0.0, 1.0);
+    let r: u8 = (56.0 + progress * (251.0 - 56.0)).round() as u8;
+    let g: u8 = (189.0 + progress * (146.0 - 189.0)).round() as u8;
+    let b: u8 = (248.0 + progress * (60.0 - 248.0)).round() as u8;
     (r, g, b)
 }
 
@@ -27,18 +27,18 @@ fn ansi_rgb(r: u8, g: u8, b: u8, text: &str) -> String {
 }
 
 fn max_wave_distance() -> f64 {
-    let cols = LOGO_LINES
+    let cols: f64 = LOGO_LINES
         .iter()
-        .map(|l| l.chars().count())
+        .map(|l: &&str| l.chars().count())
         .max()
         .unwrap_or(0) as f64;
-    let rows = LOGO_LINES.len() as f64;
+    let rows: f64 = LOGO_LINES.len() as f64;
     cols + (rows - 1.0) * 2.0
 }
 
 fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
-    let wave_front = frame as f64 * speed;
-    let max_distance = max_wave_distance();
+    let wave_front: f64 = frame as f64 * speed;
+    let max_distance: f64 = max_wave_distance();
 
     LOGO_LINES
         .iter()
@@ -51,15 +51,15 @@ fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
                         return ch.to_string();
                     }
 
-                    let distance = col as f64 + row as f64 * 2.0;
-                    let delta = wave_front - distance;
+                    let distance: f64 = col as f64 + row as f64 * 2.0;
+                    let delta: f64 = wave_front - distance;
 
                     // Todavía no llegó la ola: sombra negra pura, sin color.
                     if delta <= 0.0 {
                         return ansi_rgb(0, 0, 0, &ch.to_string());
                     }
 
-                    let hue_progress = distance / max_distance;
+                    let hue_progress: f64 = distance / max_distance;
                     let (br, bg, bb) = brand_rgb(hue_progress);
 
                     // La ola ya asentó del todo: color de marca pleno.
@@ -69,10 +69,10 @@ fn render_animated_logo(frame: usize, speed: f64) -> Vec<String> {
 
                     // En tránsito: interpolación directa negro -> color de marca.
                     // Nunca pasa por blanco.
-                    let t = delta / REVEAL_WIDTH;
-                    let r = (t * br as f64).round() as u8;
-                    let g = (t * bg as f64).round() as u8;
-                    let b = (t * bb as f64).round() as u8;
+                    let t: f64 = delta / REVEAL_WIDTH;
+                    let r: u8 = (t * br as f64).round() as u8;
+                    let g: u8 = (t * bg as f64).round() as u8;
+                    let b: u8 = (t * bb as f64).round() as u8;
 
                     ansi_rgb(r, g, b, &ch.to_string())
                 })
@@ -87,8 +87,8 @@ fn is_no_color() -> bool {
 
 /// Print the SkillIndex banner — wave animation if TTY and colors enabled, else static.
 pub async fn print_banner(version: &str) {
-    let ver = format!("v{version}");
-    let subtitle = format!(
+    let ver: String = format!("v{version}");
+    let subtitle: String = format!(
         "Instala las mejores skills de IA para tu proyecto · {ver} · Desarrollado por Gabriel Ortega"
     );
 
@@ -102,18 +102,18 @@ pub async fn print_banner(version: &str) {
         return;
     }
 
-    let speed = 2.5_f64;
-    let frame_delay_ms = 28_u64;
-    let rows = LOGO_LINES.len();
+    let speed: f64 = 2.5_f64;
+    let frame_delay_ms: u64 = 28_u64;
+    let rows: usize = LOGO_LINES.len();
     // Sumamos REVEAL_WIDTH para que el último carácter llegue a asentarse en color pleno.
-    let total_frames = ((max_wave_distance() + REVEAL_WIDTH) / speed).ceil() as usize;
+    let total_frames: usize = ((max_wave_distance() + REVEAL_WIDTH) / speed).ceil() as usize;
 
-    write(&format!("{}\n", crate::ui::hide_cursor()));
+    write(&format!("{}\n", super::hide_cursor()));
     for frame in 0..=total_frames {
-        let lines = render_animated_logo(frame, speed);
-        let rendered = lines
+        let lines: Vec<String> = render_animated_logo(frame, speed);
+        let rendered: String = lines
             .iter()
-            .map(|line| format!("   {line}"))
+            .map(|line: &String| format!("   {line}"))
             .collect::<Vec<_>>()
             .join("\n");
         write(&rendered);
@@ -126,17 +126,17 @@ pub async fn print_banner(version: &str) {
     }
 
     write(&format!("   {}\n", dim(&subtitle)));
-    write(&crate::ui::show_cursor());
+    write(&super::show_cursor());
     println!();
 }
 
 /// Synchronous version for tests (no animation, no async)
 pub fn format_banner_static(version: &str) -> String {
-    let ver = format!("v{version}");
-    let subtitle = format!(
+    let ver: String = format!("v{version}");
+    let subtitle: String = format!(
         "Instala las mejores skills de IA para tu proyecto · {ver} · Desarrollado por Gabriel Ortega"
     );
-    let mut out = String::new();
+    let mut out: String = String::new();
     out.push('\n');
     for line in LOGO_LINES {
         out.push_str(&format!("{}\n", bold(&brand_cyan(line))));
@@ -153,7 +153,7 @@ mod tests {
     #[test]
     fn render_animated_logo_first_frame_is_black_shadow() {
         // frame 0: la mayoría de las columnas todavía no fueron alcanzadas por la ola.
-        let lines = render_animated_logo(0, 2.5);
+        let lines: Vec<String> = render_animated_logo(0, 2.5);
         assert_eq!(lines.len(), 6);
         assert!(
             lines[0].contains("\x1b[38;2;0;0;0m"),
@@ -166,7 +166,7 @@ mod tests {
         // Recorremos varios frames y nos aseguramos de que nunca aparezca blanco puro
         // ni nada cercano (255,255,255) — el problema que estábamos corrigiendo.
         for frame in 0..40 {
-            let lines = render_animated_logo(frame, 2.5);
+            let lines: Vec<String> = render_animated_logo(frame, 2.5);
             for line in &lines {
                 assert!(
                     !line.contains("\x1b[38;2;255;255;255m"),
@@ -179,10 +179,10 @@ mod tests {
     #[test]
     fn render_animated_logo_settles_to_brand_color() {
         // Frame muy alto: la ola ya pasó por todo el logo, sin blanco de por medio.
-        let max_distance = max_wave_distance();
-        let speed = 2.5;
-        let settled_frame = ((max_distance + REVEAL_WIDTH * 2.0) / speed).ceil() as usize;
-        let lines = render_animated_logo(settled_frame, speed);
+        let max_distance: f64 = max_wave_distance();
+        let speed: f64 = 2.5;
+        let settled_frame: usize = ((max_distance + REVEAL_WIDTH * 2.0) / speed).ceil() as usize;
+        let lines: Vec<String> = render_animated_logo(settled_frame, speed);
         // Debe contener colores de marca (cian → naranja), no negro ni blanco
         assert!(lines[0].contains("\x1b[38;2;"));
         assert!(!lines[0].contains("\x1b[38;2;0;0;0m"));
@@ -192,7 +192,7 @@ mod tests {
 
     #[test]
     fn format_banner_static_contains_version() {
-        let s = format_banner_static("0.3.6");
+        let s: String = format_banner_static("0.3.6");
         assert!(s.contains("v0.3.6"));
         assert!(s.contains("Instala las mejores skills de IA para tu proyecto"));
         assert!(s.contains("Desarrollado por Gabriel Ortega"));
@@ -201,14 +201,14 @@ mod tests {
 
     #[test]
     fn static_banner_line_count() {
-        let s = format_banner_static("1.0.0");
+        let s: String = format_banner_static("1.0.0");
         let lines: Vec<&str> = s.split('\n').collect();
         assert!(lines.len() >= 9);
     }
 
     #[tokio::test]
     async fn print_banner_does_not_panic_no_color() {
-        let prev = std::env::var("NO_COLOR").ok();
+        let prev: Option<String> = std::env::var("NO_COLOR").ok();
         unsafe { std::env::set_var("NO_COLOR", "1") };
         print_banner("0.3.6").await;
         match prev {

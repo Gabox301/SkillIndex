@@ -1,3 +1,5 @@
+pub mod banner;
+
 use std::env;
 use std::io::{self, IsTerminal, Write};
 
@@ -92,7 +94,7 @@ pub fn log(msg: &str) {
 
 /// Like `process.stdout.write` — raw write without newline
 pub fn write(msg: &str) {
-    let mut stdout = io::stdout();
+    let mut stdout: io::Stdout = io::stdout();
     let _ = stdout.write_all(msg.as_bytes());
     let _ = stdout.flush();
 }
@@ -119,8 +121,8 @@ pub const SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", 
 
 /// Strip ANSI escape codes — mirrors `stripAnsi` in main.ts
 pub fn strip_ansi(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    let mut chars = s.chars().peekable();
+    let mut out: String = String::with_capacity(s.len());
+    let mut chars: std::iter::Peekable<std::str::Chars<'_>> = s.chars().peekable();
     while let Some(c) = chars.next() {
         if c == '\x1b' && chars.peek() == Some(&'[') {
             chars.next();
@@ -142,11 +144,11 @@ mod tests {
 
     #[test]
     fn strip_ansi_removes_codes() {
-        let s = "\x1b[31mhello\x1b[39m";
+        let s: &str = "\x1b[31mhello\x1b[39m";
         assert_eq!(strip_ansi(s), "hello");
-        let s2 = format!("{}hi{}", bold(""), "");
+        let s2: String = format!("{}hi{}", bold(""), "");
         // bold without color may be empty if NO_COLOR, but strip should work
-        let colored = "\x1b[1mhello\x1b[22m";
+        let colored: &str = "\x1b[1mhello\x1b[22m";
         assert_eq!(strip_ansi(colored), "hello");
         let _ = s2;
     }
@@ -165,7 +167,7 @@ mod tests {
         for f in [
             bold, dim, green, yellow, cyan, red, magenta, gray, muted, white, pink,
         ] {
-            let s = f("test");
+            let s: String = f("test");
             assert!(strip_ansi(&s).contains("test"));
         }
     }
@@ -179,8 +181,8 @@ mod tests {
 
     #[test]
     fn hide_show_cursor_empty_when_not_tty_or_present() {
-        let h = hide_cursor();
-        let s = show_cursor();
+        let h: String = hide_cursor();
+        let s: String = show_cursor();
         // Both are either "" or ANSI; just ensure they are strings
         assert!(h.len() <= 6);
         assert!(s.len() <= 6);

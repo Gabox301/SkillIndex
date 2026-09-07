@@ -32,7 +32,7 @@ async fn cache_env_guard() -> MutexGuard<'static, ()> {
 }
 
 fn write_file(base: &Path, rel: &str, content: &str) {
-    let p = base.join(rel);
+    let p: PathBuf = base.join(rel);
     if let Some(parent) = p.parent() {
         fs::create_dir_all(parent).unwrap();
     }
@@ -60,29 +60,30 @@ fn parity_hash_hello_buffer() {
 #[test]
 fn parity_hash_bundle_single_entry() {
     // Mirrors installer.test.ts bundle parity: single entry
-    let hash = sha256_buffer(b"single content");
-    let bundle = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
-    let expected = sha256_buffer(format!("SKILL.md:{hash}").as_bytes());
+    let hash: String = sha256_buffer(b"single content");
+    let bundle: String = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
+    let expected: String = sha256_buffer(format!("SKILL.md:{hash}").as_bytes());
     assert_eq!(bundle, expected);
 }
 
 #[test]
 fn parity_hash_bundle_sorted() {
-    let h1 = sha256_buffer(b"a");
-    let h2 = sha256_buffer(b"b");
-    let bundle1 = bundle_hash(&[
+    let h1: String = sha256_buffer(b"a");
+    let h2: String = sha256_buffer(b"b");
+    let bundle1: String = bundle_hash(&[
         ("b.md".to_string(), h2.clone()),
         ("a.md".to_string(), h1.clone()),
     ]);
-    let bundle2 = bundle_hash(&[("a.md".to_string(), h1), ("b.md".to_string(), h2.clone())]);
+    let bundle2: String =
+        bundle_hash(&[("a.md".to_string(), h1), ("b.md".to_string(), h2.clone())]);
     assert_eq!(bundle1, bundle2);
     // sorted join check
-    let sorted = {
-        let mut v = [
+    let sorted: String = {
+        let mut v: [(String, String); 2] = [
             ("a.md".to_string(), sha256_buffer(b"a")),
             ("b.md".to_string(), sha256_buffer(b"b")),
         ];
-        v.sort_by(|a, b| a.0.cmp(&b.0));
+        v.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
         v.iter()
             .map(|(k, h)| format!("{k}:{h}"))
             .collect::<Vec<_>>()
@@ -94,15 +95,19 @@ fn parity_hash_bundle_sorted() {
 #[test]
 fn parity_hash_bundle_219_fixtures() {
     // Parity vs Node: verify every registry entry's bundleHash matches recomputed bundle_hash
-    let reg_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("skills-registry/index.json");
-    let data = fs::read_to_string(&reg_path).expect("registry index exists");
+    let reg_path: PathBuf =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("skills-registry/index.json");
+    let data: String = fs::read_to_string(&reg_path).expect("registry index exists");
     let reg: Registry = serde_json::from_str(&data).unwrap();
-    let mut ok = 0usize;
-    let mut skipped = 0usize;
+    let mut ok: usize = 0usize;
+    let mut skipped: usize = 0usize;
     for (name, entry) in &reg.skills {
         // skip placeholder non-hex bundleHash (elysiajs)
         if entry.bundle_hash.len() != 64
-            || entry.bundle_hash.chars().any(|c| !c.is_ascii_hexdigit())
+            || entry
+                .bundle_hash
+                .chars()
+                .any(|c: char| !c.is_ascii_hexdigit())
         {
             skipped += 1;
             continue;
@@ -112,8 +117,8 @@ fn parity_hash_bundle_219_fixtures() {
             .iter()
             .map(|(k, v)| (normalize_registry_rel_path(k), v.clone()))
             .collect();
-        entries.sort_by(|a, b| a.0.cmp(&b.0));
-        let computed = bundle_hash(&entries);
+        entries.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
+        let computed: String = bundle_hash(&entries);
         assert_eq!(
             computed, entry.bundle_hash,
             "bundle mismatch for skill {name}: expected {}, got {}",
@@ -148,13 +153,13 @@ fn parity_hash_is_disallowed_zip() {
 #[test]
 fn parity_hash_bundle_spec_example() {
     // spec: a.md:h1,b.md:h2 => sha256("a.md:h1\nb.md:h2") sorted matches 219
-    let h1 = "h1".to_string();
-    let h2 = "h2".to_string();
-    let bundle = bundle_hash(&[
+    let h1: String = "h1".to_string();
+    let h2: String = "h2".to_string();
+    let bundle: String = bundle_hash(&[
         ("b.md".to_string(), h2.clone()),
         ("a.md".to_string(), h1.clone()),
     ]);
-    let manual = sha256_buffer("a.md:h1\nb.md:h2".as_bytes());
+    let manual: String = sha256_buffer("a.md:h1\nb.md:h2".as_bytes());
     assert_eq!(bundle, manual);
 }
 
@@ -212,7 +217,7 @@ fn parity_gradle_multiple_kotlin() {
 
 #[test]
 fn parity_gradle_multiline() {
-    let content = "include(\n  \":app\",\n  \":core\",\n  \":shared:data\"\n)";
+    let content: &str = "include(\n  \":app\",\n  \":core\",\n  \":shared:data\"\n)";
     assert_eq!(
         parse_settings_gradle_modules(content),
         vec!["app", "core", "shared/data"]
@@ -243,18 +248,18 @@ fn parity_gradle_spec_example() {
 
 #[test]
 fn parity_gradle_layout_root_files() {
-    let dir = tempdir().unwrap();
-    let paths = gradle_layout_candidate_paths(dir.path());
+    let dir: tempfile::TempDir = tempdir().unwrap();
+    let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
     assert_eq!(paths.len(), 5);
     assert!(paths.iter().any(|p| p.ends_with("build.gradle.kts")));
 }
 
 #[test]
 fn parity_gradle_layout_includes_subdir() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     fs::create_dir_all(dir.path().join("composeApp")).unwrap();
     fs::write(dir.path().join("composeApp/build.gradle.kts"), "").unwrap();
-    let paths = gradle_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
     assert!(
         paths
             .iter()
@@ -264,13 +269,13 @@ fn parity_gradle_layout_includes_subdir() {
 
 #[test]
 fn parity_gradle_layout_settings_kts() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "settings.gradle.kts",
         r#"include(":feature:login")"#,
     );
-    let paths = gradle_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
     assert!(
         paths
             .iter()
@@ -282,53 +287,53 @@ fn parity_gradle_layout_settings_kts() {
 
 #[test]
 fn parity_dotnet_root_files() {
-    let dir = tempdir().unwrap();
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let dir: tempfile::TempDir = tempdir().unwrap();
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert_eq!(paths.len(), 4);
     assert!(paths.iter().any(|p| p.ends_with("global.json")));
 }
 
 #[test]
 fn parity_dotnet_csproj_depth0() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "MyApp.csproj",
         "<Project Sdk=\"Microsoft.NET.Sdk\">",
     );
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(paths.iter().any(|p| p.ends_with("MyApp.csproj")));
 }
 
 #[test]
 fn parity_dotnet_nested_depth2() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "src/Library/Library.csproj",
         "<Project Sdk=\"Microsoft.NET.Sdk\">",
     );
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(paths.iter().any(|p| p.ends_with("Library.csproj")));
 }
 
 #[test]
 fn parity_dotnet_excludes_depth3() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "src/A/B/C/App.csproj",
         "<Project Sdk=\"Microsoft.NET.Sdk\">",
     );
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(!paths.iter().any(|p| p.ends_with("App.csproj")));
 }
 
 #[test]
 fn parity_dotnet_case_insensitive() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "App.CSPROJ", "<Project>");
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(
         paths
             .iter()
@@ -338,19 +343,19 @@ fn parity_dotnet_case_insensitive() {
 
 #[test]
 fn parity_dotnet_skips_bin_obj() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "bin/Debug/Exclude.csproj", "<Project>");
     write_file(dir.path(), "src/Keep.csproj", "<Project>");
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(!paths.iter().any(|p| p.to_string_lossy().contains("bin")));
     assert!(paths.iter().any(|p| p.ends_with("Keep.csproj")));
 }
 
 #[test]
 fn parity_dotnet_skips_dot_dirs() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), ".hidden/App.csproj", "<Project>");
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(
         !paths
             .iter()
@@ -362,14 +367,14 @@ fn parity_dotnet_skips_dot_dirs() {
 
 #[test]
 fn parity_frontend_html_depth1() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "index.html", "<html></html>");
     assert!(has_web_frontend_files(dir.path(), 3));
 }
 
 #[test]
 fn parity_frontend_vue_depth3() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "src/components/App.vue",
@@ -380,35 +385,35 @@ fn parity_frontend_vue_depth3() {
 
 #[test]
 fn parity_frontend_vue_depth4_excluded() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "src/a/b/c/d/App.vue", "<template></template>");
     assert!(!has_web_frontend_files(dir.path(), 3));
 }
 
 #[test]
 fn parity_frontend_blade() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "resources/views/home.blade.php", "blade");
     assert!(has_web_frontend_files(dir.path(), 3));
 }
 
 #[test]
 fn parity_frontend_twig() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "templates/page.twig", "twig");
     assert!(has_web_frontend_files(dir.path(), 3));
 }
 
 #[test]
 fn parity_frontend_php_alone_false() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "index.php", "<?php echo 'hi';");
     assert!(!has_web_frontend_files(dir.path(), 3));
 }
 
 #[test]
 fn parity_frontend_skip_node_modules() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(
         dir.path(),
         "node_modules/pkg/App.vue",
@@ -419,7 +424,7 @@ fn parity_frontend_skip_node_modules() {
 
 #[test]
 fn parity_frontend_dot_skip() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), ".hidden/App.vue", "<template></template>");
     assert!(!has_web_frontend_files(dir.path(), 3));
 }
@@ -462,7 +467,7 @@ fn parity_installer_encode_spaces() {
 
 #[test]
 fn parity_registry_base_urls_default() {
-    let urls = get_registry_raw_base_urls(None);
+    let urls: Vec<String> = get_registry_raw_base_urls(None);
     assert_eq!(urls.len(), 2);
     assert!(urls[0].contains("/v"));
     assert!(urls[1].ends_with("/main/skills-registry"));
@@ -470,10 +475,10 @@ fn parity_registry_base_urls_default() {
 
 #[test]
 fn parity_registry_parse_skill_path() {
-    let p = parse_skill_path("owner/repo/hello-skill");
+    let p: skillindex::registry::ParsedSkillPath = parse_skill_path("owner/repo/hello-skill");
     assert_eq!(p.repo, "owner/repo");
     assert_eq!(p.skill_name, "hello-skill");
-    let http = parse_skill_path("https://example.com/skill");
+    let http: skillindex::registry::ParsedSkillPath = parse_skill_path("https://example.com/skill");
     assert_eq!(http.skill_name, "");
 }
 
@@ -482,7 +487,7 @@ fn parity_registry_parse_skill_path() {
 
 #[test]
 fn parity_cache_dir_appends_hash() {
-    let dir = get_cache_registry_dir("abc123");
+    let dir: PathBuf = get_cache_registry_dir("abc123");
     assert!(dir.ends_with("abc123"));
 }
 
@@ -494,13 +499,13 @@ fn parity_cache_dir_appends_hash() {
 #[test]
 fn parity_args_dry_run_flag() {
     // cargo test -- --nocapture should not trigger dry-run logic via binary, but we test via clap directly
-    let args = Args::try_parse_from(["skillindex", "--dry-run"]).unwrap();
+    let args: Args = Args::try_parse_from(["skillindex", "--dry-run"]).unwrap();
     assert!(args.dry_run);
 }
 
 #[test]
 fn parity_args_yes_and_agent() {
-    let args =
+    let args: Args =
         Args::try_parse_from(["skillindex", "-y", "-a", "cursor", "-a", "claude-code"]).unwrap();
     assert!(args.yes);
     assert_eq!(args.agent, vec!["cursor", "claude-code"]);
@@ -525,7 +530,7 @@ fn parity_display_wrap_truncate() {
 #[test]
 fn parity_display_three_col() {
     let techs: Vec<DisplayTechnology> = (0..7)
-        .map(|i| DisplayTechnology {
+        .map(|i: i32| DisplayTechnology {
             id: format!("t{i}"),
             name: format!("Tech{i}"),
             skills: vec![],
@@ -535,8 +540,8 @@ fn parity_display_three_col() {
         id: "combo".to_string(),
         name: "Combo".to_string(),
     }];
-    let out = format_detected(&techs, &combos, true);
-    let plain = skillindex::ui::strip_ansi(&out);
+    let out: String = format_detected(&techs, &combos, true);
+    let plain: String = skillindex::ui::strip_ansi(&out);
     for i in 0..7 {
         assert!(plain.contains(&format!("Tech{i}")));
     }
@@ -546,7 +551,7 @@ fn parity_display_three_col() {
 
 #[test]
 fn parity_display_security_sorted() {
-    let checks = vec![
+    let checks: Vec<skillindex::registry::InstallSecurityCheck> = vec![
         skillindex::registry::InstallSecurityCheck {
             name: "zebra".to_string(),
             status: "ok".to_string(),
@@ -560,10 +565,10 @@ fn parity_display_security_sorted() {
             findings: vec!["flag".to_string()],
         },
     ];
-    let out = format_security_checks(&checks);
-    let plain = skillindex::ui::strip_ansi(&out);
-    let alpha_pos = plain.find("alpha").unwrap();
-    let zebra_pos = plain.find("zebra").unwrap();
+    let out: String = format_security_checks(&checks);
+    let plain: String = skillindex::ui::strip_ansi(&out);
+    let alpha_pos: usize = plain.find("alpha").unwrap();
+    let zebra_pos: usize = plain.find("zebra").unwrap();
     assert!(alpha_pos < zebra_pos);
 }
 
@@ -578,10 +583,10 @@ fn parity_display_security_sorted() {
 #[test]
 fn parity_fallback_node_via_env() {
     // Spawn node index.ts --help with SKILLINDEX_USE_RUST=0, should succeed via Node fallback (fallback to index.mjs shim if needed)
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let index_ts = manifest_dir.join("index.ts");
-    let index_mjs = manifest_dir.join("index.mjs");
-    let index = if index_ts.exists() {
+    let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let index_ts: PathBuf = manifest_dir.join("index.ts");
+    let index_mjs: PathBuf = manifest_dir.join("index.mjs");
+    let index: PathBuf = if index_ts.exists() {
         index_ts
     } else {
         index_mjs
@@ -589,17 +594,17 @@ fn parity_fallback_node_via_env() {
     if !index.exists() {
         return;
     }
-    let is_ts = index.extension().and_then(|e| e.to_str()) == Some("ts");
-    let mut cmd = if is_ts {
-        let mut c = std::process::Command::new("bun");
+    let is_ts: bool = index.extension().and_then(|e: &std::ffi::OsStr| e.to_str()) == Some("ts");
+    let mut cmd: std::process::Command = if is_ts {
+        let mut c: std::process::Command = std::process::Command::new("bun");
         c.arg(index.clone());
         c
     } else {
-        let mut c = std::process::Command::new("node");
+        let mut c: std::process::Command = std::process::Command::new("node");
         c.arg(index.clone());
         c
     };
-    let output = cmd
+    let output: std::process::Output = cmd
         .arg("--help")
         .env("SKILLINDEX_USE_RUST", "0")
         .output()
@@ -609,7 +614,7 @@ fn parity_fallback_node_via_env() {
         "node fallback failed: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let combined = format!(
+    let combined: String = format!(
         "{}{}",
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
@@ -623,32 +628,32 @@ fn parity_fallback_node_via_env() {
 
 #[tokio::test]
 async fn parity_installer_rate_limit_iso() {
-    let _cache_guard = cache_env_guard().await;
+    let _cache_guard: MutexGuard<'_, ()> = cache_env_guard().await;
     use httpmock::MockServer;
     use skillindex::infra::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;
 
-    let server = MockServer::start();
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let server: httpmock::prelude::MockServer = MockServer::start();
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: PathBuf = tmp.path().join("registry");
+    let project_dir: PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
     fs::create_dir_all(&reg_dir).unwrap();
 
     // build entry
-    let skill_name = "rate-skill";
-    let content = "content";
-    let hash = sha256_buffer(content.as_bytes());
-    let bundle = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
-    let entry = RegistryEntry {
+    let skill_name: &str = "rate-skill";
+    let content: &str = "content";
+    let hash: String = sha256_buffer(content.as_bytes());
+    let bundle: String = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
+    let entry: skillindex::registry::RegistryEntry = RegistryEntry {
         source: "owner/repo".to_string(),
         skill_path: format!("owner/repo/{skill_name}"),
         commit_sha: "deadbeef".to_string(),
         files: vec!["SKILL.md".to_string()],
         sha256: {
-            let mut m = HashMap::new();
+            let mut m: HashMap<String, String> = HashMap::new();
             m.insert("SKILL.md".to_string(), hash);
             m
         },
@@ -663,9 +668,10 @@ async fn parity_installer_rate_limit_iso() {
         },
         security_check: None,
     };
-    let mut skills = HashMap::new();
+    let mut skills: std::collections::HashMap<String, skillindex::registry::RegistryEntry> =
+        HashMap::new();
     skills.insert(skill_name.to_string(), entry);
-    let registry = Registry {
+    let registry: Registry = Registry {
         version: 1,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         reviewer: Reviewer {
@@ -679,7 +685,7 @@ async fn parity_installer_rate_limit_iso() {
         serde_json::to_string_pretty(&registry).unwrap(),
     )
     .unwrap();
-    let mock = server.mock(|when, then| {
+    let mock: httpmock::Mock<'_> = server.mock(|when: httpmock::When, then: httpmock::Then| {
         when.method(httpmock::Method::GET)
             .path(format!("/{skill_name}/SKILL.md"));
         then.status(403)
@@ -687,17 +693,18 @@ async fn parity_installer_rate_limit_iso() {
             .header("x-ratelimit-reset", "999")
             .body("rate limited");
     });
-    let cache_root = tmp.path().join("cache-rate-parity");
-    let prev = std::env::var("SKILLINDEX_CACHE_DIR").ok();
+    let cache_root: PathBuf = tmp.path().join("cache-rate-parity");
+    let prev: Option<String> = std::env::var("SKILLINDEX_CACHE_DIR").ok();
     unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
-    let opts = InstallOptions {
+    let opts: skillindex::installer::InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
         ..Default::default()
     };
-    let client = reqwest::Client::new();
-    let result = install_skill_with_client("owner/repo/rate-skill", &[], &opts, &client).await;
+    let client: reqwest::Client = reqwest::Client::new();
+    let result: skillindex::installer::InstallResult =
+        install_skill_with_client("owner/repo/rate-skill", &[], &opts, &client).await;
     assert!(!result.success);
     assert!(
         result.output.contains("Límite de tasa de GitHub excedido")
@@ -713,31 +720,31 @@ async fn parity_installer_rate_limit_iso() {
 
 #[tokio::test]
 async fn parity_installer_httpmock_network_ok() {
-    let _cache_guard = cache_env_guard().await;
+    let _cache_guard: MutexGuard<'_, ()> = cache_env_guard().await;
     use httpmock::MockServer;
     use skillindex::infra::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;
 
-    let server = MockServer::start();
-    let tmp = tempdir().unwrap();
-    let reg_dir = tmp.path().join("registry");
-    let project_dir = tmp.path().join("project");
+    let server: httpmock::prelude::MockServer = MockServer::start();
+    let tmp: tempfile::TempDir = tempdir().unwrap();
+    let reg_dir: PathBuf = tmp.path().join("registry");
+    let project_dir: PathBuf = tmp.path().join("project");
     fs::create_dir_all(&project_dir).unwrap();
     fs::create_dir_all(&reg_dir).unwrap();
 
-    let skill_name = "net-skill-parity";
-    let content = "# net skill parity";
-    let hash = sha256_buffer(content.as_bytes());
-    let bundle = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
-    let entry = RegistryEntry {
+    let skill_name: &str = "net-skill-parity";
+    let content: &str = "# net skill parity";
+    let hash: String = sha256_buffer(content.as_bytes());
+    let bundle: String = bundle_hash(&[("SKILL.md".to_string(), hash.clone())]);
+    let entry: skillindex::registry::RegistryEntry = RegistryEntry {
         source: "owner/repo".to_string(),
         skill_path: format!("owner/repo/{skill_name}"),
         commit_sha: "deadbeef".to_string(),
         files: vec!["SKILL.md".to_string()],
         sha256: {
-            let mut m = HashMap::new();
+            let mut m: HashMap<String, String> = HashMap::new();
             m.insert("SKILL.md".to_string(), hash);
             m
         },
@@ -752,9 +759,10 @@ async fn parity_installer_httpmock_network_ok() {
         },
         security_check: None,
     };
-    let mut skills = HashMap::new();
+    let mut skills: std::collections::HashMap<String, skillindex::registry::RegistryEntry> =
+        HashMap::new();
     skills.insert(skill_name.to_string(), entry.clone());
-    let registry = Registry {
+    let registry: Registry = Registry {
         version: 1,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         reviewer: Reviewer {
@@ -768,22 +776,22 @@ async fn parity_installer_httpmock_network_ok() {
         serde_json::to_string_pretty(&registry).unwrap(),
     )
     .unwrap();
-    let mock = server.mock(|when, then| {
+    let mock: httpmock::Mock<'_> = server.mock(|when: httpmock::When, then: httpmock::Then| {
         when.method(httpmock::Method::GET)
             .path(format!("/{skill_name}/SKILL.md"));
         then.status(200).body(content);
     });
-    let cache_root = tmp.path().join("cache-net-parity");
-    let prev = std::env::var("SKILLINDEX_CACHE_DIR").ok();
+    let cache_root: PathBuf = tmp.path().join("cache-net-parity");
+    let prev: Option<String> = std::env::var("SKILLINDEX_CACHE_DIR").ok();
     unsafe { std::env::set_var("SKILLINDEX_CACHE_DIR", cache_root.to_str().unwrap()) };
-    let opts = InstallOptions {
+    let opts: skillindex::installer::InstallOptions = InstallOptions {
         project_dir: Some(project_dir.clone()),
         registry_dir: Some(reg_dir.clone()),
         registry_base_url: Some(server.base_url()),
         ..Default::default()
     };
-    let client = reqwest::Client::new();
-    let result =
+    let client: reqwest::Client = reqwest::Client::new();
+    let result: skillindex::installer::InstallResult =
         install_skill_with_client("owner/repo/net-skill-parity", &[], &opts, &client).await;
     assert!(
         result.success,
@@ -809,7 +817,7 @@ async fn parity_installer_httpmock_network_ok() {
 
 #[test]
 fn parity_extra_frontend_extensions_loop() {
-    let exts = vec![
+    let exts: Vec<&str> = vec![
         "page.html",
         "style.css",
         "app.vue",
@@ -818,7 +826,7 @@ fn parity_extra_frontend_extensions_loop() {
         "tsx.tsx",
     ];
     for rel in exts {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), rel, "x");
         assert!(has_web_frontend_files(dir.path(), 3), "failed for {rel}");
     }
@@ -826,7 +834,7 @@ fn parity_extra_frontend_extensions_loop() {
 
 #[test]
 fn parity_extra_gradle_parse_variants() {
-    let variants = vec![
+    let variants: Vec<(&str, Vec<&str>)> = vec![
         (r#"include("app")"#, vec!["app"]),
         (r#"include(":app",":lib:core")"#, vec!["app", "lib/core"]),
         ("include 'a', 'b'", vec!["a", "b"]),
@@ -838,10 +846,10 @@ fn parity_extra_gradle_parse_variants() {
 
 #[test]
 fn parity_extra_dotnet_filters() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "App.csproj", "<Project>");
     write_file(dir.path(), "bin/Ignore.csproj", "<Project>");
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(paths.iter().any(|p| p.ends_with("App.csproj")));
     assert!(
         !paths
@@ -868,18 +876,18 @@ fn parity_extra_installer_hash_reject_zip_case_insensitive() {
 
 #[test]
 fn parity_hash_bundle_two_files_references() {
-    let h1 = sha256_buffer(b"skill content");
-    let h2 = sha256_buffer(b"references notes");
-    let bundle = bundle_hash(&[
+    let h1: String = sha256_buffer(b"skill content");
+    let h2: String = sha256_buffer(b"references notes");
+    let bundle: String = bundle_hash(&[
         ("SKILL.md".to_string(), h1.clone()),
         ("references/notes.md".to_string(), h2.clone()),
     ]);
-    let mut sorted = [
+    let mut sorted: [(String, String); 2] = [
         ("SKILL.md".to_string(), h1),
         ("references/notes.md".to_string(), h2),
     ];
-    sorted.sort_by(|a, b| a.0.cmp(&b.0));
-    let expected = sha256_buffer(
+    sorted.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
+    let expected: String = sha256_buffer(
         sorted
             .iter()
             .map(|(k, v)| format!("{k}:{v}"))
@@ -900,20 +908,20 @@ fn parity_gradle_parse_complex_colon_path() {
 
 #[test]
 fn parity_dotnet_fsproj_and_sln() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "Lib.fsproj", "<Project>");
     write_file(dir.path(), "Solution.sln", "");
-    let paths = dotnet_layout_candidate_paths(dir.path());
+    let paths: Vec<PathBuf> = dotnet_layout_candidate_paths(dir.path());
     assert!(paths.iter().any(|p| p.ends_with("Lib.fsproj")));
     assert!(paths.iter().any(|p| p.ends_with("Solution.sln")));
 }
 
 #[test]
 fn parity_frontend_scss_and_jsx() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "styles/app.scss", ".a{}");
     assert!(has_web_frontend_files(dir.path(), 3));
-    let dir2 = tempdir().unwrap();
+    let dir2: tempfile::TempDir = tempdir().unwrap();
     write_file(dir2.path(), "src/app.jsx", "jsx");
     assert!(has_web_frontend_files(dir2.path(), 3));
 }
@@ -935,7 +943,7 @@ fn parity_registry_is_disallowed_via_registry() {
 
 #[test]
 fn parity_cache_bundle_hash_dir() {
-    let dir = get_cache_registry_dir(
+    let dir: PathBuf = get_cache_registry_dir(
         "deadbeef1234567890deadbeef1234567890deadbeef1234567890deadbeef1234",
     );
     assert!(dir.to_string_lossy().contains("deadbeef"));
@@ -944,16 +952,16 @@ fn parity_cache_bundle_hash_dir() {
 #[test]
 fn parity_installer_normalize_and_bundle() {
     assert_eq!(normalize_registry_rel_path("a\\b/c"), "a/b/c");
-    let bundle = bundle_hash(&[("a.md".to_string(), "h1".to_string())]);
+    let bundle: String = bundle_hash(&[("a.md".to_string(), "h1".to_string())]);
     assert_eq!(bundle, sha256_buffer("a.md:h1".as_bytes()));
 }
 
 #[test]
 fn parity_frontend_depth_boundary_exact() {
-    let dir = tempdir().unwrap();
+    let dir: tempfile::TempDir = tempdir().unwrap();
     write_file(dir.path(), "a/b/c/App.vue", "<template></template>"); // depth 3 from root (a=1,b=2,c=3)
     assert!(has_web_frontend_files(dir.path(), 3));
-    let dir2 = tempdir().unwrap();
+    let dir2: tempfile::TempDir = tempdir().unwrap();
     write_file(dir2.path(), "a/b/c/d/App.vue", "<template></template>"); // depth 4
     assert!(!has_web_frontend_files(dir2.path(), 3));
 }
