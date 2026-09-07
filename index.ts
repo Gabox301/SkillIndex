@@ -22,6 +22,7 @@ function findRustBinary(): string | null {
   const binName: string = process.platform === 'win32' ? 'skillindex.exe' : 'skillindex';
   const candidates: string[] = [
     join(__dirname, 'bin', binName),
+    join(__dirname, '..', 'bin', binName),
     join(__dirname, 'target', 'release', binName),
     join(__dirname, 'target', 'debug', binName),
     join(__dirname, '..', 'target', 'release', binName),
