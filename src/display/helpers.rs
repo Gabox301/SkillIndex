@@ -16,8 +16,8 @@ pub fn format_skill_label(skill: &str, styled: bool) -> String {
             return skill.to_string();
         }
     }
-    let author = parts[0];
-    let skill_name = parts[2];
+    let author: &str = parts[0];
+    let skill_name: &str = parts[2];
     if !styled {
         return format!("{author} › {skill_name}");
     }
@@ -34,7 +34,7 @@ pub fn strip_ansi_owned(s: &str) -> String {
 }
 
 pub fn visible_pad(value: &str, width: usize) -> String {
-    let visible_len = strip_ansi(value).chars().count();
+    let visible_len: usize = strip_ansi(value).chars().count();
     if visible_len >= width {
         value.to_string()
     } else {
@@ -43,8 +43,8 @@ pub fn visible_pad(value: &str, width: usize) -> String {
 }
 
 pub fn truncate_visible(value: &str, width: usize) -> String {
-    let plain = strip_ansi(value);
-    let len = plain.chars().count();
+    let plain: String = strip_ansi(value);
+    let len: usize = plain.chars().count();
     if len <= width {
         return value.to_string();
     }
@@ -64,7 +64,7 @@ pub fn wrap_text(value: &str, width: usize) -> Vec<String> {
         return vec![String::new()];
     }
     let mut lines: Vec<String> = Vec::new();
-    let mut line = String::new();
+    let mut line: String = String::new();
     for word in words {
         if word.chars().count() > width {
             if !line.is_empty() {
@@ -77,7 +77,7 @@ pub fn wrap_text(value: &str, width: usize) -> Vec<String> {
             }
             continue;
         }
-        let next = if line.is_empty() {
+        let next: String = if line.is_empty() {
             word.to_string()
         } else {
             format!("{line} {word}")
@@ -99,12 +99,12 @@ pub fn format_time(ms: u64) -> String {
     if ms < 1000 {
         return format!("{ms}ms");
     }
-    let s = ms as f64 / 1000.0;
+    let s: f64 = ms as f64 / 1000.0;
     if s < 60.0 {
         return format!("{:.1}s", s);
     }
-    let m = (s / 60.0).floor() as u64;
-    let rem = (s % 60.0).round() as u64;
+    let m: u64 = (s / 60.0).floor() as u64;
+    let rem: u64 = (s % 60.0).round() as u64;
     format!("{m}m {rem}s")
 }
 
@@ -115,26 +115,26 @@ mod tests {
 
     #[test]
     fn format_skill_label_plain_url() {
-        let s = format_skill_label("https://example.com/skill", false);
+        let s: String = format_skill_label("https://example.com/skill", false);
         assert_eq!(s, "https://example.com/skill");
     }
 
     #[test]
     fn format_skill_label_plain_three_parts() {
-        let s = format_skill_label("owner/repo/my-skill", false);
+        let s: String = format_skill_label("owner/repo/my-skill", false);
         assert_eq!(s, "owner › my-skill");
     }
 
     #[test]
     fn format_skill_label_plain_not_three() {
-        let s = format_skill_label("owner/repo", false);
+        let s: String = format_skill_label("owner/repo", false);
         assert_eq!(s, "owner/repo");
     }
 
     #[test]
     fn format_skill_label_styled_contains_parts() {
-        let s = format_skill_label("owner/repo/my-skill", true);
-        let plain = strip_ansi(&s);
+        let s: String = format_skill_label("owner/repo/my-skill", true);
+        let plain: String = strip_ansi(&s);
         assert!(plain.contains("owner"));
         assert!(plain.contains("my-skill"));
         assert!(plain.contains("›"));
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn wrap_text_basic() {
-        let lines = wrap_text("hello world foo bar", 10);
+        let lines: Vec<String> = wrap_text("hello world foo bar", 10);
         assert!(lines.len() >= 2);
         for l in &lines {
             assert!(l.chars().count() <= 10);
@@ -151,8 +151,8 @@ mod tests {
 
     #[test]
     fn wrap_text_long_word_split() {
-        let long = "a".repeat(50);
-        let lines = wrap_text(&long, 10);
+        let long: String = "a".repeat(50);
+        let lines: Vec<String> = wrap_text(&long, 10);
         assert!(lines.len() == 5);
         for l in &lines {
             assert!(l.chars().count() <= 10);
@@ -161,15 +161,15 @@ mod tests {
 
     #[test]
     fn visible_pad_pads_correctly() {
-        let s = green("hi");
-        let padded = visible_pad(&s, 5);
+        let s: String = green("hi");
+        let padded: String = visible_pad(&s, 5);
         assert_eq!(strip_ansi(&padded).chars().count(), 5);
     }
 
     #[test]
     fn truncate_visible_truncates() {
-        let s = "hello world";
-        let t = truncate_visible(s, 5);
+        let s: &str = "hello world";
+        let t: String = truncate_visible(s, 5);
         assert_eq!(t.chars().count(), 5);
         assert!(t.ends_with('…'));
     }

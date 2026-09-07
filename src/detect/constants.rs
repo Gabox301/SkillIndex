@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn scan_skip_dirs_contains_expected_entries() {
-        let expected = [
+        let expected: [&str; 18] = [
             "node_modules",
             ".git",
             "vendor",
@@ -98,8 +98,8 @@ mod tests {
 
     #[test]
     fn cache_identity_is_stable() {
-        let a = SCAN_SKIP_DIRS.len();
-        let b = SCAN_SKIP_DIRS.len();
+        let a: usize = SCAN_SKIP_DIRS.len();
+        let b: usize = SCAN_SKIP_DIRS.len();
         assert_eq!(a, b);
         assert_eq!(a, 18);
     }

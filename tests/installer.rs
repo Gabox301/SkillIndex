@@ -1,7 +1,7 @@
 //! Integration tests for skill installation.
 //! Mirrors installer.test.ts — one test per `it(...)` block.
 
-use skillindex::hash::{bundle_hash, sha256_buffer};
+use skillindex::infra::hash::{bundle_hash, sha256_buffer};
 use skillindex::installer::{
     InstallOptions, copy_dir, ensure_symlink_to, install_all, install_skill, rel_path_from_to,
     update_skills_lock,

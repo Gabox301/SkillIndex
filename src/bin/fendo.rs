@@ -2,12 +2,12 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     // fendo checks from repo root (where .npmrc, package.json, lockfiles live)
     // When run via cargo, CARGO_MANIFEST_DIR is the crate root (project root after migration)
-    let root = manifest_dir.clone();
+    let root: PathBuf = manifest_dir.clone();
 
-    let mut failed = false;
+    let mut failed: bool = false;
 
     let ok = |msg: &str| println!("✔ {msg}");
     let mut fail = |msg: &str| {
@@ -19,11 +19,11 @@ fn main() {
 
     // Check package.json files
     for rel in ["package.json", "packages/skillindex/package.json"] {
-        let path = root.join(rel);
+        let path: PathBuf = root.join(rel);
         if !path.exists() {
             continue;
         }
-        let content = match fs::read_to_string(&path) {
+        let content: String = match fs::read_to_string(&path) {
             Ok(c) => c,
             Err(_) => continue,
         };
@@ -47,15 +47,15 @@ fn main() {
             }
         }
         for (name, ver) in &all_deps {
-            let v = ver.trim();
+            let v: &str = ver.trim();
             if v.starts_with('^') || v.starts_with('~') {
                 fail(&format!(
                     "{}: {name}@{v} uses ^/~ — pin exact version",
                     path.display()
                 ));
             }
-            let lower = v.to_lowercase();
-            let is_git_or_tarball = lower.starts_with("git+")
+            let lower: String = v.to_lowercase();
+            let is_git_or_tarball: bool = lower.starts_with("git+")
                 || lower.starts_with("github:")
                 || (lower.contains("://")
                     && (lower.ends_with(".tgz") || lower.ends_with(".tar.gz")))
@@ -80,12 +80,12 @@ fn main() {
     }
 
     // Check .npmrc
-    let npmrc_path = root.join(".npmrc");
+    let npmrc_path: PathBuf = root.join(".npmrc");
     if !npmrc_path.exists() {
         fail(".npmrc missing — hardening not applied");
     } else {
-        let txt = fs::read_to_string(&npmrc_path).unwrap_or_default();
-        let checks = [
+        let txt: String = fs::read_to_string(&npmrc_path).unwrap_or_default();
+        let checks: [(&str, &str); 3] = [
             ("save-exact=true", "save-exact=true"),
             ("ignore-scripts=true", "ignore-scripts=true"),
             ("engine-strict=true", "engine-strict=true"),
@@ -103,21 +103,21 @@ fn main() {
     }
 
     // Check lockfile
-    let candidates = [
+    let candidates: [&str; 5] = [
         "bun.lock",
         "bun.lockb",
         "pnpm-lock.yaml",
         "package-lock.json",
         "yarn.lock",
     ];
-    let mut found = Vec::new();
+    let mut found: Vec<String> = Vec::new();
     for f in candidates {
         if root.join(f).exists() {
             found.push(f.to_string());
         }
     }
-    let pkg_candidates = ["pnpm-lock.yaml", "bun.lock", "bun.lockb"];
-    let mut pkg_found = Vec::new();
+    let pkg_candidates: [&str; 3] = ["pnpm-lock.yaml", "bun.lock", "bun.lockb"];
+    let mut pkg_found: Vec<String> = Vec::new();
     for f in pkg_candidates {
         if root.join("packages/skillindex").join(f).exists() {
             pkg_found.push(f.to_string());
@@ -130,17 +130,17 @@ fn main() {
     if found.is_empty() && pkg_found.is_empty() {
         fail("No lockfile found (bun.lock / pnpm-lock.yaml) — commit it");
     } else {
-        let all_found = [found.clone(), pkg_found.clone()].concat();
+        let all_found: Vec<String> = [found.clone(), pkg_found.clone()].concat();
         ok(&format!("Lockfile present: {}", all_found.join(", ")));
     }
 
     // Check .gitignore doesn't ignore lockfile
-    let gi_path = root.join(".gitignore");
+    let gi_path: PathBuf = root.join(".gitignore");
     if gi_path.exists() {
-        let txt = fs::read_to_string(&gi_path).unwrap_or_default();
+        let txt: String = fs::read_to_string(&gi_path).unwrap_or_default();
         let lines: Vec<String> = txt
-            .split(|c| ['\n', '\r'].contains(&c))
-            .map(|l| l.trim().to_string())
+            .split(|c: char| ['\n', '\r'].contains(&c))
+            .map(|l: &str| l.trim().to_string())
             .collect();
         for f in &found {
             if lines.contains(f)

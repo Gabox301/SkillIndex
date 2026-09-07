@@ -35,34 +35,34 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         return Ok(items);
     }
 
-    let mut selected = opts
+    let mut selected: Vec<bool> = opts
         .initial_selected
         .clone()
         .unwrap_or_else(|| vec![true; items.len()]);
     let mut cursor: usize = 0;
 
-    let g_count = crate::prompt::helpers::group_count(&items, opts.group_fn.as_deref());
-    let show_groups = g_count > 1;
-    let rows = build_rows(&items, opts.group_fn.as_deref(), show_groups);
+    let g_count: usize = crate::prompt::helpers::group_count(&items, opts.group_fn.as_deref());
+    let show_groups: bool = g_count > 1;
+    let rows: Vec<Row> = build_rows(&items, opts.group_fn.as_deref(), show_groups);
 
     const VIEWPORT_MARGIN: usize = 1;
     const RESERVED_ROWS: usize = 6;
-    let terminal_rows = crossterm::terminal::size()
+    let terminal_rows: usize = crossterm::terminal::size()
         .map(|(_, h)| h as usize)
         .unwrap_or(24);
-    let viewport_height = rows
+    let viewport_height: usize = rows
         .len()
         .min(terminal_rows.saturating_sub(RESERVED_ROWS))
         .max(3);
     let mut view_start: usize = 0;
     let mut last_drawn_lines: usize = 0;
 
-    let mut stdout = io::stdout();
+    let mut stdout: io::Stdout = io::stdout();
     execute!(stdout, Hide)?;
 
     enable_raw_mode()?;
 
-    let mut rendered = false;
+    let mut rendered: bool = false;
 
     let clear_rendered =
         |rendered: &mut bool, stdout: &mut io::Stdout, lines: usize| -> io::Result<()> {
@@ -89,8 +89,8 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                 rows: &[Row],
                 opts: &MultiSelectOptions<T>|
      -> io::Result<usize> {
-        let count = selected.iter().filter(|&&b| b).count();
-        let end = rows.len().min(view_start + viewport_height);
+        let count: usize = selected.iter().filter(|&&b| b).count();
+        let end: usize = rows.len().min(view_start + viewport_height);
         let mut lines: usize = 0;
 
         if view_start > 0 {
@@ -99,14 +99,14 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         }
 
         for (r, row) in rows.iter().enumerate().take(end).skip(view_start) {
-            let pointer = if r == cursor {
+            let pointer: String = if r == cursor {
                 brand_cyan("❯")
             } else {
                 " ".to_string()
             };
             match row {
                 Row::Group { group, members } => {
-                    let state = group_selection_state(selected, members);
+                    let state: GroupState = group_selection_state(selected, members);
                     writeln!(
                         stdout,
                         "   {pointer} {} {}",
@@ -115,40 +115,40 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                     )?;
                 }
                 Row::Item { index } => {
-                    let i = *index;
-                    let check = if selected[i] {
+                    let i: usize = *index;
+                    let check: String = if selected[i] {
                         green("◼")
                     } else {
                         dim("◻")
                     };
-                    let label = (opts.label_fn)(&items[i], i);
-                    let hint = opts
+                    let label: String = (opts.label_fn)(&items[i], i);
+                    let hint: String = opts
                         .hint_fn
                         .as_ref()
                         .map(|f| f(&items[i], i))
                         .unwrap_or_default();
-                    let hint_part = if hint.is_empty() {
+                    let hint_part: String = if hint.is_empty() {
                         String::new()
                     } else {
                         format!("  {}", dim(&hint))
                     };
-                    let indent = if show_groups { "       " } else { "     " };
+                    let indent: &str = if show_groups { "       " } else { "     " };
                     writeln!(stdout, "{indent}{pointer} {check} {label}{hint_part}")?;
                 }
             }
             lines += 1;
         }
 
-        let below_count = rows.len() - end;
+        let below_count: usize = rows.len() - end;
         if below_count > 0 {
             writeln!(stdout, "{}", dim(&format!("   ↓ {below_count} más")))?;
             lines += 1;
         }
 
-        let shortcut_hints = opts
+        let shortcut_hints: String = opts
             .shortcuts
             .iter()
-            .map(|s| {
+            .map(|s: &crate::prompt::Shortcut<T>| {
                 format!(
                     "{} {}",
                     white(&bold(&format!("[{}]", s.key))),
@@ -157,13 +157,13 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
             })
             .collect::<Vec<_>>()
             .join(&dim(" · "));
-        let shortcut_part = if opts.shortcuts.is_empty() {
+        let shortcut_part: String = if opts.shortcuts.is_empty() {
             String::new()
         } else {
             format!("{shortcut_hints}{}", dim(" · "))
         };
 
-        let mut hint_line = String::new();
+        let mut hint_line: String = String::new();
         hint_line.push_str("   ");
         hint_line.push_str(&white(&bold("[↑↓]")));
         hint_line.push_str(&dim(" mover · "));
@@ -183,7 +183,7 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
         Ok(lines)
     };
 
-    let row_count = rows.len();
+    let row_count: usize = rows.len();
 
     macro_rules! redraw {
         () => {{
@@ -211,7 +211,7 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
     redraw!();
 
     loop {
-        let event = event::read()?;
+        let event: Event = event::read()?;
         if let Event::Key(key) = event {
             if key.kind != KeyEventKind::Press {
                 continue;
@@ -246,15 +246,15 @@ pub fn multi_select<T: Clone>(items: Vec<T>, opts: MultiSelectOptions<T>) -> io:
                     redraw!();
                 }
                 KeyCode::Char('a') => {
-                    let all = selected.iter().all(|&b| b);
+                    let all: bool = selected.iter().all(|&b| b);
                     selected.fill(!all);
                     redraw!();
                 }
                 KeyCode::Char(c) => {
-                    let mut handled = false;
+                    let mut handled: bool = false;
                     for sc in &opts.shortcuts {
                         if sc.key == c {
-                            let result = (sc.func)(&items);
+                            let result: Vec<bool> = (sc.func)(&items);
                             for (i, v) in result.into_iter().enumerate() {
                                 if i < selected.len() {
                                     selected[i] = v;

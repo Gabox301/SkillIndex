@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
-use crate::hash::normalize_registry_rel_path;
+use crate::infra::hash::normalize_registry_rel_path;
 
 fn get_github_token() -> Option<String> {
     if let Ok(v) = env::var("GITHUB_TOKEN")
@@ -20,21 +20,21 @@ fn get_github_token() -> Option<String> {
 
 fn is_githubusercontent_url(url: &str) -> bool {
     // extract host between "://" and next "/"
-    let host = if let Some(start) = url.find("://") {
-        let rest = &url[start + 3..];
-        let end = rest.find('/').unwrap_or(rest.len());
+    let host: &str = if let Some(start) = url.find("://") {
+        let rest: &str = &url[start + 3..];
+        let end: usize = rest.find('/').unwrap_or(rest.len());
         &rest[..end]
     } else {
         url
     };
-    let lower = host.to_ascii_lowercase();
+    let lower: String = host.to_ascii_lowercase();
     lower == "raw.githubusercontent.com"
         || lower.ends_with(".githubusercontent.com")
         || lower == "githubusercontent.com"
 }
 
 pub fn github_download_headers(url: &str) -> reqwest::header::HeaderMap {
-    let mut headers = reqwest::header::HeaderMap::new();
+    let mut headers: reqwest::header::HeaderMap = reqwest::header::HeaderMap::new();
     headers.insert(
         reqwest::header::USER_AGENT,
         reqwest::header::HeaderValue::from_static("skillindex"),
@@ -42,7 +42,7 @@ pub fn github_download_headers(url: &str) -> reqwest::header::HeaderMap {
     if let Some(token) = get_github_token()
         && is_githubusercontent_url(url)
     {
-        let bearer = format!("Bearer {token}");
+        let bearer: String = format!("Bearer {token}");
         if let Ok(v) = reqwest::header::HeaderValue::from_str(&bearer) {
             headers.insert(reqwest::header::AUTHORIZATION, v);
         }
@@ -51,9 +51,9 @@ pub fn github_download_headers(url: &str) -> reqwest::header::HeaderMap {
 }
 
 fn encode_uri_component(s: &str) -> String {
-    let mut out = String::with_capacity(s.len() * 3);
+    let mut out: String = String::with_capacity(s.len() * 3);
     for b in s.bytes() {
-        let c = b as char;
+        let c: char = b as char;
         if matches!(
             c,
             'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '!' | '~' | '*' | '\'' | '(' | ')'
@@ -67,8 +67,8 @@ fn encode_uri_component(s: &str) -> String {
 }
 
 pub fn encode_raw_path(skill_name: &str, rel: &str) -> String {
-    let normalized = normalize_registry_rel_path(rel);
-    let mut segments = Vec::new();
+    let normalized: String = normalize_registry_rel_path(rel);
+    let mut segments: Vec<String> = Vec::new();
     segments.push(encode_uri_component(skill_name));
     for part in normalized.split('/') {
         segments.push(encode_uri_component(part));
@@ -79,7 +79,7 @@ pub fn encode_raw_path(skill_name: &str, rel: &str) -> String {
 pub fn rel_path_from_to(from: &Path, to: &Path) -> String {
     let from_comps: Vec<_> = from.components().collect();
     let to_comps: Vec<_> = to.components().collect();
-    let mut common = 0usize;
+    let mut common: usize = 0usize;
     for (a, b) in from_comps.iter().zip(to_comps.iter()) {
         if a == b {
             common += 1;
@@ -104,10 +104,10 @@ pub fn rel_path_from_to(from: &Path, to: &Path) -> String {
 pub fn copy_dir(src: &Path, dest: &Path) -> std::io::Result<()> {
     fs::create_dir_all(dest)?;
     for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let ty = entry.file_type()?;
-        let s = entry.path();
-        let d = dest.join(entry.file_name());
+        let entry: fs::DirEntry = entry?;
+        let ty: fs::FileType = entry.file_type()?;
+        let s: std::path::PathBuf = entry.path();
+        let d: std::path::PathBuf = dest.join(entry.file_name());
         if ty.is_dir() {
             copy_dir(&s, &d)?;
         } else if ty.is_file() {
@@ -130,10 +130,10 @@ pub fn ensure_symlink_to(target: &Path, link_path: &Path) -> std::io::Result<()>
             let _ = fs::remove_dir_all(link_path);
         }
     }
-    let rel = rel_path_from_to(link_path.parent().unwrap_or(Path::new(".")), target);
+    let rel: String = rel_path_from_to(link_path.parent().unwrap_or(Path::new(".")), target);
     #[cfg(windows)]
     {
-        let res = std::os::windows::fs::symlink_dir(&rel, link_path);
+        let res: Result<(), std::io::Error> = std::os::windows::fs::symlink_dir(&rel, link_path);
         match res {
             Ok(()) => Ok(()),
             Err(_) => {
@@ -185,8 +185,8 @@ mod tests {
 
     #[test]
     fn rel_path_from_to_basic() {
-        let from = Path::new("/a/b/c");
-        let to = Path::new("/a/b/d/e");
+        let from: &Path = Path::new("/a/b/c");
+        let to: &Path = Path::new("/a/b/d/e");
         assert_eq!(rel_path_from_to(from, to), "../d/e");
         assert_eq!(
             rel_path_from_to(Path::new("/a/b"), Path::new("/a/b/c/d")),
@@ -200,12 +200,12 @@ mod tests {
 
     #[test]
     fn copy_dir_recursively() {
-        let src = tempdir().unwrap();
-        let dest = tempdir().unwrap();
+        let src: tempfile::TempDir = tempdir().unwrap();
+        let dest: tempfile::TempDir = tempdir().unwrap();
         fs::create_dir_all(src.path().join("sub")).unwrap();
         fs::write(src.path().join("a.txt"), b"hello").unwrap();
         fs::write(src.path().join("sub/b.txt"), b"world").unwrap();
-        let out = dest.path().join("out");
+        let out: std::path::PathBuf = dest.path().join("out");
         copy_dir(src.path(), &out).unwrap();
         assert_eq!(fs::read_to_string(out.join("a.txt")).unwrap(), "hello");
         assert_eq!(fs::read_to_string(out.join("sub/b.txt")).unwrap(), "world");
@@ -213,11 +213,11 @@ mod tests {
 
     #[test]
     fn ensure_symlink_to_creates_link_or_copy() {
-        let tmp = tempdir().unwrap();
-        let target = tmp.path().join("target");
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let target: std::path::PathBuf = tmp.path().join("target");
         fs::create_dir_all(&target).unwrap();
         fs::write(target.join("file.txt"), b"data").unwrap();
-        let link = tmp.path().join("link").join("skill");
+        let link: std::path::PathBuf = tmp.path().join("link").join("skill");
         ensure_symlink_to(&target, &link).unwrap();
         // either symlink or copy, file should be accessible
         assert!(link.exists() || link.is_symlink());
@@ -240,17 +240,18 @@ mod tests {
 
     #[test]
     fn github_headers_include_bearer_on_github() {
-        let _env_guard = crate::cache::env_lock();
-        let prev = env::var("GITHUB_TOKEN").ok();
+        let _env_guard: crate::infra::cache::EnvGuard = crate::infra::cache::env_lock();
+        let prev: Option<String> = env::var("GITHUB_TOKEN").ok();
         unsafe { env::set_var("GITHUB_TOKEN", "test-token-123") };
-        let headers = github_download_headers(
+        let headers: reqwest::header::HeaderMap = github_download_headers(
             "https://raw.githubusercontent.com/Gabox301/SkillIndex/main/file",
         );
         assert_eq!(
             headers.get("authorization").unwrap().to_str().unwrap(),
             "Bearer test-token-123"
         );
-        let headers2 = github_download_headers("https://example.test/file");
+        let headers2: reqwest::header::HeaderMap =
+            github_download_headers("https://example.test/file");
         assert!(headers2.get("authorization").is_none());
         match prev {
             Some(v) => unsafe { env::set_var("GITHUB_TOKEN", v) },
@@ -260,14 +261,15 @@ mod tests {
 
     #[test]
     fn github_headers_no_token_no_auth() {
-        let _env_guard = crate::cache::env_lock();
-        let prev = env::var("GITHUB_TOKEN").ok();
-        let prev2 = env::var("GH_TOKEN").ok();
+        let _env_guard: crate::infra::cache::EnvGuard = crate::infra::cache::env_lock();
+        let prev: Option<String> = env::var("GITHUB_TOKEN").ok();
+        let prev2: Option<String> = env::var("GH_TOKEN").ok();
         unsafe {
             env::remove_var("GITHUB_TOKEN");
             env::remove_var("GH_TOKEN")
         };
-        let headers = github_download_headers("https://raw.githubusercontent.com/foo/bar");
+        let headers: reqwest::header::HeaderMap =
+            github_download_headers("https://raw.githubusercontent.com/foo/bar");
         assert!(headers.get("authorization").is_none());
         if let Some(v) = prev {
             unsafe { env::set_var("GITHUB_TOKEN", v) };

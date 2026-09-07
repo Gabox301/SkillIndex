@@ -18,20 +18,23 @@ pub fn collect_skills(
         if let Some(existing) = skill_map.get_mut(&skill) {
             if !existing.sources.contains(&source) {
                 existing.sources.push(source.clone());
-                if let Some(entry) = skills.iter_mut().find(|e| e.skill == skill)
+                if let Some(entry) = skills
+                    .iter_mut()
+                    .find(|e: &&mut SkillEntry| e.skill == skill)
                     && !entry.sources.contains(&source)
                 {
                     entry.sources.push(source.clone());
                 }
             }
         } else {
-            let installed = if let Some(set) = installed_names {
-                let parsed = crate::registry::parse_skill_path(&skill);
+            let installed: bool = if let Some(set) = installed_names {
+                let parsed: crate::registry::ParsedSkillPath =
+                    crate::registry::parse_skill_path(&skill);
                 set.contains(&parsed.skill_name)
             } else {
                 false
             };
-            let entry = SkillEntry {
+            let entry: SkillEntry = SkillEntry {
                 skill: skill.clone(),
                 sources: vec![source.clone()],
                 installed,
@@ -48,7 +51,10 @@ pub fn collect_skills(
     }
 
     for combo in combos {
-        if let Some(c) = get_combos_slice().iter().find(|c| c.name == combo.name) {
+        if let Some(c) = get_combos_slice()
+            .iter()
+            .find(|c: &&crate::skills::ComboSkill| c.name == combo.name)
+        {
             for skill in c.skills {
                 add_skill(skill.to_string(), combo.name.clone());
             }
@@ -71,12 +77,12 @@ mod tests {
 
     #[test]
     fn collect_skills_includes_tech_skills() {
-        let tech = DisplayTechnology {
+        let tech: DisplayTechnology = DisplayTechnology {
             id: "react".into(),
             name: "React".into(),
             skills: vec!["vercel-labs/agent-skills/react-best-practices".into()],
         };
-        let skills = collect_skills(&[tech], false, &[], None);
+        let skills: Vec<SkillEntry> = collect_skills(&[tech], false, &[], None);
         assert_eq!(skills.len(), 1);
         assert_eq!(
             skills[0].skill,
@@ -86,7 +92,7 @@ mod tests {
 
     #[test]
     fn collect_skills_frontend_bonus() {
-        let skills = collect_skills(&[], true, &[], None);
+        let skills: Vec<SkillEntry> = collect_skills(&[], true, &[], None);
         assert!(skills.iter().any(|s| s.skill.contains("frontend-design")));
     }
 }

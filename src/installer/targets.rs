@@ -32,7 +32,7 @@ pub fn resolve_install_targets(project_dir: &Path, agents: &[String]) -> Vec<Ins
             continue;
         }
         if let Some(folder) = agent_folder_for(agent) {
-            let folder = folder.to_string();
+            let folder: String = folder.to_string();
             if !folders.contains(&folder) {
                 folders.push(folder);
             }
@@ -43,8 +43,8 @@ pub fn resolve_install_targets(project_dir: &Path, agents: &[String]) -> Vec<Ins
     }
     folders
         .into_iter()
-        .map(|folder| {
-            let skills_dir = project_dir.join(&folder).join("skills");
+        .map(|folder: String| {
+            let skills_dir: PathBuf = project_dir.join(&folder).join("skills");
             InstallTarget { folder, skills_dir }
         })
         .collect()
@@ -57,14 +57,14 @@ mod tests {
 
     #[test]
     fn resolve_install_targets_universal_fallback() {
-        let targets = resolve_install_targets(Path::new("/proj"), &[]);
+        let targets: Vec<InstallTarget> = resolve_install_targets(Path::new("/proj"), &[]);
         assert_eq!(targets.len(), 1);
         assert_eq!(targets[0].folder, ".agents");
     }
 
     #[test]
     fn resolve_install_targets_skips_universal_when_mapped_present() {
-        let targets = resolve_install_targets(
+        let targets: Vec<InstallTarget> = resolve_install_targets(
             Path::new("/proj"),
             &["universal".to_string(), "claude-code".to_string()],
         );
@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn resolve_install_targets_dedupes_folders() {
-        let targets = resolve_install_targets(
+        let targets: Vec<InstallTarget> = resolve_install_targets(
             Path::new("/proj"),
             &["claude-code".to_string(), "claude-code".to_string()],
         );

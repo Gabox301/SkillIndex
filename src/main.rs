@@ -8,7 +8,6 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use skillindex::args::Args;
 use skillindex::banner::print_banner;
-use skillindex::cache::clear_skillindex_cache;
 use skillindex::claude::cleanup_claude_md;
 use skillindex::detect::{
     collect_skills, detect_agents, detect_technologies, get_installed_skill_names, partition_combos,
@@ -17,6 +16,7 @@ use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_skill_label, print_detected, print_security_checks,
     print_skills_list,
 };
+use skillindex::infra::cache::clear_skillindex_cache;
 use skillindex::installer::{InstallError, InstallOptions, SkillEntry, install_all, install_skill};
 use skillindex::prompt::{MultiSelectOptions, Shortcut, multi_select};
 use skillindex::registry::{load_registry, security_check_for_entry};

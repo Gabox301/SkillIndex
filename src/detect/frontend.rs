@@ -20,14 +20,14 @@ pub static WEB_FRONTEND_EXTENSIONS: LazyLock<HashSet<&'static str>> = LazyLock::
 /// Scans recursively, skipping `SCAN_SKIP_DIRS` and dot-directories.
 pub fn has_web_frontend_files(project_dir: &Path, max_depth: usize) -> bool {
     fn scan(dir: &Path, depth: usize, max_depth: usize, extensions: &HashSet<&str>) -> bool {
-        let entries = match fs::read_dir(dir) {
+        let entries: fs::ReadDir = match fs::read_dir(dir) {
             Ok(e) => e,
             Err(_) => return false,
         };
 
         for entry in entries.flatten() {
-            let path = entry.path();
-            let name = match entry.file_name().into_string() {
+            let path: std::path::PathBuf = entry.path();
+            let name: String = match entry.file_name().into_string() {
                 Ok(n) => n,
                 Err(_) => continue,
             };
@@ -38,7 +38,7 @@ pub fn has_web_frontend_files(project_dir: &Path, max_depth: usize) -> bool {
                         return true;
                     }
                     if let Some(dot) = name.rfind('.') {
-                        let ext = &name[dot..];
+                        let ext: &str = &name[dot..];
                         if extensions.contains(ext) {
                             return true;
                         }
@@ -65,8 +65,8 @@ pub fn has_web_frontend_files_walk(project_dir: &Path, max_depth: usize) -> bool
     for entry in WalkDir::new(project_dir)
         .max_depth(max_depth + 1)
         .into_iter()
-        .filter_entry(|e| {
-            let name = e.file_name().to_string_lossy();
+        .filter_entry(|e: &walkdir::DirEntry| {
+            let name: std::borrow::Cow<'_, str> = e.file_name().to_string_lossy();
             if e.depth() == 0 {
                 return true;
             }
@@ -79,7 +79,7 @@ pub fn has_web_frontend_files_walk(project_dir: &Path, max_depth: usize) -> bool
         .flatten()
     {
         if entry.file_type().is_file() {
-            let name = entry.file_name().to_string_lossy();
+            let name: std::borrow::Cow<'_, str> = entry.file_name().to_string_lossy();
             if name.ends_with(".blade.php") {
                 return true;
             }
@@ -100,7 +100,7 @@ mod tests {
     use tempfile::tempdir;
 
     fn write_file(base: &Path, rel: &str, content: &str) {
-        let p = base.join(rel);
+        let p: std::path::PathBuf = base.join(rel);
         if let Some(parent) = p.parent() {
             fs::create_dir_all(parent).unwrap();
         }
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn web_frontend_extensions_contains_expected() {
-        let expected = [
+        let expected: [&str; 16] = [
             ".html", ".htm", ".css", ".scss", ".sass", ".less", ".vue", ".svelte", ".jsx", ".tsx",
             ".twig", ".tpl", ".ejs", ".hbs", ".pug", ".njk",
         ];
@@ -121,14 +121,14 @@ mod tests {
 
     #[test]
     fn detects_html_at_depth_1() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "index.html", "<html></html>");
         assert!(has_web_frontend_files(dir.path(), 3));
     }
 
     #[test]
     fn detects_vue_at_depth_3() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(
             dir.path(),
             "src/components/App.vue",
@@ -139,31 +139,31 @@ mod tests {
 
     #[test]
     fn detects_blade_php() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "resources/views/home.blade.php", "blade");
         assert!(has_web_frontend_files(dir.path(), 3));
     }
 
     #[test]
     fn detects_twig_and_tpl() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "templates/page.twig", "twig");
         assert!(has_web_frontend_files(dir.path(), 3));
-        let dir2 = tempdir().unwrap();
+        let dir2: tempfile::TempDir = tempdir().unwrap();
         write_file(dir2.path(), "page.tpl", "tpl");
         assert!(has_web_frontend_files(dir2.path(), 3));
     }
 
     #[test]
     fn does_not_detect_php_alone() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "index.php", "<?php echo 1;");
         assert!(!has_web_frontend_files(dir.path(), 3));
     }
 
     #[test]
     fn does_not_descend_into_skip_dirs() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(
             dir.path(),
             "node_modules/pkg/App.vue",
@@ -177,20 +177,20 @@ mod tests {
 
     #[test]
     fn does_not_descend_beyond_max_depth() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         // depth 0 = dir itself, depth 3 should allow src/a/b/file.vue? Let's create depth 4
         write_file(dir.path(), "a/b/c/d/App.vue", "<template></template>");
         // a (1) -> b (2) -> c (3) -> d (4) -> file at depth 4 should be beyond max_depth 3
         assert!(!has_web_frontend_files(dir.path(), 3));
         // But file at depth 3 should be found
-        let dir2 = tempdir().unwrap();
+        let dir2: tempfile::TempDir = tempdir().unwrap();
         write_file(dir2.path(), "a/b/c/App.vue", "<template></template>");
         assert!(has_web_frontend_files(dir2.path(), 3));
     }
 
     #[test]
     fn skips_dot_directories() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), ".hidden/App.vue", "<template></template>");
         assert!(!has_web_frontend_files(dir.path(), 3));
     }
@@ -200,7 +200,7 @@ mod tests {
         for ext in [
             ".jsx", ".tsx", ".css", ".scss", ".svelte", ".hbs", ".pug", ".njk", ".ejs",
         ] {
-            let dir = tempdir().unwrap();
+            let dir: tempfile::TempDir = tempdir().unwrap();
             write_file(dir.path(), &format!("src/app{ext}"), "content");
             assert!(has_web_frontend_files(dir.path(), 3), "should detect {ext}");
         }
@@ -208,7 +208,7 @@ mod tests {
 
     #[test]
     fn empty_dir_no_frontend() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         fs::write(dir.path().join("README.md"), "# hi").unwrap();
         assert!(!has_web_frontend_files(dir.path(), 3));
     }

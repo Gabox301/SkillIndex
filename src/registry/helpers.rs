@@ -30,8 +30,8 @@ pub fn parse_skill_path(skill: &str) -> crate::registry::types::ParsedSkillPath 
             full: skill.to_string(),
         };
     }
-    let repo = format!("{}/{}", parts[0], parts[1]);
-    let skill_name = parts[2..].join("/");
+    let repo: String = format!("{}/{}", parts[0], parts[1]);
+    let skill_name: String = parts[2..].join("/");
     ParsedSkillPath {
         repo,
         skill_name,
@@ -57,14 +57,14 @@ mod tests {
 
     #[test]
     fn parse_skill_path_basic() {
-        let p = parse_skill_path("owner/repo/hello-skill");
+        let p: crate::registry::ParsedSkillPath = parse_skill_path("owner/repo/hello-skill");
         assert_eq!(p.repo, "owner/repo");
         assert_eq!(p.skill_name, "hello-skill");
     }
 
     #[test]
     fn parse_skill_path_http() {
-        let p = parse_skill_path("https://example.com/skill");
+        let p: crate::registry::ParsedSkillPath = parse_skill_path("https://example.com/skill");
         assert_eq!(p.skill_name, "");
         assert_eq!(p.repo, "https://example.com/skill");
     }

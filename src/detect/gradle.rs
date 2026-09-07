@@ -20,21 +20,21 @@ static GRADLE_CACHE: LazyLock<Mutex<HashMap<String, Vec<PathBuf>>>> =
 /// Verbatim port of `parseSettingsGradleModules` in lib.ts
 /// Regex `/include\s*\(?\s*([^)]+)/g` + inner quoted strings, then `: -> /` handling
 pub fn parse_settings_gradle_modules(content: &str) -> Vec<String> {
-    let mut modules = Vec::new();
-    let mut i = 0;
-    let bytes_len = content.len();
+    let mut modules: Vec<String> = Vec::new();
+    let mut i: usize = 0;
+    let bytes_len: usize = content.len();
 
     while i < bytes_len {
-        let remaining = &content[i..];
+        let remaining: &str = &content[i..];
         let Some(rel_pos) = remaining.find("include") else {
             break;
         };
-        let start = i + rel_pos;
-        let mut cursor = start + "include".len();
+        let start: usize = i + rel_pos;
+        let mut cursor: usize = start + "include".len();
 
         // \s* — skip whitespace (space, tab, newline, etc.)
         while cursor < bytes_len {
-            let ch = content[cursor..].chars().next().unwrap();
+            let ch: char = content[cursor..].chars().next().unwrap();
             if ch.is_whitespace() {
                 cursor += ch.len_utf8();
             } else {
@@ -46,7 +46,7 @@ pub fn parse_settings_gradle_modules(content: &str) -> Vec<String> {
         if cursor < bytes_len && content[cursor..].starts_with('(') {
             cursor += 1;
             while cursor < bytes_len {
-                let ch = content[cursor..].chars().next().unwrap();
+                let ch: char = content[cursor..].chars().next().unwrap();
                 if ch.is_whitespace() {
                     cursor += ch.len_utf8();
                 } else {
@@ -56,27 +56,27 @@ pub fn parse_settings_gradle_modules(content: &str) -> Vec<String> {
         }
 
         // ([^)]+) — capture until next ')' or end
-        let capture_start = cursor;
+        let capture_start: usize = cursor;
         if capture_start >= bytes_len || content[capture_start..].starts_with(')') {
             // No capture (empty or immediate ')'), advance and continue
             i = cursor + 1;
             continue;
         }
 
-        let capture_end = if let Some(close) = content[capture_start..].find(')') {
+        let capture_end: usize = if let Some(close) = content[capture_start..].find(')') {
             capture_start + close
         } else {
             bytes_len
         };
 
-        let args = &content[capture_start..capture_end];
+        let args: &str = &content[capture_start..capture_end];
 
         // inner quotedRe /['"]([^'"]+)['"]/g
-        let mut q = 0;
+        let mut q: usize = 0;
         while q < args.len() {
-            let single = args[q..].find('\'');
-            let double = args[q..].find('"');
-            let next = match (single, double) {
+            let single: Option<usize> = args[q..].find('\'');
+            let double: Option<usize> = args[q..].find('"');
+            let next: Option<(usize, char)> = match (single, double) {
                 (Some(s), Some(d)) => {
                     if s < d {
                         Some((s, '\''))
@@ -91,17 +91,17 @@ pub fn parse_settings_gradle_modules(content: &str) -> Vec<String> {
             let Some((rel_idx, quote_char)) = next else {
                 break;
             };
-            let open = q + rel_idx;
-            let after_open = open + 1;
+            let open: usize = q + rel_idx;
+            let after_open: usize = open + 1;
             if after_open >= args.len() {
                 break;
             }
             let Some(close_rel) = args[after_open..].find(quote_char) else {
                 break;
             };
-            let close = after_open + close_rel;
-            let inner = &args[after_open..close];
-            let mut module = inner.to_string();
+            let close: usize = after_open + close_rel;
+            let inner: &str = &args[after_open..close];
+            let mut module: String = inner.to_string();
             if module.starts_with(':') {
                 module = module[1..].to_string();
             }
@@ -124,7 +124,7 @@ pub fn parse_settings_gradle_modules(content: &str) -> Vec<String> {
 
 /// Helper to join a project dir with a slash-separated relative path in a platform-safe way
 fn join_relative(base: &Path, relative: &str) -> PathBuf {
-    let mut p = base.to_path_buf();
+    let mut p: PathBuf = base.to_path_buf();
     for part in relative.split('/') {
         if !part.is_empty() {
             p = p.join(part);
@@ -135,9 +135,10 @@ fn join_relative(base: &Path, relative: &str) -> PathBuf {
 
 /// Cached candidate paths for Gradle layout — mirrors `gradleLayoutCandidatePaths` in lib.ts
 pub fn gradle_layout_candidate_paths(project_dir: &Path) -> Vec<PathBuf> {
-    let key = project_dir.to_string_lossy().to_string();
+    let key: String = project_dir.to_string_lossy().to_string();
     {
-        let cache = GRADLE_CACHE.lock().unwrap();
+        let cache: std::sync::MutexGuard<'_, HashMap<String, Vec<PathBuf>>> =
+            GRADLE_CACHE.lock().unwrap();
         if let Some(cached) = cache.get(&key) {
             return cached.clone();
         }
@@ -165,7 +166,7 @@ pub fn gradle_layout_candidate_paths(project_dir: &Path) -> Vec<PathBuf> {
             if !ft.is_dir() {
                 continue;
             }
-            let name = entry.file_name().to_string_lossy().to_string();
+            let name: String = entry.file_name().to_string_lossy().to_string();
             if name.starts_with('.') || SCAN_SKIP_DIRS.contains(name.as_str()) {
                 continue;
             }
@@ -177,8 +178,8 @@ pub fn gradle_layout_candidate_paths(project_dir: &Path) -> Vec<PathBuf> {
 
     // Parse settings.gradle.kts / settings.gradle for module includes
     for settings_file in ["settings.gradle.kts", "settings.gradle"] {
-        let settings_path = project_dir.join(settings_file);
-        let content = match fs::read_to_string(&settings_path) {
+        let settings_path: PathBuf = project_dir.join(settings_file);
+        let content: String = match fs::read_to_string(&settings_path) {
             Ok(c) => c,
             Err(_) => continue,
         };
@@ -190,7 +191,8 @@ pub fn gradle_layout_candidate_paths(project_dir: &Path) -> Vec<PathBuf> {
         break;
     }
 
-    let mut cache = GRADLE_CACHE.lock().unwrap();
+    let mut cache: std::sync::MutexGuard<'_, HashMap<String, Vec<PathBuf>>> =
+        GRADLE_CACHE.lock().unwrap();
     cache.insert(key, candidates.clone());
     candidates
 }
@@ -208,7 +210,7 @@ mod tests {
     use tempfile::tempdir;
 
     fn write_file(base: &Path, rel: &str, content: &str) {
-        let p = base.join(rel);
+        let p: PathBuf = base.join(rel);
         if let Some(parent) = p.parent() {
             fs::create_dir_all(parent).unwrap();
         }
@@ -219,43 +221,44 @@ mod tests {
 
     #[test]
     fn extracts_module_from_kotlin_dsl_include() {
-        let modules = parse_settings_gradle_modules(r#"include("app")"#);
+        let modules: Vec<String> = parse_settings_gradle_modules(r#"include("app")"#);
         assert_eq!(modules, vec!["app"]);
     }
 
     #[test]
     fn extracts_module_from_groovy_include() {
-        let modules = parse_settings_gradle_modules("include 'app'");
+        let modules: Vec<String> = parse_settings_gradle_modules("include 'app'");
         assert_eq!(modules, vec!["app"]);
     }
 
     #[test]
     fn strips_leading_colon() {
-        let modules = parse_settings_gradle_modules(r#"include(":app")"#);
+        let modules: Vec<String> = parse_settings_gradle_modules(r#"include(":app")"#);
         assert_eq!(modules, vec!["app"]);
     }
 
     #[test]
     fn converts_colon_separated_to_fs_path() {
-        let modules = parse_settings_gradle_modules(r#"include(":feature:login")"#);
+        let modules: Vec<String> = parse_settings_gradle_modules(r#"include(":feature:login")"#);
         assert_eq!(modules, vec!["feature/login"]);
     }
 
     #[test]
     fn handles_multiple_modules_groovy() {
-        let modules = parse_settings_gradle_modules("include 'app', 'core', 'data'");
+        let modules: Vec<String> = parse_settings_gradle_modules("include 'app', 'core', 'data'");
         assert_eq!(modules, vec!["app", "core", "data"]);
     }
 
     #[test]
     fn handles_multiple_modules_kotlin_dsl() {
-        let modules = parse_settings_gradle_modules(r#"include(":app", ":core", ":data")"#);
+        let modules: Vec<String> =
+            parse_settings_gradle_modules(r#"include(":app", ":core", ":data")"#);
         assert_eq!(modules, vec!["app", "core", "data"]);
     }
 
     #[test]
     fn handles_multiline_include_block() {
-        let content = "include(\n  \":app\",\n  \":core\",\n  \":shared:data\"\n)";
+        let content: &str = "include(\n  \":app\",\n  \":core\",\n  \":shared:data\"\n)";
         assert_eq!(
             parse_settings_gradle_modules(content),
             vec!["app", "core", "shared/data"]
@@ -264,13 +267,13 @@ mod tests {
 
     #[test]
     fn handles_multiple_separate_includes() {
-        let content = "include(\":app\")\ninclude(\":core\")";
+        let content: &str = "include(\":app\")\ninclude(\":core\")";
         assert_eq!(parse_settings_gradle_modules(content), vec!["app", "core"]);
     }
 
     #[test]
     fn returns_empty_when_no_includes() {
-        let content = "rootProject.name = \"my-app\"\npluginManagement { }";
+        let content: &str = "rootProject.name = \"my-app\"\npluginManagement { }";
         assert!(parse_settings_gradle_modules(content).is_empty());
     }
 
@@ -281,14 +284,14 @@ mod tests {
 
     #[test]
     fn ignores_non_include_content_around_includes() {
-        let content = "rootProject.name = \"my-app\"\npluginManagement {\n    repositories { google() }\n}\ninclude(\":app\")";
+        let content: &str = "rootProject.name = \"my-app\"\npluginManagement {\n    repositories { google() }\n}\ninclude(\":app\")";
         assert_eq!(parse_settings_gradle_modules(content), vec!["app"]);
     }
 
     #[test]
     fn spec_gradle_include_app_lib_core() {
         // Direct from spec: include(":app",":lib:core") -> ["app","lib/core"]
-        let modules = parse_settings_gradle_modules(r#"include(":app",":lib:core")"#);
+        let modules: Vec<String> = parse_settings_gradle_modules(r#"include(":app",":lib:core")"#);
         assert_eq!(modules, vec!["app", "lib/core"]);
     }
 
@@ -296,8 +299,8 @@ mod tests {
 
     #[test]
     fn gradle_layout_includes_root_files() {
-        let dir = tempdir().unwrap();
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let dir: tempfile::TempDir = tempdir().unwrap();
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         // Must contain 5 root entries even if files don't exist
         assert_eq!(paths.len(), 5);
         assert!(paths.iter().any(|p| p.ends_with("build.gradle.kts")));
@@ -310,10 +313,10 @@ mod tests {
 
     #[test]
     fn gradle_layout_includes_subdir_build_files() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         fs::create_dir_all(dir.path().join("composeApp")).unwrap();
         fs::write(dir.path().join("composeApp/build.gradle.kts"), "").unwrap();
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert!(
             paths
                 .iter()
@@ -323,12 +326,12 @@ mod tests {
 
     #[test]
     fn gradle_layout_skips_dot_and_skip_dirs() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         fs::create_dir_all(dir.path().join(".hidden")).unwrap();
         fs::write(dir.path().join(".hidden/build.gradle.kts"), "").unwrap();
         fs::create_dir_all(dir.path().join("node_modules/pkg")).unwrap();
         fs::write(dir.path().join("node_modules/build.gradle.kts"), "").unwrap();
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         // Should not contain hidden or node_modules entries
         assert!(
             !paths
@@ -344,13 +347,13 @@ mod tests {
 
     #[test]
     fn gradle_layout_parses_settings_kts() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(
             dir.path(),
             "settings.gradle.kts",
             r#"include(":feature:login")"#,
         );
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert!(
             paths
                 .iter()
@@ -365,50 +368,50 @@ mod tests {
 
     #[test]
     fn gradle_layout_parses_settings_gradle_fallback() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "settings.gradle", "include 'shared'");
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert!(paths.iter().any(|p| p.ends_with("shared/build.gradle.kts")));
     }
 
     #[test]
     fn gradle_layout_cache_returns_same_instance() {
-        let dir = tempdir().unwrap();
-        let first = gradle_layout_candidate_paths(dir.path());
+        let dir: tempfile::TempDir = tempdir().unwrap();
+        let first: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         // Create a new file after first call — cached result should NOT include it
         fs::create_dir_all(dir.path().join("newMod")).unwrap();
         fs::write(dir.path().join("newMod/build.gradle.kts"), "").unwrap();
-        let second = gradle_layout_candidate_paths(dir.path());
+        let second: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert_eq!(first, second);
         clear_gradle_cache();
         // After clear, new file should appear
-        let third = gradle_layout_candidate_paths(dir.path());
+        let third: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert!(third.iter().any(|p| p.ends_with("newMod/build.gradle.kts")));
         clear_gradle_cache();
     }
 
     #[test]
     fn gradle_layout_deduplicates() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         // Create settings that includes a module that is also a direct subdir
         fs::create_dir_all(dir.path().join("app")).unwrap();
         fs::write(dir.path().join("app/build.gradle.kts"), "").unwrap();
         write_file(dir.path(), "settings.gradle.kts", r#"include(":app")"#);
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         // app/build.gradle.kts should appear only once despite being added via subdir scan and via settings
-        let count = paths
+        let count: usize = paths
             .iter()
-            .filter(|p| p.ends_with("app/build.gradle.kts"))
+            .filter(|p: &&PathBuf| p.ends_with("app/build.gradle.kts"))
             .count();
         assert_eq!(count, 1);
     }
 
     #[test]
     fn gradle_layout_settings_kts_takes_precedence_over_gradle() {
-        let dir = tempdir().unwrap();
+        let dir: tempfile::TempDir = tempdir().unwrap();
         write_file(dir.path(), "settings.gradle.kts", r#"include(":a")"#);
         write_file(dir.path(), "settings.gradle", r#"include(":b")"#);
-        let paths = gradle_layout_candidate_paths(dir.path());
+        let paths: Vec<PathBuf> = gradle_layout_candidate_paths(dir.path());
         assert!(paths.iter().any(|p| p.ends_with("a/build.gradle.kts")));
         assert!(!paths.iter().any(|p| p.ends_with("b/build.gradle.kts")));
     }

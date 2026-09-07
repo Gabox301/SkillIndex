@@ -4,15 +4,15 @@ use std::path::Path;
 
 /// Compute SHA-256 hex lowercase of a byte buffer — mirrors `sha256Buffer` in installer.ts
 pub fn sha256_buffer(buf: &[u8]) -> String {
-    let mut hasher = Sha256::new();
+    let mut hasher: Sha256 = Sha256::new();
     hasher.update(buf);
     let result = hasher.finalize();
-    result.iter().map(|b| format!("{b:02x}")).collect()
+    result.iter().map(|b: &u8| format!("{b:02x}")).collect()
 }
 
 /// Compute SHA-256 hex lowercase of a file's contents — mirrors `sha256File` in installer.ts
 pub fn sha256_file(path: &Path) -> std::io::Result<String> {
-    let data = fs::read(path)?;
+    let data: Vec<u8> = fs::read(path)?;
     Ok(sha256_buffer(&data))
 }
 
@@ -35,8 +35,8 @@ pub fn bundle_hash(entries: &[(String, String)]) -> String {
         .iter()
         .map(|(rel, hash)| (normalize_registry_rel_path(rel), hash.clone()))
         .collect();
-    normalized.sort_by(|a, b| a.0.cmp(&b.0));
-    let joined = normalized
+    normalized.sort_by(|a: &(String, String), b: &(String, String)| a.0.cmp(&b.0));
+    let joined: String = normalized
         .iter()
         .map(|(rel, hash)| format!("{rel}:{hash}"))
         .collect::<Vec<_>>()
@@ -72,24 +72,25 @@ mod tests {
             "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
         );
         // ensure lower hex
-        let h = sha256_buffer(b"test");
+        let h: String = sha256_buffer(b"test");
         assert_eq!(h, h.to_lowercase());
         assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
     }
 
     #[test]
     fn sha256_file_matches_buffer() {
-        let dir = tempdir().unwrap();
-        let p = dir.path().join("file.txt");
+        let dir: tempfile::TempDir = tempdir().unwrap();
+        let p: std::path::PathBuf = dir.path().join("file.txt");
         fs::write(&p, b"hello world").unwrap();
-        let file_hash = sha256_file(&p).unwrap();
-        let buf_hash = sha256_buffer(b"hello world");
+        let file_hash: String = sha256_file(&p).unwrap();
+        let buf_hash: String = sha256_buffer(b"hello world");
         assert_eq!(file_hash, buf_hash);
     }
 
     #[test]
     fn sha256_file_missing_returns_error() {
-        let result = sha256_file(Path::new("/nonexistent/path/file.txt"));
+        let result: Result<String, std::io::Error> =
+            sha256_file(Path::new("/nonexistent/path/file.txt"));
         assert!(result.is_err());
     }
 
@@ -115,12 +116,12 @@ mod tests {
 
     #[test]
     fn bundle_hash_single_entry() {
-        let entries = vec![(
+        let entries: Vec<(String, String)> = vec![(
             "SKILL.md".to_string(),
             "8e1a9758b9721b48f534cee5998a3fcea8833f4885ca5929847f9fc48b773957".to_string(),
         )];
         let joined = "SKILL.md:8e1a9758b9721b48f534cee5998a3fcea8833f4885ca5929847f9fc48b773957";
-        let expected = sha256_buffer(joined.as_bytes());
+        let expected: String = sha256_buffer(joined.as_bytes());
         assert_eq!(bundle_hash(&entries), expected);
         // matches real fixture: bun
         assert_eq!(
@@ -132,26 +133,26 @@ mod tests {
     #[test]
     fn bundle_hash_sorted() {
         // a.md:h1,b.md:h2 sorted -> sha256("a.md:h1\nb.md:h2")
-        let entries_a = vec![
+        let entries_a: Vec<(String, String)> = vec![
             ("b.md".to_string(), "h2".to_string()),
             ("a.md".to_string(), "h1".to_string()),
         ];
-        let entries_b = vec![
+        let entries_b: Vec<(String, String)> = vec![
             ("a.md".to_string(), "h1".to_string()),
             ("b.md".to_string(), "h2".to_string()),
         ];
         assert_eq!(bundle_hash(&entries_a), bundle_hash(&entries_b));
-        let expected = sha256_buffer(b"a.md:h1\nb.md:h2");
+        let expected: String = sha256_buffer(b"a.md:h1\nb.md:h2");
         assert_eq!(bundle_hash(&entries_a), expected);
     }
 
     #[test]
     fn bundle_hash_backslash_normalized() {
-        let entries_bs = vec![
+        let entries_bs: Vec<(String, String)> = vec![
             ("references\\notes.md".to_string(), "abc".to_string()),
             ("SKILL.md".to_string(), "def".to_string()),
         ];
-        let entries_slash = vec![
+        let entries_slash: Vec<(String, String)> = vec![
             ("references/notes.md".to_string(), "abc".to_string()),
             ("SKILL.md".to_string(), "def".to_string()),
         ];
@@ -160,7 +161,7 @@ mod tests {
 
     #[test]
     fn bundle_hash_from_buffers_matches_hash() {
-        let buffers = vec![
+        let buffers: Vec<(String, Vec<u8>)> = vec![
             ("a.md".to_string(), b"content a".to_vec()),
             ("b.md".to_string(), b"content b".to_vec()),
         ];
@@ -175,14 +176,14 @@ mod tests {
     fn bundle_hash_219_fixtures_parity() {
         // Load real registry and verify bundle hashes for all entries match
         // Skips placeholder entries like `elysiajs` where bundleHash is not a hex digest (known bad fixture).
-        let manifest_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        let manifest_path: std::path::PathBuf = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("skills-registry")
             .join("index.json");
         let manifest_path = if manifest_path.exists() {
             manifest_path
         } else {
             // fallback: try parent
-            let alt = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            let alt: std::path::PathBuf = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
                 .parent()
                 .unwrap()
                 .join("skills-registry")
@@ -193,34 +194,36 @@ mod tests {
                 return;
             }
         };
-        let data = fs::read_to_string(&manifest_path).unwrap();
+        let data: String = fs::read_to_string(&manifest_path).unwrap();
         let v: serde_json::Value = serde_json::from_str(&data).unwrap();
-        let skills = v.get("skills").unwrap().as_object().unwrap();
+        let skills: &serde_json::Map<String, serde_json::Value> =
+            v.get("skills").unwrap().as_object().unwrap();
         assert!(
             skills.len() >= 100,
             "expected at least 100 fixtures, got {}",
             skills.len()
         );
-        let mut verified = 0usize;
+        let mut verified: usize = 0usize;
         for (name, entry) in skills {
-            let files = entry.get("files").unwrap().as_array().unwrap();
-            let sha_map = entry.get("sha256").unwrap().as_object().unwrap();
-            let expected_bundle = entry.get("bundleHash").unwrap().as_str().unwrap();
+            let files: &Vec<serde_json::Value> = entry.get("files").unwrap().as_array().unwrap();
+            let sha_map: &serde_json::Map<String, serde_json::Value> =
+                entry.get("sha256").unwrap().as_object().unwrap();
+            let expected_bundle: &str = entry.get("bundleHash").unwrap().as_str().unwrap();
             // Skip placeholder non-hex bundle hashes (e.g. "elysiajs-skill-hash")
             if expected_bundle.len() != 64
-                || !expected_bundle.chars().all(|c| c.is_ascii_hexdigit())
+                || !expected_bundle.chars().all(|c: char| c.is_ascii_hexdigit())
             {
                 continue;
             }
             let entries: Vec<(String, String)> = files
                 .iter()
-                .map(|f| {
-                    let rel = f.as_str().unwrap().to_string();
-                    let hash = sha_map.get(&rel).unwrap().as_str().unwrap().to_string();
+                .map(|f: &serde_json::Value| {
+                    let rel: String = f.as_str().unwrap().to_string();
+                    let hash: String = sha_map.get(&rel).unwrap().as_str().unwrap().to_string();
                     (rel, hash)
                 })
                 .collect();
-            let computed = bundle_hash(&entries);
+            let computed: String = bundle_hash(&entries);
             assert_eq!(
                 computed, expected_bundle,
                 "bundle hash mismatch for skill {name}"

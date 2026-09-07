@@ -2,10 +2,10 @@ use super::types::{GroupFn, GroupState, Row};
 
 pub fn group_count<T>(items: &[T], group_fn: Option<&GroupFn<T>>) -> usize {
     let Some(f) = group_fn else { return 0 };
-    let mut count = 0usize;
+    let mut count: usize = 0usize;
     let mut last: Option<String> = None;
     for item in items {
-        let g = f(item);
+        let g: String = f(item);
         if last.as_ref() != Some(&g) {
             count += 1;
             last = Some(g);
@@ -18,8 +18,8 @@ pub fn group_selection_state(selected: &[bool], member_indices: &[usize]) -> Gro
     if member_indices.is_empty() {
         return GroupState::None;
     }
-    let mut any_on = false;
-    let mut any_off = false;
+    let mut any_on: bool = false;
+    let mut any_off: bool = false;
     for &i in member_indices {
         if selected[i] {
             any_on = true;
@@ -37,7 +37,7 @@ pub fn group_selection_state(selected: &[bool], member_indices: &[usize]) -> Gro
 }
 
 pub fn toggle_group_selection(selected: &mut [bool], member_indices: &[usize]) {
-    let next = group_selection_state(selected, member_indices) != GroupState::All;
+    let next: bool = group_selection_state(selected, member_indices) != GroupState::All;
     for &i in member_indices {
         selected[i] = next;
     }
@@ -53,12 +53,12 @@ pub fn compute_viewport_start(
     if height >= total {
         return 0;
     }
-    let max_start = total - height;
-    let m = margin.min((height - 1) / 2);
-    let cursor = cursor as isize;
-    let height = height as isize;
-    let m = m as isize;
-    let mut start = prev_start as isize;
+    let max_start: usize = total - height;
+    let m: usize = margin.min((height - 1) / 2);
+    let cursor: isize = cursor as isize;
+    let height: isize = height as isize;
+    let m: isize = m as isize;
+    let mut start: isize = prev_start as isize;
     if cursor - m < start {
         start = cursor - m;
     }
@@ -80,7 +80,7 @@ pub(crate) fn build_rows<T>(
             let mut last_group: Option<String> = None;
             let mut current_header: Option<usize> = None;
             for (i, item) in items.iter().enumerate() {
-                let group = gf(item);
+                let group: String = gf(item);
                 if last_group.as_ref() != Some(&group) {
                     last_group = Some(group.clone());
                     rows.push(Row::Group {
@@ -98,7 +98,9 @@ pub(crate) fn build_rows<T>(
             }
             rows
         }
-        _ => (0..items.len()).map(|index| Row::Item { index }).collect(),
+        _ => (0..items.len())
+            .map(|index: usize| Row::Item { index })
+            .collect(),
     }
 }
 
@@ -106,7 +108,7 @@ pub fn shortcut_new_only<T, F>(items: &[T], is_installed: F) -> Vec<bool>
 where
     F: Fn(&T) -> bool,
 {
-    items.iter().map(|it| !is_installed(it)).collect()
+    items.iter().map(|it: &T| !is_installed(it)).collect()
 }
 
 #[cfg(test)]
@@ -121,18 +123,18 @@ mod tests {
 
     #[test]
     fn group_count_computes_correctly() {
-        let items = vec!["a", "b", "c"];
+        let items: Vec<&str> = vec!["a", "b", "c"];
         let f: Box<dyn Fn(&&str) -> String> =
-            Box::new(|s| if *s == "c" { "g2".into() } else { "g1".into() });
-        let c = group_count(&items, Some(&f));
+            Box::new(|s: &&str| if *s == "c" { "g2".into() } else { "g1".into() });
+        let c: usize = group_count(&items, Some(&f));
         assert_eq!(c, 2);
-        let c0 = group_count(&items, None);
+        let c0: usize = group_count(&items, None);
         assert_eq!(c0, 0);
     }
 
     #[test]
     fn shortcut_new_only_selects_new() {
-        let items = vec![
+        let items: Vec<Dummy> = vec![
             Dummy {
                 name: "a".into(),
                 installed: true,
@@ -150,7 +152,7 @@ mod tests {
                 installed: false,
             },
         ];
-        let sel = shortcut_new_only(&items, |d| d.installed);
+        let sel: Vec<bool> = shortcut_new_only(&items, |d: &Dummy| d.installed);
         assert_eq!(sel, vec![false, true, false, true]);
     }
 }

@@ -7,7 +7,7 @@ use std::time::Duration;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
-use skillindex::hash::{bundle_hash, sha256_buffer};
+use skillindex::infra::hash::{bundle_hash, sha256_buffer};
 use skillindex::registry::parse_skill_path;
 use skillindex::skills::{COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP};
 
@@ -76,7 +76,7 @@ struct Reviewer {
 }
 
 fn collect_all_skill_paths() -> Vec<String> {
-    let mut out = HashSet::new();
+    let mut out: HashSet<String> = HashSet::new();
     for tech in SKILLS_MAP.iter() {
         for s in tech.skills {
             out.insert(s.to_string());
@@ -94,7 +94,7 @@ fn collect_all_skill_paths() -> Vec<String> {
 }
 
 fn resolve_repo_head(repo: &str) -> anyhow::Result<(String, String)> {
-    let output = Command::new("git")
+    let output: std::process::Output = Command::new("git")
         .args([
             "ls-remote",
             "--symref",
@@ -111,11 +111,11 @@ fn resolve_repo_head(repo: &str) -> anyhow::Result<(String, String)> {
         );
     }
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut default_branch = "main".to_string();
-    let mut sha = String::new();
-    let symref_re = regex::Regex::new(r"^ref:\s+refs/heads/(.+)\s+HEAD$").unwrap();
-    let head_re = regex::Regex::new(r"^([0-9a-f]{40})\s+HEAD$").unwrap();
+    let stdout: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&output.stdout);
+    let mut default_branch: String = "main".to_string();
+    let mut sha: String = String::new();
+    let symref_re: regex::Regex = regex::Regex::new(r"^ref:\s+refs/heads/(.+)\s+HEAD$").unwrap();
+    let head_re: regex::Regex = regex::Regex::new(r"^([0-9a-f]{40})\s+HEAD$").unwrap();
 
     for line in stdout.lines() {
         if let Some(caps) = symref_re.captures(line) {
@@ -135,7 +135,7 @@ fn resolve_repo_head(repo: &str) -> anyhow::Result<(String, String)> {
 }
 
 fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
-    let s = String::from_utf8_lossy(data);
+    let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
     if !s.contains('\r') {
         return data.to_vec();
     }
@@ -147,7 +147,7 @@ fn should_skip_skill_file(rel: &str) -> bool {
 }
 
 fn find_skill_dir(repo_root: &Path, skill_name: &str) -> Option<PathBuf> {
-    let mut candidates = Vec::new();
+    let mut candidates: Vec<PathBuf> = Vec::new();
     let skip_dirs: HashSet<&str> = [
         ".git",
         ".github",
@@ -185,7 +185,7 @@ fn find_skill_dir(repo_root: &Path, skill_name: &str) -> Option<PathBuf> {
         if depth > 8 {
             return;
         }
-        let entries = match fs::read_dir(dir) {
+        let entries: fs::ReadDir = match fs::read_dir(dir) {
             Ok(e) => e,
             Err(_) => return,
         };
@@ -193,11 +193,11 @@ fn find_skill_dir(repo_root: &Path, skill_name: &str) -> Option<PathBuf> {
             if let Ok(ft) = entry.file_type()
                 && ft.is_dir()
             {
-                let name = entry.file_name().to_string_lossy().to_string();
+                let name: String = entry.file_name().to_string_lossy().to_string();
                 if skip_dirs.contains(name.as_str()) {
                     continue;
                 }
-                let p = entry.path();
+                let p: PathBuf = entry.path();
                 if name == skill_name {
                     if p.join("SKILL.md").exists() {
                         candidates.push(p.clone());
@@ -217,21 +217,21 @@ fn find_skill_dir(repo_root: &Path, skill_name: &str) -> Option<PathBuf> {
         }
         return None;
     }
-    candidates.sort_by_key(|p| p.as_os_str().len());
+    candidates.sort_by_key(|p: &PathBuf| p.as_os_str().len());
     candidates.into_iter().next()
 }
 
 fn list_files_recursive(dir: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
+    let mut out: Vec<PathBuf> = Vec::new();
     fn walk(current: &Path, out: &mut Vec<PathBuf>) {
         if let Ok(entries) = fs::read_dir(current) {
             for entry in entries.flatten() {
-                let p = entry.path();
+                let p: PathBuf = entry.path();
                 if p.is_dir() {
                     walk(&p, out);
                 } else if p.is_file() {
                     if let Ok(rel) = p.strip_prefix(current) {
-                        let rel_str = rel.to_string_lossy().replace('\\', "/");
+                        let rel_str: String = rel.to_string_lossy().replace('\\', "/");
                         if rel_str.to_lowercase().ends_with(".zip") {
                             continue;
                         }
@@ -249,7 +249,7 @@ fn list_files_recursive(dir: &Path) -> Vec<PathBuf> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    let args: Args = Args::parse();
 
     if args.only.is_some() && args.retry_failed {
         eprintln!("✘ --only and --retry-failed cannot be used together");
@@ -264,13 +264,13 @@ async fn main() -> anyhow::Result<()> {
         println!("  --no-review: skipping audit");
     }
 
-    let all_skills = collect_all_skill_paths();
+    let all_skills: Vec<String> = collect_all_skill_paths();
     println!("Found {} declared skills", all_skills.len());
 
     // Group by repo
     let mut by_repo: HashMap<String, Vec<(String, String)>> = HashMap::new();
     for full in &all_skills {
-        let parsed = parse_skill_path(full);
+        let parsed: skillindex::registry::ParsedSkillPath = parse_skill_path(full);
         if parsed.skill_name.is_empty() {
             continue;
         }
@@ -285,11 +285,11 @@ async fn main() -> anyhow::Result<()> {
             .push((full.clone(), parsed.skill_name.clone()));
     }
 
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let registry_dir = manifest_dir.join("skills-registry");
-    let manifest_path = registry_dir.join("index.json");
+    let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let registry_dir: PathBuf = manifest_dir.join("skills-registry");
+    let manifest_path: PathBuf = registry_dir.join("index.json");
 
-    let manifest_str = fs::read_to_string(&manifest_path).unwrap_or_else(|_| {
+    let manifest_str: String = fs::read_to_string(&manifest_path).unwrap_or_else(|_| {
         r#"{"version":1,"generated_at":"","reviewer":{"model":"gpt-5.4","prompt_version":"1.0.0"},"skills":{}}"#.to_string()
     });
     let mut manifest: Manifest = serde_json::from_str(&manifest_str).unwrap_or(Manifest {
@@ -302,9 +302,9 @@ async fn main() -> anyhow::Result<()> {
         skills: HashMap::new(),
     });
 
-    let mut total_skills = 0;
-    let mut total_approved = 0;
-    let mut total_unchanged = 0;
+    let mut total_skills: i32 = 0;
+    let mut total_approved: i32 = 0;
+    let mut total_unchanged: i32 = 0;
 
     for (repo, skills) in &by_repo {
         println!("{} ({} skills)", repo, skills.len());
@@ -317,7 +317,7 @@ async fn main() -> anyhow::Result<()> {
         };
 
         // Check if unchanged
-        let mut all_unchanged = true;
+        let mut all_unchanged: bool = true;
         for (_, skill_name) in skills {
             if let Some(entry) = manifest.skills.get(skill_name) {
                 if entry.commit_sha != sha {
@@ -339,16 +339,16 @@ async fn main() -> anyhow::Result<()> {
         }
 
         // For now, use git clone --depth 1 with sparse checkout for simplicity
-        let tmp_dir = tempfile::tempdir()?;
-        let tmp_path = tmp_dir.path();
+        let tmp_dir: tempfile::TempDir = tempfile::tempdir()?;
+        let tmp_path: &Path = tmp_dir.path();
 
         // Try tarball first, fallback to git clone
         let repo_root: PathBuf;
-        let tarball_path = tmp_path.join("repo.tar.gz");
-        let tarball_url = format!("https://codeload.github.com/{}/tar.gz/{}", repo, sha);
+        let tarball_path: PathBuf = tmp_path.join("repo.tar.gz");
+        let tarball_url: String = format!("https://codeload.github.com/{}/tar.gz/{}", repo, sha);
 
         // Try to download tarball via reqwest
-        let client = reqwest::Client::builder()
+        let client: reqwest::Client = reqwest::Client::builder()
             .user_agent("skillindex-sync")
             .timeout(Duration::from_millis(180000))
             .build()?;
@@ -358,16 +358,17 @@ async fn main() -> anyhow::Result<()> {
                 let bytes = resp.bytes().await?;
                 fs::write(&tarball_path, &bytes)?;
                 // Extract tarball
-                let tar_gz = fs::File::open(&tarball_path)?;
-                let gz = flate2::read::GzDecoder::new(tar_gz);
-                let mut archive = tar::Archive::new(gz);
+                let tar_gz: fs::File = fs::File::open(&tarball_path)?;
+                let gz: flate2::read::GzDecoder<fs::File> = flate2::read::GzDecoder::new(tar_gz);
+                let mut archive: tar::Archive<flate2::read::GzDecoder<fs::File>> =
+                    tar::Archive::new(gz);
                 archive.unpack(tmp_path)?;
                 // Find extracted root
                 let mut extracted_root: Option<PathBuf> = None;
                 for entry in fs::read_dir(tmp_path)? {
-                    let entry = entry?;
+                    let entry: fs::DirEntry = entry?;
                     if entry.file_type()?.is_dir() {
-                        let name = entry.file_name().to_string_lossy().to_string();
+                        let name: String = entry.file_name().to_string_lossy().to_string();
                         if name != "repo.tar.gz" {
                             extracted_root = Some(entry.path());
                             break;
@@ -378,7 +379,7 @@ async fn main() -> anyhow::Result<()> {
                     repo_root = root;
                 } else {
                     // Fallback to git clone
-                    let repo_dir = tmp_path.join("repo");
+                    let repo_dir: PathBuf = tmp_path.join("repo");
                     let status = Command::new("git")
                         .args([
                             "clone",
@@ -399,8 +400,8 @@ async fn main() -> anyhow::Result<()> {
             }
             _ => {
                 // Fallback to git clone
-                let repo_dir = tmp_path.join("repo");
-                let status = Command::new("git")
+                let repo_dir: PathBuf = tmp_path.join("repo");
+                let status: std::process::ExitStatus = Command::new("git")
                     .args([
                         "clone",
                         "--depth",
@@ -421,7 +422,7 @@ async fn main() -> anyhow::Result<()> {
 
         for (full, skill_name) in skills {
             total_skills += 1;
-            let skill_dir = match find_skill_dir(&repo_root, skill_name) {
+            let skill_dir: PathBuf = match find_skill_dir(&repo_root, skill_name) {
                 Some(d) => d,
                 None => {
                     eprintln!("  ✘ {} — SKILL.md not found in {}", skill_name, repo);
@@ -429,10 +430,10 @@ async fn main() -> anyhow::Result<()> {
                 }
             };
 
-            let files = list_files_recursive(&skill_dir);
+            let files: Vec<PathBuf> = list_files_recursive(&skill_dir);
             let mut rel_files: Vec<(String, Vec<u8>)> = Vec::new();
             for abs_path in &files {
-                let rel = abs_path
+                let rel: String = abs_path
                     .strip_prefix(&skill_dir)
                     .unwrap()
                     .to_string_lossy()
@@ -440,19 +441,19 @@ async fn main() -> anyhow::Result<()> {
                 if should_skip_skill_file(&rel) {
                     continue;
                 }
-                let data = fs::read(abs_path)?;
-                let normalized = normalize_line_endings(&data);
+                let data: Vec<u8> = fs::read(abs_path)?;
+                let normalized: Vec<u8> = normalize_line_endings(&data);
                 rel_files.push((rel, normalized));
             }
 
             let mut sha_map: HashMap<String, String> = HashMap::new();
             let mut entries_for_hash: Vec<(String, String)> = Vec::new();
             for (rel, buf) in &rel_files {
-                let hash = sha256_buffer(buf);
+                let hash: String = sha256_buffer(buf);
                 sha_map.insert(rel.clone(), hash.clone());
                 entries_for_hash.push((rel.clone(), hash));
             }
-            let bundle_hash = bundle_hash(&entries_for_hash);
+            let bundle_hash: String = bundle_hash(&entries_for_hash);
 
             // Check if unchanged
             if let Some(prev) = manifest.skills.get(skill_name)
@@ -474,17 +475,18 @@ async fn main() -> anyhow::Result<()> {
             }
 
             // Write to registry
-            let dest_dir = registry_dir.join(skill_name);
+            let dest_dir: PathBuf = registry_dir.join(skill_name);
             let _ = fs::remove_dir_all(&dest_dir);
             for (rel, buf) in &rel_files {
-                let dest_path = dest_dir.join(rel);
+                let dest_path: PathBuf = dest_dir.join(rel);
                 if let Some(parent) = dest_path.parent() {
                     fs::create_dir_all(parent)?;
                 }
                 fs::write(&dest_path, buf)?;
             }
 
-            let now = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+            let now: String =
+                chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
             manifest.skills.insert(
                 skill_name.clone(),
                 ManifestEntry {

@@ -1,6 +1,5 @@
 use clap::Parser;
 use skillindex::args::Args;
-use skillindex::cache::get_cache_registry_dir;
 use skillindex::detect::dotnet::dotnet_layout_candidate_paths;
 use skillindex::detect::frontend::has_web_frontend_files;
 use skillindex::detect::gradle::{gradle_layout_candidate_paths, parse_settings_gradle_modules};
@@ -8,7 +7,8 @@ use skillindex::display::{
     DisplayCombo, DisplayTechnology, format_detected, format_security_checks, format_skill_label,
     truncate_visible, visible_pad, wrap_text,
 };
-use skillindex::hash::{
+use skillindex::infra::cache::get_cache_registry_dir;
+use skillindex::infra::hash::{
     bundle_hash, is_disallowed_skill_file, normalize_registry_rel_path, sha256_buffer,
 };
 use skillindex::installer::encode_raw_path;
@@ -463,12 +463,9 @@ fn parity_installer_encode_spaces() {
 #[test]
 fn parity_registry_base_urls_default() {
     let urls = get_registry_raw_base_urls(None);
-    // When no env, should return 2 URLs with version and main
-    // If env is set from prior tests, we tolerate either, but at least contains main
-    assert!(
-        urls.iter()
-            .any(|u| u.contains("main/packages/skillindex/skills-registry"))
-    );
+    assert_eq!(urls.len(), 2);
+    assert!(urls[0].contains("/v"));
+    assert!(urls[1].ends_with("/main/skills-registry"));
 }
 
 #[test]
@@ -628,7 +625,7 @@ fn parity_fallback_node_via_env() {
 async fn parity_installer_rate_limit_iso() {
     let _cache_guard = cache_env_guard().await;
     use httpmock::MockServer;
-    use skillindex::hash::sha256_buffer;
+    use skillindex::infra::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;
@@ -718,7 +715,7 @@ async fn parity_installer_rate_limit_iso() {
 async fn parity_installer_httpmock_network_ok() {
     let _cache_guard = cache_env_guard().await;
     use httpmock::MockServer;
-    use skillindex::hash::sha256_buffer;
+    use skillindex::infra::hash::sha256_buffer;
     use skillindex::installer::{InstallOptions, install_skill_with_client};
     use skillindex::registry::{Registry, RegistryEntry, Review, Reviewer};
     use std::collections::HashMap;

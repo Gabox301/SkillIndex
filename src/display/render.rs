@@ -10,12 +10,16 @@ pub fn format_detected(
     combos: &[DisplayCombo],
     is_frontend: bool,
 ) -> String {
-    let mut out = String::new();
+    let mut out: String = String::new();
     if !detected.is_empty() {
-        let with_skills: Vec<&DisplayTechnology> =
-            detected.iter().filter(|t| !t.skills.is_empty()).collect();
-        let without_skills: Vec<&DisplayTechnology> =
-            detected.iter().filter(|t| t.skills.is_empty()).collect();
+        let with_skills: Vec<&DisplayTechnology> = detected
+            .iter()
+            .filter(|t: &&DisplayTechnology| !t.skills.is_empty())
+            .collect();
+        let without_skills: Vec<&DisplayTechnology> = detected
+            .iter()
+            .filter(|t: &&DisplayTechnology| t.skills.is_empty())
+            .collect();
         let mut all_tech: Vec<&DisplayTechnology> = Vec::new();
         all_tech.extend(with_skills);
         all_tech.extend(without_skills);
@@ -27,17 +31,17 @@ pub fn format_detected(
         out.push('\n');
 
         const COLS: usize = 3;
-        let max_len = all_tech
+        let max_len: usize = all_tech
             .iter()
-            .map(|t| t.name.chars().count())
+            .map(|t: &&DisplayTechnology| t.name.chars().count())
             .max()
             .unwrap_or(0);
-        let col_width = max_len + 3;
+        let col_width: usize = max_len + 3;
 
         let format_tech = |tech: &DisplayTechnology| -> String {
-            let has_skills = !tech.skills.is_empty();
-            let icon = if has_skills { green("✔") } else { dim("●") };
-            let padded = format!(
+            let has_skills: bool = !tech.skills.is_empty();
+            let icon: String = if has_skills { green("✔") } else { dim("●") };
+            let padded: String = format!(
                 "{}{}",
                 tech.name,
                 " ".repeat(col_width - tech.name.chars().count())
@@ -50,9 +54,9 @@ pub fn format_detected(
         };
 
         for chunk in all_tech.chunks(COLS) {
-            let row = chunk
+            let row: String = chunk
                 .iter()
-                .map(|t| format_tech(t))
+                .map(|t: &&DisplayTechnology| format_tech(t))
                 .collect::<Vec<_>>()
                 .join("");
             out.push_str(&format!("     {row}\n"));
@@ -86,7 +90,7 @@ pub fn format_detected(
 }
 
 pub fn print_detected(detected: &[DisplayTechnology], combos: &[DisplayCombo], is_frontend: bool) {
-    let s = format_detected(detected, combos, is_frontend);
+    let s: String = format_detected(detected, combos, is_frontend);
     if !s.is_empty() {
         print!("{s}");
     }
@@ -96,14 +100,14 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
     const INSTALLED_TAG: &str = " (instalada)";
     let entries: Vec<(String, String, bool)> = skills
         .iter()
-        .map(|s| {
-            let label = format_skill_label(&s.skill, false);
-            let styled = format_skill_label(&s.skill, true);
+        .map(|s: &SkillEntry| {
+            let label: String = format_skill_label(&s.skill, false);
+            let styled: String = format_skill_label(&s.skill, true);
             (label, styled, s.installed)
         })
         .collect();
 
-    let max_effective = entries
+    let max_effective: usize = entries
         .iter()
         .map(|(label, _, installed)| {
             label.chars().count()
@@ -116,15 +120,15 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
         .max()
         .unwrap_or(0);
 
-    let new_count = skills.iter().filter(|s| !s.installed).count();
-    let installed_count = skills.len() - new_count;
-    let count_label = if installed_count > 0 {
+    let new_count: usize = skills.iter().filter(|s: &&SkillEntry| !s.installed).count();
+    let installed_count: usize = skills.len() - new_count;
+    let count_label: String = if installed_count > 0 {
         format!("({}, {} ya instaladas)", skills.len(), installed_count)
     } else {
         format!("({})", skills.len())
     };
 
-    let mut out = String::new();
+    let mut out: String = String::new();
     out.push_str(&format!(
         "{}\n",
         brand_cyan("   ◆ ") + &bold("Skills por instalar ") + &dim(&count_label)
@@ -136,22 +140,22 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
         let tech_sources: Vec<&String> = skill
             .sources
             .iter()
-            .filter(|s| !s.contains(" + "))
+            .filter(|s: &&String| !s.contains(" + "))
             .collect();
-        let installed_tag = if skill.installed {
+        let installed_tag: String = if skill.installed {
             dim(INSTALLED_TAG)
         } else {
             String::new()
         };
-        let effective_len = label.chars().count()
+        let effective_len: usize = label.chars().count()
             + if skill.installed {
                 INSTALLED_TAG.chars().count()
             } else {
                 0
             };
-        let pad = " ".repeat(max_effective.saturating_sub(effective_len));
-        let num = format!("{:2}", i + 1);
-        let source_suffix = if tech_sources.is_empty() {
+        let pad: String = " ".repeat(max_effective.saturating_sub(effective_len));
+        let num: String = format!("{:2}", i + 1);
+        let source_suffix: String = if tech_sources.is_empty() {
             String::new()
         } else {
             format!(
@@ -166,8 +170,8 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
                 ))
             )
         };
-        let num_part = dim(&format!("   {num}."));
-        let label_part = format!(" {styled_label}");
+        let num_part: String = dim(&format!("   {num}."));
+        let label_part: String = format!(" {styled_label}");
         out.push_str(&format!(
             "{num_part}{label_part}{installed_tag}{pad}{source_suffix}\n"
         ));
@@ -177,7 +181,7 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
 }
 
 pub fn print_skills_list(skills: &[SkillEntry]) {
-    let s = format_skills_list(skills);
+    let s: String = format_skills_list(skills);
     print!("{s}");
 }
 
@@ -186,13 +190,13 @@ fn format_security_findings(check: &InstallSecurityCheck) -> Option<String> {
         .findings
         .iter()
         .map(|f| f.trim().to_string())
-        .filter(|s| !s.is_empty())
+        .filter(|s: &String| !s.is_empty())
         .collect();
     if findings.is_empty() {
         return None;
     }
-    let summary = check.summary.trim().to_string();
-    let mut parts = Vec::new();
+    let summary: String = check.summary.trim().to_string();
+    let mut parts: Vec<String> = Vec::new();
     if !summary.is_empty() {
         parts.push(summary);
     }
@@ -210,26 +214,30 @@ pub fn format_security_checks(checks: &[InstallSecurityCheck]) -> String {
     if with_findings.is_empty() {
         return String::new();
     }
-    with_findings.sort_by(|a, b| a.0.name.cmp(&b.0.name));
+    with_findings.sort_by(
+        |a: &(&InstallSecurityCheck, String), b: &(&InstallSecurityCheck, String)| {
+            a.0.name.cmp(&b.0.name)
+        },
+    );
 
-    let skill_width = {
-        let max = with_findings
+    let skill_width: usize = {
+        let max: usize = with_findings
             .iter()
             .map(|(c, _)| c.name.chars().count())
             .max()
             .unwrap_or(5);
         max.clamp(5, 34)
     };
-    let check_width = 12usize;
-    let terminal_width = crossterm::terminal::size()
+    let check_width: usize = 12usize;
+    let terminal_width: usize = crossterm::terminal::size()
         .map(|(w, _)| w as usize)
         .unwrap_or(100);
-    let findings_width = std::cmp::max(
+    let findings_width: usize = std::cmp::max(
         40,
         terminal_width.saturating_sub(skill_width + check_width + 16),
     );
 
-    let mut out = String::new();
+    let mut out: String = String::new();
     out.push('\n');
     out.push_str(&format!(
         "{}\n",
@@ -256,12 +264,12 @@ pub fn format_security_checks(checks: &[InstallSecurityCheck]) -> String {
     ));
 
     for (check, findings) in with_findings {
-        let status = if check.status == "warning" {
+        let status: String = if check.status == "warning" {
             yellow("advertencia")
         } else {
             green("ok")
         };
-        let lines = wrap_text(&findings, findings_width);
+        let lines: Vec<String> = wrap_text(&findings, findings_width);
         out.push_str(&format!(
             "   | {} | {} | {} |\n",
             visible_pad(&truncate_visible(&check.name, skill_width), skill_width),
@@ -281,7 +289,7 @@ pub fn format_security_checks(checks: &[InstallSecurityCheck]) -> String {
 }
 
 pub fn print_security_checks(checks: &[InstallSecurityCheck]) {
-    let s = format_security_checks(checks);
+    let s: String = format_security_checks(checks);
     if !s.is_empty() {
         print!("{s}");
     }
@@ -295,15 +303,18 @@ mod tests {
     #[test]
     fn three_col_rows_7_techs() {
         let techs: Vec<DisplayTechnology> = (0..7)
-            .map(|i| DisplayTechnology {
+            .map(|i: i32| DisplayTechnology {
                 id: format!("tech{i}"),
                 name: format!("Tech{i}"),
                 skills: if i % 2 == 0 { vec!["s".into()] } else { vec![] },
             })
             .collect();
-        let out = format_detected(&techs, &[], false);
-        let plain = strip_ansi(&out);
-        let tech_rows: Vec<&str> = plain.lines().filter(|l| l.contains("Tech")).collect();
+        let out: String = format_detected(&techs, &[], false);
+        let plain: String = strip_ansi(&out);
+        let tech_rows: Vec<&str> = plain
+            .lines()
+            .filter(|l: &&str| l.contains("Tech"))
+            .collect();
         assert_eq!(
             tech_rows.len(),
             3,
@@ -317,20 +328,23 @@ mod tests {
 
     #[test]
     fn three_col_single_tech() {
-        let techs = vec![DisplayTechnology {
+        let techs: Vec<DisplayTechnology> = vec![DisplayTechnology {
             id: "a".into(),
             name: "React".into(),
             skills: vec!["s".into()],
         }];
-        let out = format_detected(&techs, &[], false);
-        let plain = strip_ansi(&out);
-        let rows: Vec<&str> = plain.lines().filter(|l| l.contains("React")).collect();
+        let out: String = format_detected(&techs, &[], false);
+        let plain: String = strip_ansi(&out);
+        let rows: Vec<&str> = plain
+            .lines()
+            .filter(|l: &&str| l.contains("React"))
+            .collect();
         assert_eq!(rows.len(), 1);
     }
 
     #[test]
     fn security_table_sorted_and_wrapped() {
-        let checks = vec![
+        let checks: Vec<InstallSecurityCheck> = vec![
             InstallSecurityCheck {
                 name: "zebra-skill".into(),
                 status: "warning".into(),
@@ -344,10 +358,10 @@ mod tests {
                 findings: vec!["short".into()],
             },
         ];
-        let out = format_security_checks(&checks);
-        let plain = strip_ansi(&out);
-        let alpha_pos = plain.find("alpha-skill").unwrap();
-        let zebra_pos = plain.find("zebra-skill").unwrap();
+        let out: String = format_security_checks(&checks);
+        let plain: String = strip_ansi(&out);
+        let alpha_pos: usize = plain.find("alpha-skill").unwrap();
+        let zebra_pos: usize = plain.find("zebra-skill").unwrap();
         assert!(alpha_pos < zebra_pos);
         assert!(plain.contains("Skill"));
         assert!(plain.contains("Hallazgos"));
@@ -356,29 +370,29 @@ mod tests {
 
     #[test]
     fn security_table_empty_returns_empty() {
-        let out = format_security_checks(&[]);
+        let out: String = format_security_checks(&[]);
         assert!(out.is_empty());
-        let checks = vec![InstallSecurityCheck {
+        let checks: Vec<InstallSecurityCheck> = vec![InstallSecurityCheck {
             name: "x".into(),
             status: "ok".into(),
             summary: "".into(),
             findings: vec![],
         }];
-        let out2 = format_security_checks(&checks);
+        let out2: String = format_security_checks(&checks);
         assert!(out2.is_empty());
     }
 
     #[test]
     fn skill_34_truncate() {
-        let long_name = "a".repeat(50);
-        let checks = vec![InstallSecurityCheck {
+        let long_name: String = "a".repeat(50);
+        let checks: Vec<InstallSecurityCheck> = vec![InstallSecurityCheck {
             name: long_name.clone(),
             status: "warning".into(),
             summary: "s".into(),
             findings: vec!["f".into()],
         }];
-        let out = format_security_checks(&checks);
-        let plain = strip_ansi(&out);
+        let out: String = format_security_checks(&checks);
+        let plain: String = strip_ansi(&out);
         assert!(plain.contains('…'));
     }
 }

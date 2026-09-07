@@ -10,7 +10,7 @@ pub fn get_skillindex_cache_dir() -> PathBuf {
     {
         return PathBuf::from(v);
     }
-    let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let home: PathBuf = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
     home.join(".cache")
         .join("skillindex")
         .join("skills-registry")
@@ -29,8 +29,8 @@ pub fn get_cache_registry_dir_for_entry(bundle_hash: &str) -> PathBuf {
 /// Clears the SkillIndex cache — mirrors `clearSkillIndexCache` in installer.ts
 /// Returns `(cache_dir, removed)` where `removed` indicates whether the dir existed.
 pub fn clear_skillindex_cache() -> (PathBuf, bool) {
-    let dir = get_skillindex_cache_dir();
-    let existed = dir.exists();
+    let dir: PathBuf = get_skillindex_cache_dir();
+    let existed: bool = dir.exists();
     // force remove — ignore errors like TS `force:true`
     let _ = fs::remove_dir_all(&dir);
     (dir, existed)
@@ -48,27 +48,29 @@ pub(crate) struct EnvGuard {
 impl Drop for EnvGuard {
     fn drop(&mut self) {
         if self._guard.is_some() {
-            ENV_LOCK_COUNT.with(|c| c.set(0));
+            ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(0));
         } else {
-            let count = ENV_LOCK_COUNT.with(|c| c.get());
+            let count: usize = ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.get());
             if count > 0 {
-                ENV_LOCK_COUNT.with(|c| c.set(count - 1));
+                ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(count - 1));
             }
         }
     }
 }
 #[cfg(test)]
 pub(crate) fn env_lock() -> EnvGuard {
-    let count = ENV_LOCK_COUNT.with(|c| c.get());
+    let count: usize = ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.get());
     if count > 0 {
-        ENV_LOCK_COUNT.with(|c| c.set(count + 1));
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(count + 1));
         EnvGuard { _guard: None }
     } else {
-        let guard = ENV_LOCK
+        let guard: std::sync::MutexGuard<'_, ()> = ENV_LOCK
             .get_or_init(|| std::sync::Mutex::new(()))
             .lock()
-            .unwrap_or_else(|e| e.into_inner());
-        ENV_LOCK_COUNT.with(|c| c.set(1));
+            .unwrap_or_else(|e: std::sync::PoisonError<std::sync::MutexGuard<'_, ()>>| {
+                e.into_inner()
+            });
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(1));
         EnvGuard {
             _guard: Some(guard),
         }
@@ -81,35 +83,37 @@ pub(crate) fn with_env_var<F, R>(key: &str, value: Option<&str>, f: F) -> R
 where
     F: FnOnce() -> R,
 {
-    let count = ENV_LOCK_COUNT.with(|c| c.get());
+    let count: usize = ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.get());
     // Acquire lock only if not already holding
     let _guard_opt: Option<std::sync::MutexGuard<'static, ()>> = if count == 0 {
-        let g = ENV_LOCK
+        let g: std::sync::MutexGuard<'_, ()> = ENV_LOCK
             .get_or_init(|| std::sync::Mutex::new(()))
             .lock()
-            .unwrap_or_else(|e| e.into_inner());
-        ENV_LOCK_COUNT.with(|c| c.set(1));
+            .unwrap_or_else(|e: std::sync::PoisonError<std::sync::MutexGuard<'_, ()>>| {
+                e.into_inner()
+            });
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(1));
         Some(g)
     } else {
-        ENV_LOCK_COUNT.with(|c| c.set(count + 1));
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(count + 1));
         None
     };
-    let prev = env::var(key).ok();
+    let prev: Option<String> = env::var(key).ok();
     match value {
         Some(v) => unsafe { env::set_var(key, v) },
         None => unsafe { env::remove_var(key) },
     }
-    let result = f();
+    let result: R = f();
     match prev {
         Some(v) => unsafe { env::set_var(key, v) },
         None => unsafe { env::remove_var(key) },
     }
-    let new_count = ENV_LOCK_COUNT.with(|c| c.get());
+    let new_count: usize = ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.get());
     if _guard_opt.is_some() {
-        ENV_LOCK_COUNT.with(|c| c.set(0));
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(0));
         // _guard_opt dropped here releasing mutex
     } else {
-        ENV_LOCK_COUNT.with(|c| c.set(new_count - 1));
+        ENV_LOCK_COUNT.with(|c: &std::cell::Cell<usize>| c.set(new_count - 1));
     }
     result
 }
@@ -133,8 +137,8 @@ mod tests {
     #[test]
     fn cache_dir_falls_back_to_home() {
         with_env_var("SKILLINDEX_CACHE_DIR", None, || {
-            let dir = get_skillindex_cache_dir();
-            let home = dirs::home_dir().unwrap();
+            let dir: PathBuf = get_skillindex_cache_dir();
+            let home: PathBuf = dirs::home_dir().unwrap();
             assert_eq!(
                 dir,
                 home.join(".cache")
@@ -147,8 +151,8 @@ mod tests {
     #[test]
     fn cache_dir_empty_string_falls_through() {
         with_env_var("SKILLINDEX_CACHE_DIR", Some(""), || {
-            let dir = get_skillindex_cache_dir();
-            let home = dirs::home_dir().unwrap();
+            let dir: PathBuf = get_skillindex_cache_dir();
+            let home: PathBuf = dirs::home_dir().unwrap();
             assert_eq!(
                 dir,
                 home.join(".cache")
@@ -161,15 +165,15 @@ mod tests {
     #[test]
     fn get_cache_registry_dir_appends_hash() {
         with_env_var("SKILLINDEX_CACHE_DIR", Some("/tmp/cache-root"), || {
-            let dir = get_cache_registry_dir("abc123");
+            let dir: PathBuf = get_cache_registry_dir("abc123");
             assert_eq!(dir, PathBuf::from("/tmp/cache-root").join("abc123"));
         });
     }
 
     #[test]
     fn clear_skillindex_cache_removes_dir() {
-        let tmp = tempdir().unwrap();
-        let cache_root = tmp.path().join("my-cache");
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let cache_root: PathBuf = tmp.path().join("my-cache");
         fs::create_dir_all(&cache_root).unwrap();
         fs::write(cache_root.join("file.txt"), b"data").unwrap();
         assert!(cache_root.exists());
@@ -188,8 +192,8 @@ mod tests {
 
     #[test]
     fn clear_skillindex_cache_nonexistent_returns_false() {
-        let tmp = tempdir().unwrap();
-        let cache_root = tmp.path().join("nonexistent-cache-dir");
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let cache_root: PathBuf = tmp.path().join("nonexistent-cache-dir");
         assert!(!cache_root.exists());
         with_env_var(
             "SKILLINDEX_CACHE_DIR",
@@ -204,10 +208,10 @@ mod tests {
 
     #[test]
     fn get_cache_registry_dir_respects_env() {
-        let tmp = tempdir().unwrap();
-        let root = tmp.path().join("cache-env-test");
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let root: PathBuf = tmp.path().join("cache-env-test");
         with_env_var("SKILLINDEX_CACHE_DIR", Some(root.to_str().unwrap()), || {
-            let d = get_cache_registry_dir("hash123");
+            let d: PathBuf = get_cache_registry_dir("hash123");
             assert_eq!(d, root.join("hash123"));
         });
     }

@@ -1,10 +1,9 @@
 pub mod args;
 pub mod banner;
-pub mod cache;
 pub mod claude;
 pub mod detect;
 pub mod display;
-pub mod hash;
+pub mod infra;
 pub mod installer;
 pub mod prompt;
 pub mod registry;
