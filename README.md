@@ -2,27 +2,57 @@
 
 Detecta e instala las mejores skills de agentes IA para tu proyecto. Un comando, cero configuración.
 
+> **Construido en Rust 🦀** — binario nativo, rápido y sin runtime. Escaneo 100% local, detección sin red.
+
 ```bash
-npx skillindex
+npx skillindex        # vía Node (sin instalar)
+# o
+cargo install skillindex  # vía Rust
+skillindex            # binario nativo
 ```
 
 `skillindex` escanea tu proyecto, detecta las tecnologías que usas e instala skills curadas de [agentes IA](https://skills.sh) que hacen que Cursor, Claude Code y otros asistentes realmente entiendan tu stack.
 
-## Inicio rápido
+## Instalación
 
-Ejecútalo en la raíz de tu proyecto:
+### Opción 1 — npx (sin instalar, requiere Node.js)
 
 ```bash
 npx skillindex
 ```
 
+Ideal para probar sin instalar nada. Usa el wrapper de npm que descarga el binario Rust apropiado para tu plataforma.
+
+### Opción 2 — Cargo (binario nativo Rust)
+
+```bash
+cargo install skillindex
+skillindex
+```
+
+Compila e instala el binario nativo. Más rápido, sin dependencia de Node, ideal para CI o uso diario.
+
+```bash
+cargo binstall skillindex  # alternativa aún más rápida si usas cargo-binstall
+```
+
+## Inicio rápido
+
+Ejecútalo en la raíz de tu proyecto (con `npx` o `skillindex` si lo instalaste con Cargo):
+
+```bash
+npx skillindex
+# o
+skillindex
+```
+
 Listo. Hará:
 
-1. **Escanear** tu `package.json`, archivos de configuración y estructura del proyecto
-2. **Detectar** cada tecnología de tu stack
-3. **Mostrar** un selector interactivo con las mejores skills para tu proyecto
-4. **Instalar** en paralelo con progreso en vivo
-5. **Generar `CLAUDE.md` automáticamente** cuando Claude Code es uno de los agentes destino
+1. **Escanear** tu proyecto — `package.json`/`pnpm-lock.yaml`/`bun.lock` **pero también** `Cargo.toml`, `go.mod`, `pubspec.yaml`, `pyproject.toml`/`requirements.txt`, `*.csproj`/`*.sln`/`global.json`, `Package.swift`, Gradle, Deno y más...
+2. **Detectar** cada tecnología de tu stack (50+), sin importar el lenguaje o package manager.
+3. **Mostrar** un selector interactivo con las mejores skills para tu proyecto.
+4. **Instalar** en paralelo con progreso en vivo.
+5. **Generar `CLAUDE.md` automáticamente** cuando Claude Code es uno de los agentes destino.
 
 ### Omitir la confirmación
 
@@ -53,15 +83,15 @@ Si `claude-code` es autodetectado o se pasa con `-a`, `skillindex` escribe un ar
 
 ## Agentes soportados
 
-Detecta automáticamente los agentes configurados **en tu proyecto** (`<project>/.claude`, `.cursor`, `.opencode`, etc.) y delega la elección a vos:
+Detecta automáticamente los agentes configurados **en tu proyecto** (`<project>/.claude`, `.cursor`, `.opencode`, etc.) y te permite elegir dónde instalar:
 
-- **Claude Code** (`.claude`), **Cursor** (`.cursor`), **Opencode** (`.opencode`), **Kiro** (`.kiro`), **Cline** (`.cline`), **Junie** (`.junie`), **CodeBuddy** (`.codebuddy`), **Continue** (`.continue`)
-- Si detecta más de un agente en el proyecto, te muestra un selector para elegir dónde instalar (por defecto todos seleccionados, podés destildar `.kiro` si solo usás opencode/cursor). Si no hay ninguno, instala en `.agents` (`universal`).
+- **Claude Code** (`.claude`), **Cursor** (`.cursor`), **Opencode** (`.opencode`), **Kiro** (`.kiro`), **Cline** (`.cline`), **Junie** (`.junie`), **CodeBuddy** (`.codebuddy`), y otros...
+- Si detecta más de un agente en el proyecto, muestra un selector para elegir dónde instalar (por defecto todos seleccionados; puedes desmarcar `.kiro` si solo usas opencode/cursor). Si no hay ninguno, instala en `.agents` (`universal`).
 - Con `-a` o `-y` se respeta tu elección sin preguntar; `--dry-run` muestra los agentes elegidos sin instalar.
 
 ## Tecnologías soportadas
 
-`skillindex` detecta **más de 50 tecnologías** desde tu `package.json`, lockfiles, archivos Gradle y archivos de configuración:
+`skillindex` detecta **más de 50 tecnologías** — no solo Node — desde tu `package.json`/`lockfiles`, pero también `Cargo.toml` (Rust), `go.mod` (Go), `pubspec.yaml` (Dart/Flutter), `pyproject.toml`/`requirements.txt` (Python), `*.csproj`/`*.sln` (.NET/C#), `Package.swift` (Swift), Gradle (Kotlin/Android/Spring), Deno, y más:
 
 ### Frameworks y librerías
 
@@ -184,13 +214,15 @@ Cuando se usan múltiples tecnologías juntas, `skillindex` detecta **combinacio
 
 ## Cómo funciona
 
-`skillindex` usa [skills.sh](https://skills.sh) por debajo — el registro abierto de skills para agentes IA. Las skills son archivos markdown que enseñan a los asistentes IA cómo trabajar con tecnologías específicas, siguiendo mejores prácticas y patrones de los mantenedores oficiales.
+`skillindex` está **escrito en Rust** y usa [skills.sh](https://skills.sh) por debajo — el registro abierto de skills para agentes IA. Las skills son archivos markdown que enseñan a los asistentes IA cómo trabajar con tecnologías específicas, siguiendo mejores prácticas y patrones de los mantenedores oficiales.
 
-La detección se ejecuta completamente en local con cero peticiones de red hasta que comienza la instalación.
+Todo el escaneo y detección se ejecuta **100% en local y en Rust**, sin peticiones de red hasta que comienza la instalación. El binario nativo garantiza instalación paralela y progreso en vivo con rendimiento nativo.
 
 ## Requisitos
 
-- Node.js >= 22.0.0
+- **Vía npx:** Node.js >= 22.0.0
+- **Vía Cargo:** Rust >= 1.98.1 (`rustup` recomendado) — `cargo install skillindex`
+- Si instalas el binario con Cargo, no necesitas Node.js en absoluto
 
 ## Licencia
 
