@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use skillindex::infra::hash::{bundle_hash, sha256_buffer};
+use skillindex::infra::hash::{bundle_hash, normalize_registry_rel_path, sha256_buffer};
 
 fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
     let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
@@ -22,7 +22,7 @@ fn list_files_recursive(dir: &Path) -> Vec<PathBuf> {
             } else if path.is_file() {
                 // relative path check for .zip
                 if let Ok(rel) = path.strip_prefix(dir) {
-                    let rel_str: String = rel.to_string_lossy().replace('\\', "/");
+                    let rel_str: String = normalize_registry_rel_path(&rel.to_string_lossy());
                     if rel_str.to_lowercase().ends_with(".zip") {
                         continue;
                     }
@@ -76,11 +76,9 @@ fn main() -> anyhow::Result<()> {
         // Build relFiles with normalized content
         let mut rel_files: Vec<(String, Vec<u8>)> = Vec::new();
         for abs_path in &files {
-            let rel: String = abs_path
-                .strip_prefix(&skill_dir)
-                .unwrap()
-                .to_string_lossy()
-                .replace('\\', "/");
+            let rel: String = normalize_registry_rel_path(
+                &abs_path.strip_prefix(&skill_dir).unwrap().to_string_lossy(),
+            );
             let data: Vec<u8> = fs::read(abs_path)?;
             let normalized: Vec<u8> = normalize_line_endings(&data);
             // Write back if changed (normalize on disk to LF)

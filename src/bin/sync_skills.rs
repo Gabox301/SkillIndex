@@ -7,7 +7,7 @@ use std::time::Duration;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
-use skillindex::infra::hash::{bundle_hash, sha256_buffer};
+use skillindex::infra::hash::{bundle_hash, normalize_registry_rel_path, sha256_buffer};
 use skillindex::registry::parse_skill_path;
 use skillindex::skills::{COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP};
 
@@ -231,7 +231,7 @@ fn list_files_recursive(dir: &Path) -> Vec<PathBuf> {
                     walk(&p, out);
                 } else if p.is_file() {
                     if let Ok(rel) = p.strip_prefix(current) {
-                        let rel_str: String = rel.to_string_lossy().replace('\\', "/");
+                        let rel_str: String = normalize_registry_rel_path(&rel.to_string_lossy());
                         if rel_str.to_lowercase().ends_with(".zip") {
                             continue;
                         }
@@ -433,11 +433,9 @@ async fn main() -> anyhow::Result<()> {
             let files: Vec<PathBuf> = list_files_recursive(&skill_dir);
             let mut rel_files: Vec<(String, Vec<u8>)> = Vec::new();
             for abs_path in &files {
-                let rel: String = abs_path
-                    .strip_prefix(&skill_dir)
-                    .unwrap()
-                    .to_string_lossy()
-                    .replace('\\', "/");
+                let rel: String = normalize_registry_rel_path(
+                    &abs_path.strip_prefix(&skill_dir).unwrap().to_string_lossy(),
+                );
                 if should_skip_skill_file(&rel) {
                     continue;
                 }

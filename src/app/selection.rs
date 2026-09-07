@@ -1,4 +1,7 @@
-use skillindex::display::format_skill_label;
+use skillindex::display::{
+    format_skill_label,
+    helpers::{INSTALLED_TAG, SECURITY_TAG, skill_effective_len, skill_pad},
+};
 use skillindex::installer::SkillEntry;
 use skillindex::prompt::{MultiSelectOptions, Shortcut, multi_select};
 use skillindex::ui::{bold, brand_cyan, dim, is_tty, log, yellow};
@@ -111,9 +114,6 @@ pub fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillE
         return skills;
     }
 
-    const INSTALLED_TAG: &str = " (instalada)";
-    const SECURITY_TAG: &str = " (revisión de seguridad ⚠)";
-
     let mut label_cache: std::collections::HashMap<String, (String, String, bool)> =
         std::collections::HashMap::new();
     for s in &skills {
@@ -126,9 +126,7 @@ pub fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillE
         .iter()
         .map(|s: &SkillEntry| {
             let (label, _, has_warn) = label_cache.get(&s.skill).unwrap();
-            label.len()
-                + if s.installed { INSTALLED_TAG.len() } else { 0 }
-                + if *has_warn { SECURITY_TAG.len() } else { 0 }
+            skill_effective_len(label, s.installed, *has_warn)
         })
         .max()
         .unwrap_or(0);
@@ -164,14 +162,8 @@ pub fn select_skills_sync(skills: Vec<SkillEntry>, auto_yes: bool) -> Vec<SkillE
         } else {
             String::new()
         };
-        let effective_len: usize = label.len()
-            + if item.installed {
-                INSTALLED_TAG.len()
-            } else {
-                0
-            }
-            + if *has_warn { SECURITY_TAG.len() } else { 0 };
-        let pad: String = " ".repeat(max_effective.saturating_sub(effective_len));
+        let effective_len: usize = skill_effective_len(label, item.installed, *has_warn);
+        let pad: String = skill_pad(effective_len, max_effective);
         format!("{styled_label}{installed_tag}{security_tag}{pad}")
     });
 

@@ -1,11 +1,8 @@
+use skillindex::display::format_time;
 use skillindex::installer::InstallError;
 use skillindex::ui::{bold, dim, green, log, red, strip_ansi, yellow};
 
 const ISSUES_URL: &str = "https://github.com/Gabox301/SkillIndex/issues";
-
-pub fn format_time(ms: u64) -> String {
-    skillindex::display::format_time(ms)
-}
 
 pub fn brief_error_reason(stderr: &str, output: &str) -> String {
     let raw: &str = if !stderr.trim().is_empty() {

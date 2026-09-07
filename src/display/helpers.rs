@@ -1,5 +1,18 @@
 use crate::ui::{bold, brand_cyan, strip_ansi};
 
+pub const INSTALLED_TAG: &str = " (instalada)";
+pub const SECURITY_TAG: &str = " (revisión de seguridad ⚠)";
+
+pub fn skill_effective_len(label: &str, installed: bool, has_warn: bool) -> usize {
+    label.len()
+        + if installed { INSTALLED_TAG.len() } else { 0 }
+        + if has_warn { SECURITY_TAG.len() } else { 0 }
+}
+
+pub fn skill_pad(effective_len: usize, max_effective: usize) -> String {
+    " ".repeat(max_effective.saturating_sub(effective_len))
+}
+
 pub fn format_skill_label(skill: &str, styled: bool) -> String {
     if skill.to_lowercase().starts_with("http://") || skill.to_lowercase().starts_with("https://") {
         if styled {
@@ -27,10 +40,6 @@ pub fn format_skill_label(skill: &str, styled: bool) -> String {
         crate::ui::gray("›"),
         brand_cyan(&bold(skill_name))
     )
-}
-
-pub fn strip_ansi_owned(s: &str) -> String {
-    strip_ansi(s)
 }
 
 pub fn visible_pad(value: &str, width: usize) -> String {

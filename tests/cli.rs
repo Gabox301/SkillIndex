@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use skillindex::ui::strip_ansi;
 use std::fs;
 use tempfile::tempdir;
 
@@ -77,24 +78,6 @@ fn display_three_col_via_dry_run_seven_techs() {
             "expected {name} in output, got {plain}"
         );
     }
-}
-
-fn strip_ansi(s: &str) -> String {
-    let mut out: String = String::new();
-    let mut chars: std::iter::Peekable<std::str::Chars<'_>> = s.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c == '\x1b' && chars.peek() == Some(&'[') {
-            chars.next();
-            for ch in chars.by_ref() {
-                if ch == 'm' {
-                    break;
-                }
-            }
-        } else {
-            out.push(c);
-        }
-    }
-    out
 }
 
 // ── 4.3 Banner / Prompt / Spinner ────────────────────────────────

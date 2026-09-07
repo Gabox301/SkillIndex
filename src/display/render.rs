@@ -2,7 +2,10 @@ use crate::installer::SkillEntry;
 use crate::registry::InstallSecurityCheck;
 use crate::ui::{bold, brand_cyan, dim, green, magenta, yellow};
 
-use super::helpers::{format_skill_label, truncate_visible, visible_pad, wrap_text};
+use super::helpers::{
+    INSTALLED_TAG, format_skill_label, skill_effective_len, skill_pad, truncate_visible,
+    visible_pad, wrap_text,
+};
 use super::types::{DisplayCombo, DisplayTechnology};
 
 pub fn format_detected(
@@ -97,7 +100,6 @@ pub fn print_detected(detected: &[DisplayTechnology], combos: &[DisplayCombo], i
 }
 
 pub fn format_skills_list(skills: &[SkillEntry]) -> String {
-    const INSTALLED_TAG: &str = " (instalada)";
     let entries: Vec<(String, String, bool)> = skills
         .iter()
         .map(|s: &SkillEntry| {
@@ -109,14 +111,7 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
 
     let max_effective: usize = entries
         .iter()
-        .map(|(label, _, installed)| {
-            label.chars().count()
-                + if *installed {
-                    INSTALLED_TAG.chars().count()
-                } else {
-                    0
-                }
-        })
+        .map(|(label, _, installed)| skill_effective_len(label, *installed, false))
         .max()
         .unwrap_or(0);
 
@@ -147,13 +142,8 @@ pub fn format_skills_list(skills: &[SkillEntry]) -> String {
         } else {
             String::new()
         };
-        let effective_len: usize = label.chars().count()
-            + if skill.installed {
-                INSTALLED_TAG.chars().count()
-            } else {
-                0
-            };
-        let pad: String = " ".repeat(max_effective.saturating_sub(effective_len));
+        let effective_len: usize = skill_effective_len(label, skill.installed, false);
+        let pad: String = skill_pad(effective_len, max_effective);
         let num: String = format!("{:2}", i + 1);
         let source_suffix: String = if tech_sources.is_empty() {
             String::new()
