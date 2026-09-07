@@ -44590,6 +44590,66 @@
       },
       "skillPath": "pproenca/dot-skills/zod",
       "source": "pproenca/dot-skills"
+    },
+    "design-dna": {
+      "bundleHash": "168953c1b96577918e401d87e19ffb43ee5242ec7a5bd4a0a26b00167bff0213",
+      "commitSha": "593e39bc9e3652734653bd75544a333d7d43615e",
+      "files": [
+        ".gitignore",
+        "LICENSE",
+        "README.es.md",
+        "README.ja.md",
+        "README.ko.md",
+        "README.md",
+        "README.zh-CN.md",
+        "README.zh-TW.md",
+        "SKILL.md",
+        "docs/example-deterministic-measurement.png",
+        "docs/example-style-transfer.png",
+        "references/generation-guide.md",
+        "references/schema.md",
+        "scripts/color-math.mjs",
+        "scripts/measure-colors.mjs",
+        "scripts/package.json",
+        "scripts/test/color-measurement.test.mjs",
+        "scripts/verify.mjs"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-07T05:23:03.352Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-07T05:23:03.352Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "The sync review did not find security issues."
+      },
+      "sha256": {
+        "docs/example-style-transfer.png": "f028275cf688a7cc8b0695d81ad8a2c53a0d996285d68763af459805dc4ccfb5",
+        "references/generation-guide.md": "7073c2b297854daa49c2f2474a678a438fa65db59a2cf07bd71ca373174b4ef8",
+        ".gitignore": "8c419f1e69885cf00709aeaf8ca597f20ffd3d0557da9e2f3aab7204ac6e5cf3",
+        "README.ja.md": "915b040f6094c22170b8aa0eaa5f9a7cb53dd96fc4db7b2d9f2649cc60a6e9e5",
+        "README.zh-TW.md": "3fa9ccd61923c4f068dd7dda1e8a06ff2e1077cfdbe5b8a528dc4d8458659b17",
+        "LICENSE": "2de108bcd0d904f8756e1135ca77ce1e3e9ca0edb1ae6abecb97dea76d27d174",
+        "docs/example-deterministic-measurement.png": "b49949c4f5ec7d4c5943ea461e1dc387a4295d513982c6491e3f3e3bdad625fb",
+        "SKILL.md": "e3f85b80b964bf0e124f14df9ce0369eaabca85b10cfd7c42f136686eb522d2f",
+        "scripts/measure-colors.mjs": "2cc55c0081cb7ddcbc052983bb2fc092fcb81e7b08989237f84a11934e472ae0",
+        "scripts/package.json": "f3474891d9fd3a755f9f8a818c129504b8abd78c33c11c56e58750ada908f458",
+        "references/schema.md": "082b8d1a0e8ec9b50dbdfe9f34e6e4120d48e8ad9a812839d8772224fcde2ecf",
+        "scripts/test/color-measurement.test.mjs": "c5886e032c66b164fcf22e253012d8c94752a24d7fb4cf4be0bb4ffe7f25d856",
+        "scripts/color-math.mjs": "2e4794745355a36371ba6b57fd7a43a55fdb1308c5dcbbe6a999417ae07c4e9d",
+        "README.md": "90577d37583bcad256ab5d108aca6abbd8940d832e53b7e2460653b70d5721b7",
+        "README.ko.md": "aa7d72314940ccd126908177a6ff17ef5c643e086024ea60341749e559cd3c07",
+        "README.zh-CN.md": "f2357042004a5fee1cdd683435e5326fc85227d825cce09664295522a047c1ee",
+        "scripts/verify.mjs": "eb4fc85ea7fae4cb0bcde38abff9ef374d57bb3a7d2b8e69849fd1b4b8f4035e",
+        "README.es.md": "8297bcf528422814d4c9e5ca19c1a84df8c7acf5694c15f8bce0270a55ad84dc"
+      },
+      "skillPath": "zanwei/design-dna/design-dna",
+      "source": "zanwei/design-dna"
     }
   },
   "version": 1
