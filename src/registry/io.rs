@@ -19,10 +19,13 @@ pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String
         return vec![v.trim_end_matches('/').to_string()];
     }
     let version: String = get_package_version();
-    let base: &str = "https://raw.githubusercontent.com/Gabox301/SkillIndex";
+    let gh_base: &str = "https://raw.githubusercontent.com/Gabox301/SkillIndex";
+    let jsd_base: &str = "https://cdn.jsdelivr.net/gh/Gabox301/SkillIndex";
     vec![
-        format!("{base}/v{version}/skills-registry"),
-        format!("{base}/main/skills-registry"),
+        format!("{jsd_base}@v{version}/skills-registry"),
+        format!("{gh_base}/v{version}/skills-registry"),
+        format!("{jsd_base}@main/skills-registry"),
+        format!("{gh_base}/main/skills-registry"),
     ]
 }
 
@@ -357,9 +360,12 @@ mod tests {
             env::remove_var("SKILLINDEX_REGISTRY_BASE_URL");
         }
         let urls: Vec<String> = get_registry_raw_base_urls(None);
-        assert_eq!(urls.len(), 2);
-        assert!(urls[0].contains(&format!("/v{}/", env!("CARGO_PKG_VERSION"))));
-        assert!(urls[1].ends_with("/main/skills-registry"));
+        assert_eq!(urls.len(), 4);
+        assert!(urls[0].starts_with("https://cdn.jsdelivr.net/gh/"));
+        assert!(urls[0].contains(&format!("@v{}/", env!("CARGO_PKG_VERSION"))));
+        assert!(urls[1].contains(&format!("/v{}/", env!("CARGO_PKG_VERSION"))));
+        assert!(urls[2].ends_with("@main/skills-registry"));
+        assert!(urls[3].ends_with("/main/skills-registry"));
     }
 
     #[test]
