@@ -11,7 +11,32 @@ repository = "https://github.com/Gabox301/SkillIndex"
 keywords = ["cli", "ai", "skills", "agent"]
 categories = ["command-line-utilities"]
 readme = "README.md"
-exclude = ["bin/*", "skills-registry/*", "node_modules/*", "dist/*", ".env", "pnpm-lock.yaml", "bun.lock"]
+# Allowlist en vez de exclude: el binario embebe skills-registry/index.json
+# (include_str!) y ese archivo DEBE viajar en el crate para que `cargo
+# publish --dry-run` verifique y `cargo install` compile.
+include = [
+    "src/**/*",
+    "tests/**/*",
+    ".github/**/*",
+    ".cargo/**/*",
+    "skills-registry/index.json",
+    "index.mjs",
+    "index.ts",
+    "dist-workspace.toml",
+    "README.md",
+    "package.json",
+    "tsconfig.build.json",
+    "tsconfig.json",
+    "postinstall.mjs",
+    "rust-toolchain.toml",
+    ".gitignore",
+    ".npmrc",
+    ".gitattributes",
+    ".oxlintrc.json",
+    "LICENSE",
+    "AGENTS.md",
+    "Cargo.lock",
+]
 
 [[bin]]
 name = "skillindex"
