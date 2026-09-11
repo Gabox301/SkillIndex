@@ -4,7 +4,9 @@ use std::path::Path;
 
 use crate::infra::hash::normalize_registry_rel_path;
 
-fn get_github_token() -> Option<String> {
+/// GitHub token for higher rate limits (`GITHUB_TOKEN` o `GH_TOKEN`).
+/// Se envía SOLO a hosts de GitHub (raw, codeload); jamás a CDNs de terceros.
+pub fn get_github_token() -> Option<String> {
     if let Ok(v) = env::var("GITHUB_TOKEN")
         && !v.trim().is_empty()
     {
@@ -31,6 +33,7 @@ fn is_githubusercontent_url(url: &str) -> bool {
     lower == "raw.githubusercontent.com"
         || lower.ends_with(".githubusercontent.com")
         || lower == "githubusercontent.com"
+        || lower == "codeload.github.com"
 }
 
 pub fn github_download_headers(url: &str) -> reqwest::header::HeaderMap {
@@ -231,6 +234,13 @@ mod tests {
         ));
         assert!(is_githubusercontent_url(
             "https://raw.githubusercontent.com/Gabox301/SkillIndex/main/file"
+        ));
+        // codeload sirve tarballs del sync y también acepta el token
+        assert!(is_githubusercontent_url(
+            "https://codeload.github.com/Gabox301/SkillIndex/tar.gz/abc123"
+        ));
+        assert!(!is_githubusercontent_url(
+            "https://cdn.jsdelivr.net/gh/Gabox301/SkillIndex@main/file"
         ));
         assert!(!is_githubusercontent_url(
             "https://example.test/skills-registry/file"

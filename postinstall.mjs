@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
-let pkgVersion = '3.0.1';
+let pkgVersion = '3.1.0';
 try {
   const pkg = require('./package.json');
   if (pkg.version) pkgVersion = pkg.version;
@@ -80,7 +80,6 @@ if (targetInfo) {
   const binName = process.platform === 'win32' ? 'skillindex.exe' : 'skillindex';
   const destBin = join(destDir, binName);
   const releaseBin = join(__dirname, 'target', 'release', binName);
-
   try {
     if (downloadWithCurl(url, tmpFile)) {
       let extracted = false;

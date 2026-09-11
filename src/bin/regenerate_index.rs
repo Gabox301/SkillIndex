@@ -2,15 +2,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use skillindex::infra::hash::{bundle_hash, normalize_registry_rel_path, sha256_buffer};
-
-fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
-    let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
-    if !s.contains('\r') {
-        return data.to_vec();
-    }
-    s.replace("\r\n", "\n").replace('\r', "\n").into_bytes()
-}
+use skillindex::infra::hash::{
+    bundle_hash, normalize_line_endings, normalize_registry_rel_path, sha256_buffer,
+};
 
 fn list_files_recursive(dir: &Path) -> Vec<PathBuf> {
     let mut out: Vec<PathBuf> = Vec::new();

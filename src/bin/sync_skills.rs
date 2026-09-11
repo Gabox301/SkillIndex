@@ -7,7 +7,10 @@ use std::time::Duration;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
-use skillindex::infra::hash::{bundle_hash, normalize_registry_rel_path, sha256_buffer};
+use skillindex::infra::hash::{
+    bundle_hash, normalize_line_endings, normalize_registry_rel_path, sha256_buffer,
+};
+use skillindex::installer::helpers::get_github_token;
 use skillindex::registry::parse_skill_path;
 use skillindex::skills::{COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP};
 
@@ -93,8 +96,22 @@ fn collect_all_skill_paths() -> Vec<String> {
     out.into_iter().collect()
 }
 
+/// `git` con auth cuando hay token: sube la cuota de GitHub para
+/// `ls-remote`/`clone` sin exponer el token en URLs (va por
+/// `http.extraHeader`, nunca se loguea ni queda en errores).
+fn git_cmd() -> Command {
+    let mut cmd: Command = Command::new("git");
+    if let Some(token) = get_github_token() {
+        cmd.args([
+            "-c",
+            &format!("http.extraHeader=Authorization: Bearer {token}"),
+        ]);
+    }
+    cmd
+}
+
 fn resolve_repo_head(repo: &str) -> anyhow::Result<(String, String)> {
-    let output: std::process::Output = Command::new("git")
+    let output: std::process::Output = git_cmd()
         .args([
             "ls-remote",
             "--symref",
@@ -132,14 +149,6 @@ fn resolve_repo_head(repo: &str) -> anyhow::Result<(String, String)> {
     }
 
     Ok((default_branch, sha))
-}
-
-fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
-    let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
-    if !s.contains('\r') {
-        return data.to_vec();
-    }
-    s.replace("\r\n", "\n").replace('\r', "\n").into_bytes()
 }
 
 fn should_skip_skill_file(rel: &str) -> bool {
@@ -353,7 +362,12 @@ async fn main() -> anyhow::Result<()> {
             .timeout(Duration::from_millis(180000))
             .build()?;
 
-        match client.get(&tarball_url).send().await {
+        // Token por header (nunca en la URL): más cuota en codeload.
+        let mut tarball_req = client.get(&tarball_url);
+        if let Some(token) = get_github_token() {
+            tarball_req = tarball_req.bearer_auth(token);
+        }
+        match tarball_req.send().await {
             Ok(resp) if resp.status().is_success() => {
                 let bytes = resp.bytes().await?;
                 fs::write(&tarball_path, &bytes)?;
@@ -380,7 +394,7 @@ async fn main() -> anyhow::Result<()> {
                 } else {
                     // Fallback to git clone
                     let repo_dir: PathBuf = tmp_path.join("repo");
-                    let status = Command::new("git")
+                    let status = git_cmd()
                         .args([
                             "clone",
                             "--depth",
@@ -401,7 +415,7 @@ async fn main() -> anyhow::Result<()> {
             _ => {
                 // Fallback to git clone
                 let repo_dir: PathBuf = tmp_path.join("repo");
-                let status: std::process::ExitStatus = Command::new("git")
+                let status: std::process::ExitStatus = git_cmd()
                     .args([
                         "clone",
                         "--depth",

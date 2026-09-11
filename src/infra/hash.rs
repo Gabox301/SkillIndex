@@ -28,6 +28,24 @@ pub fn is_disallowed_skill_file(rel: &str) -> bool {
         .ends_with(".zip")
 }
 
+/// Normalize CRLF/CR line endings to LF for text files.
+///
+/// Binary files are returned untouched: formats like PNG/JPG legitimately
+/// contain `0x0D` bytes (e.g. the PNG magic ends in `0D 0A`) and replacing
+/// them corrupts the file (broken CRCs, unrenderable images). Detection is
+/// UTF-8 validity — text (including CRLF text) is valid UTF-8, while
+/// true binaries almost never are.
+pub fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
+    if std::str::from_utf8(data).is_err() {
+        return data.to_vec();
+    }
+    let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
+    if !s.contains('\r') {
+        return data.to_vec();
+    }
+    s.replace("\r\n", "\n").replace('\r', "\n").into_bytes()
+}
+
 /// Compute bundle hash: `sha256(sorted "rel:sha256" join "\n")` hex lower
 /// `entries` is slice of `(rel, hex_sha256)`. Rel paths are normalized `\`→`/` and sorted.
 pub fn bundle_hash(entries: &[(String, String)]) -> String {
@@ -92,6 +110,22 @@ mod tests {
         let result: Result<String, std::io::Error> =
             sha256_file(Path::new("/nonexistent/path/file.txt"));
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn normalize_line_endings_crlf_text() {
+        assert_eq!(normalize_line_endings(b"a\r\nb\r\n"), b"a\nb\n");
+        assert_eq!(normalize_line_endings(b"a\rb"), b"a\nb");
+        assert_eq!(normalize_line_endings(b"a\nb\n"), b"a\nb\n");
+    }
+
+    #[test]
+    fn normalize_line_endings_leaves_binaries_untouched() {
+        // PNG magic ends in 0D 0A; mangling it corrupts CRCs and images.
+        let png_magic: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+        assert_eq!(normalize_line_endings(png_magic), png_magic);
+        let binary: Vec<u8> = vec![0xFF, 0xD8, 0xFF, 0x0D, 0x0A, 0x00, 0x80];
+        assert_eq!(normalize_line_endings(&binary), binary);
     }
 
     #[test]

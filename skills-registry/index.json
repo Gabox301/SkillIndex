@@ -4786,7 +4786,7 @@
       "source": "better-auth/skills"
     },
     "book-to-skill": {
-      "bundleHash": "61fe198d6b300f9b1a921e047ec71b20f03f5fb0b3b7842df09ac95647612c9a",
+      "bundleHash": "439139a38ac8ae7f7c5063a39663555ab5387a002a1ca916c71987a4c2f5e217",
       "commitSha": "a6cad12dee07a7700068e2aa51cba871ef3b5349",
       "files": [
         ".gitignore",
@@ -4939,13 +4939,13 @@
         "docs/404.md": "b5dbfed0e24541d7777b19876936e4c23d9997b875d2ea46f05dbe3c5b3b7a3d",
         "docs/CNAME": "3d205d710d93abcdd83eb874cbe91d0cc71f0f1899b6fcc4aa37e4e2a761210d",
         "docs/architecture.md": "eb5dd80ccb2bdfe10ce74d0042518c8191aea6c795db66c286294e31804a6365",
-        "docs/assets/banner.webp": "3601910e50ce0d6310889596691a69f80d43fe670c79e08e738490a641d9c02c",
-        "docs/assets/booklin-casting.png": "0c220bd1b7a50065d680839e8f43981ce6b199f82db9de48fa5a6286c65036a5",
-        "docs/assets/booklin-celebrating.png": "2a33fe06890b0cf18faaab2ecc5b973a9f7b2e1c15364bb5140c58a214b28b28",
-        "docs/assets/booklin-confused.png": "7d2237ea85d184477776a1d4c0726bb0f41f23d4a33e693a340ecc69d35e0fcc",
-        "docs/assets/booklin.png": "026cfa8ec3933e651cb9aef16df3c97101fa8b4463a3c3978f9a686efb6faeb5",
-        "docs/assets/logo.png": "2b6859b583bc86bf061ffcbb53a51e46b81174053faad0ec4f59eaf07fa9fe7b",
-        "docs/assets/og-card.jpg": "1243aa12f956b2af1e23ea880fb3ab1acaafe0cec0c076ac07e9ed6564ca6d5f",
+        "docs/assets/banner.webp": "6cdd8c98e8fdef045b8ea30bc4f9e0cc126ae378a2ab34382c2d1e751a498442",
+        "docs/assets/booklin-casting.png": "2ffdf3730838ef70f7cd28a6dc8f3f3f1275bd255c71a5464f253235f2174325",
+        "docs/assets/booklin-celebrating.png": "eb7581bd016ddaca6c3b3a6e0c4392d4168a39dccc4367309c213a0c058c7722",
+        "docs/assets/booklin-confused.png": "58db975ca80bac6e225a463255ac67b53f70c6f4154170c5e65c9a46ee5e5e2b",
+        "docs/assets/booklin.png": "13177ea2011591137844ae664ac7d8069430cf0eb46f60fff1f60e6d1a53090b",
+        "docs/assets/logo.png": "c17c309ba6c28aa9130b0e02b254429d1e667ee4513ab36ae10362427bfc4f81",
+        "docs/assets/og-card.jpg": "6cc9879515ebf43ea973fc12d2673cec82f2c4b6022d7cef0bae18212b82bfb5",
         "docs/faq.md": "08e4997f291da7e8ee2eff3b41754fdfbf2f3aa9cd5b0416296ca8d490125617",
         "docs/how-it-works.md": "185397b59869d57977bd814330abac42c2deb7f8c7f485c85910bd1e3d524f9e",
         "docs/index.md": "9f1b035875026a92c56662f05cd4da3dd3f41a736f0139d44662abfd8dc115c6",
@@ -5011,7 +5011,7 @@
     },
     "branch-pr": {
       "bundleHash": "0d27715538db83861c863ede79a67c6d0d8050e5655ef4963f9f3a4bcf38063c",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -5032,8 +5032,8 @@
       "sha256": {
         "SKILL.md": "8553fdde3397c7dc1c2fda2b4ca848baf5d9185d0db65635b151755c4e627dc8"
       },
-      "skillPath": "Gabox301/SkillIndex/branch-pr",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/branch-pr",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "building-adversary-infrastructure-tracking-system": {
       "bundleHash": "7b0628ac231747da9a124a4909d67039d1686a46b2247831ea280e7f3ed0b484",
@@ -6438,8 +6438,8 @@
       "source": "Gabox301/SkillIndex"
     },
     "chained-pr": {
-      "bundleHash": "5c6e12fc72614615a7e014d1ae276c070db697516c2d2cb9416d33450ae9461a",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "7dfcc24eb58afa56588cd314639f3abb9212eea13b1e8b7a0d5100517e5b7fe8",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/chaining-details.md"
@@ -6459,11 +6459,11 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "865f2e78db039797eabfe46d80589677c1420c052ed2b993c4435b487b17e83b",
+        "SKILL.md": "0a4a031f7b16879785d94ec771a51efc695f498f0d90adda66df35ea286102ef",
         "references/chaining-details.md": "09534b2a10a6819721cbb4b08a59bcb859b2859e65bb2977c7b979a2307e10f3"
       },
-      "skillPath": "Gabox301/SkillIndex/chained-pr",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/chained-pr",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "chrome-extension-development": {
       "bundleHash": "25f14aae8bde643f63774074d3f353bc0450972f674baa475e5c20a28490ecfd",
@@ -8537,7 +8537,7 @@
     },
     "cognitive-doc-design": {
       "bundleHash": "dcf72885e97677ea5d7dd6113e018fb753050190b246a5a622ed2537bf48c687",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -8558,8 +8558,8 @@
       "sha256": {
         "SKILL.md": "80dcaeca45c35e830939ef5440ca270b147f6370e4afcb47cdab762097f8cde0"
       },
-      "skillPath": "Gabox301/SkillIndex/cognitive-doc-design",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/cognitive-doc-design",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "collecting-indicators-of-compromise": {
       "bundleHash": "d77b2b728119266cf2831bb9744aac1b1da38c15f062155531cac888deded1ac",
@@ -8707,7 +8707,7 @@
     },
     "comment-writer": {
       "bundleHash": "b66701d64f96e1e9efc7cad2f2a11d890d671907e77de89e29992faabac67b26",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -8728,8 +8728,8 @@
       "sha256": {
         "SKILL.md": "cb980612f7237b31a4afea87899275ba20f1f621ba237ecd4a3b440f0cf2e6da"
       },
-      "skillPath": "Gabox301/SkillIndex/comment-writer",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/comment-writer",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "composition-patterns": {
       "bundleHash": "c124390cc3441844903ada94cb5820b23d922f2d0ad34e01e029e410197c8a32",
@@ -21543,7 +21543,7 @@
     },
     "gentle-ai-bench": {
       "bundleHash": "0902f92ff28cc99a17785c7a764734780310b3e618786592330ac3243da7233f",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -21564,12 +21564,12 @@
       "sha256": {
         "SKILL.md": "49ac672887b4afe88b107de17edd8c4dff34bc4ada54903bcd45a68532dcc91e"
       },
-      "skillPath": "Gabox301/SkillIndex/gentle-ai-bench",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/gentle-ai-bench",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "go-testing": {
       "bundleHash": "59edcc12c0b15fc3baf8944f5391ea0fe96b60d17b0bdc09d92e68a7de81c7cb",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/examples.md"
@@ -21592,8 +21592,8 @@
         "SKILL.md": "87205f2eff2f5dad905117e0fe7545ed432b728522ee742755fd25b22b612df3",
         "references/examples.md": "4db924d33425f317d5cc0b5b8881c4015bdc0193e3c2a218939352ae85cc369e"
       },
-      "skillPath": "Gabox301/SkillIndex/go-testing",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/go-testing",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "golang-patterns": {
       "bundleHash": "5b65e73791457de85aeb17bd75297f4f848376258b01a41eb1a4de331d7b855a",
@@ -29714,10 +29714,11 @@
       "source": "Gabox301/SkillIndex"
     },
     "issue-creation": {
-      "bundleHash": "708a042679f7300558ce6b7af60cad1be7b423c469cf2bea3a449b0375566e5e",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "634f23fcb1ebde9791ee59afac99db4c1b5f5bca73e65d18c1bc2dc0c826ab0f",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
-        "SKILL.md"
+        "SKILL.md",
+        "references/delegated-workflow-actions.md"
       ],
       "review": {
         "flags": [],
@@ -29734,10 +29735,11 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "7eb9e9565d844f46bb3bd2ae82d17cda14c537ba3e84ed8424aa6a5a21088fea"
+        "SKILL.md": "99beff12891c616f6949ddbfd5192f537f5b49c9692642e5f4cfbdb6c556f2b4",
+        "references/delegated-workflow-actions.md": "8bc27e680e31cc92ed3972d9e5ebf64a711d81567247540b0222111a61383cd9"
       },
-      "skillPath": "Gabox301/SkillIndex/issue-creation",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/issue-creation",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "java-coding-standards": {
       "bundleHash": "0eb8a23043dbddfd30e0bb50118c66d60641bf4327b162c3477b9824dc319ac7",
@@ -29806,8 +29808,8 @@
       "source": "github/awesome-copilot"
     },
     "judgment-day": {
-      "bundleHash": "b71aa90c7c56d7c4e5f675539142e268dc378ecb373118439e17d959b6e0f9f7",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "e74e732983b6fa6daea66e21ed445abc736de194815c797e3c3ac87eea4adb56",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/prompts-and-formats.md"
@@ -29827,11 +29829,11 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "b3c19a7306be579451d7e395c96b5585f349a31e2b3b4eacbcb7f1eafd734b66",
+        "SKILL.md": "ac2a4fcfd762d8e3a873742f05a71287f96294f5063d740957f81b41ff8b8486",
         "references/prompts-and-formats.md": "583f50d14a7d6229056c2df49868f12cb2d44c8da0c4bf331e61973d79620de5"
       },
-      "skillPath": "Gabox301/SkillIndex/judgment-day",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/judgment-day",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "kotlin-tooling-agp9-migration": {
       "bundleHash": "34350d804b9934aecfc1b0303e5898125467f6239f195da9af34a5a41fc404ba",
@@ -38216,8 +38218,8 @@
       "source": "ombulabs/claude-code_rails-upgrade-skill"
     },
     "rdd-defect-workflow": {
-      "bundleHash": "896c5e3c435bb5aab8fd05ce3a67e6777808fe7bf3cd9b78bc4c731bad5625c0",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "18b219774dfeca11f298a0e6acd13f535ef06f397eb8a127a982e0de0e99def4",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -38236,10 +38238,10 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "7f58b4a2a248514b6b9c72ad03ab58ed09701794dad602333ed59d45c11fb1db"
+        "SKILL.md": "7dcabfdf0aee1ddc9e509107b8b58b96ec6e0b9428732f7fe621001847e2a405"
       },
-      "skillPath": "Gabox301/SkillIndex/rdd-defect-workflow",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/rdd-defect-workflow",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "react-best-practices": {
       "bundleHash": "502eb06700e2c3cb1bd7f710860528f72281320bd5171a2087b05a090b573dc1",
@@ -39852,8 +39854,8 @@
       "source": "davila7/claude-code-templates"
     },
     "sdd-apply": {
-      "bundleHash": "b47d1fe82c8ff2746f0e130fda6e71a4a665660ef6fa0a025fc9aaca4cab25c5",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "545cb06040bd1d135f08593f80b2fe14c28ec22df945e7f8f39a77e785d80e9e",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "strict-tdd.md"
@@ -39873,15 +39875,15 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "77c46b7028f964593294b966b81ac5c7aee14a5dabe1abfce01aef9d64f559e0",
+        "SKILL.md": "a8949a52033f1dd4c636a6be41085f8d1e7d8e38cee6cd6fd1f913272a7676f7",
         "strict-tdd.md": "2b0340bfa1160db7f609a4e1b6a24bbd3a1b1a8347b2b65d400865c104fdd237"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-apply",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-apply",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-archive": {
-      "bundleHash": "d814607bc6b3eea51bdc1a14cdbe67910021566173dc24c79e71dafcd9386169",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "e573c80377e864c5a948f866d1cb60fa17b5ac051cb52717e1ac233c94e60955",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -39900,14 +39902,14 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "339670ec2851dbec7680b987e58f471ac37c925997940046fea97aba1c867c0e"
+        "SKILL.md": "3e081e1bb01169a42dc5e2423185fba5cd834f421b0ac340c1c5c21b243d4954"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-archive",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-archive",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-design": {
       "bundleHash": "e77aa4dfa4f6307e996ea2c32ba47bb25c9a33068c7f1b69aee5080e8fcd0619",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/threat-matrix.md"
@@ -39930,12 +39932,12 @@
         "SKILL.md": "63548bfbbfd98783001d8073714ff3cd2bf37a269d0f2aeff8476364c8a52830",
         "references/threat-matrix.md": "77cffeb7f4c2146d77694b0b5a8baae3d57c9f048bccc9670951f4235531a5fc"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-design",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-design",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-explore": {
       "bundleHash": "8c57097aead0f49a8c19305a64a6afb59befcf8946c8eba761bf99b56b7f1666",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -39956,12 +39958,12 @@
       "sha256": {
         "SKILL.md": "6bc9385cbdbaf0da7515fb25967ad5835e85ec57534781e614b773c4fce23b0a"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-explore",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-explore",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-init": {
-      "bundleHash": "40d09a69bea00e4ce106ede1beb6749e4eaf460e96a7f356fd2838f82414e793",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "2318ee7e2b0b8da2c9501cb9537e90450f8b3be8d38deb1fd832c9cd3e8e575f",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/init-details.md"
@@ -39981,15 +39983,15 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "f38e88d79dc1e42e3dcf04596e61921060098025ba49aeb64f6bde24a22e5406",
-        "references/init-details.md": "496875386f1ddaf1e44db4a484a396a22e28f92c0a4e0c6d9055541a59d87a34"
+        "SKILL.md": "6de008c41fa2cdc6ba71dcd5ca8a7f7810c0b566c06f336d86573138e0917701",
+        "references/init-details.md": "c983a29a6b07d487bb10fa5e9104a8e1ff91501ff31e563235ba58fdee32f06f"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-init",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-init",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-onboard": {
       "bundleHash": "a5303b789b5c8788caba28a06df1a2eb959562b78b6d0e68d8d6791ee2d57973",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -40010,12 +40012,12 @@
       "sha256": {
         "SKILL.md": "5fa7ed85bf8890a02bdb462e2bc11153f4b8382fe862bbf9464ff47182887072"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-onboard",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-onboard",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-propose": {
-      "bundleHash": "c25d19312721fc9ff50a223a33283cfb0670b50a6aa469e4ac7df9f8b20dfa2a",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "945665e836f083b81b327826eeb427135a90d2b4c2bf4bc57f492301f3a79656",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -40034,14 +40036,14 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "c0fbe5b70204c964a626eb4c129a33e13a49bf7e3eea0773adeed287ab79ffe5"
+        "SKILL.md": "3c4a2462669419c94b710b23f177b1fca4b6a61222a61916841ca5ca385ea059"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-propose",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-propose",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-spec": {
-      "bundleHash": "dc21bd009fc91210051a865d929f4dd25ddf6553f40dcb9fd2e62c125a67991d",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "25c5c26282002801afb2d75c13daabb81c6b9a3129af957228b5a9b7cd746867",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -40060,14 +40062,14 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "cdb91ee1876a0dc92e96b7239fb3f36bc6bf784807dfc1ed4a1d3b207778618f"
+        "SKILL.md": "cf2980e524146130661e28e1a79a69aff66796cfad134d7e58a5e7d9e7b4b993"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-spec",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-spec",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-tasks": {
-      "bundleHash": "93ca01eacbf7fcbe7ea28a7001dba7722ecc808fa7bc734595560feee570b3ef",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "f236e3e91c23487cdd7b0d2159ec97a6ea6e1d3b5b380aea4ee2a3ca6cd495f3",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -40086,14 +40088,14 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "71bb611eae38382864d04f11ea037737989eb7b88d459f2e4322f77545098561"
+        "SKILL.md": "85070b06d28f966a3dc48e2f7adc3b46691e9f706fece40512d90ad92b2dd895"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-tasks",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-tasks",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sdd-verify": {
-      "bundleHash": "1fa7104c04cd50d6bb21e0e615294dcfd5c08c3623b0c57976fc79a19eec1ab4",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "5c6301ce700fd06617cf1b97e40fe6b0379f8d4217b843114576fd05298c32fd",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/report-format.md",
@@ -40114,12 +40116,12 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "e561be39cf87c58e15521b72c9ec9647c8715812bf012f5db1cc7924ac0d1c45",
-        "references/report-format.md": "3d95596c7f04144107caf2dfda5f9735ffddec505cadec60306711b3e8a24053",
-        "strict-tdd-verify.md": "becb50da4841aae5f6b157462efbfcd4f20332c0c054c82a55970450be8e649c"
+        "SKILL.md": "90100333061193bfa4f3bcc3cbf3bd004204a3db239ada778c16a4a3d75448a3",
+        "references/report-format.md": "d00142ab9ccc206c544a9b1476f4ca1ce870ce3d14069e59636f3883c36fb5d6",
+        "strict-tdd-verify.md": "7024d43a3a6f2ad1b1005c24b4555196213cd9d1aceb59a00136bf3f54b31e73"
       },
-      "skillPath": "Gabox301/SkillIndex/sdd-verify",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/sdd-verify",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "securing-agentic-ai-tool-invocation": {
       "bundleHash": "0072913f85afe252326b7c7f9533e5952c47d87fcf393df2d0c5a1c57d279b6d",
@@ -40723,7 +40725,7 @@
     },
     "skill-creator": {
       "bundleHash": "07ad01fd87472a8c77d4cfa7c9fcf943fc0f94dc8b0f012f556aa6751edc9abe",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/skill-style-guide.md"
@@ -40746,12 +40748,12 @@
         "SKILL.md": "2e560aec25d3e6f880626b894333c141c7dd98e6a0f3c35af9693b6e8538f357",
         "references/skill-style-guide.md": "64debd903403a73fe42a953100c17378aceb9c10061bec252c5515499f12f5fa"
       },
-      "skillPath": "Gabox301/SkillIndex/skill-creator",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/skill-creator",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "skill-improver": {
       "bundleHash": "bf2323446ce25d214d38437e91c4701152fd9aa2e4ce975259c79e51432f9423",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md",
         "references/skill-style-guide.md"
@@ -40774,12 +40776,12 @@
         "SKILL.md": "4b71aa7f242259a3e4ef8f5c87c591e154b2fe1ef5277c9d7428ba2fa678a151",
         "references/skill-style-guide.md": "64debd903403a73fe42a953100c17378aceb9c10061bec252c5515499f12f5fa"
       },
-      "skillPath": "Gabox301/SkillIndex/skill-improver",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/skill-improver",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "skill-registry": {
       "bundleHash": "3d9064750f41aa6a8a42c2d6a4279ada73da17a05b148d941a8f7690280a629b",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -40800,8 +40802,8 @@
       "sha256": {
         "SKILL.md": "06b49f63bd311218618d79cbdaeed63f49c5853fda552ffe2c3e81e42e94f189"
       },
-      "skillPath": "Gabox301/SkillIndex/skill-registry",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/skill-registry",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "sqlalchemy": {
       "bundleHash": "d496cb0646b6a5e9c274bd6c2ddd0203f592680fcd0e18f72c6605da82593dac",
@@ -41323,7 +41325,7 @@
     },
     "systemic-issue-triage": {
       "bundleHash": "90e24a778a5b65a0250836896f6a01e9133b42f9e263ef23c7cada5c3cc4a225",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -41344,8 +41346,8 @@
       "sha256": {
         "SKILL.md": "d0562fa1e2f8cee55222a208878821936922e0ac5d8702c204ae53aa0963f014"
       },
-      "skillPath": "Gabox301/SkillIndex/systemic-issue-triage",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/systemic-issue-triage",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "tailwind-css-patterns": {
       "bundleHash": "8fd534b64b3f305ade80c207e2f9ba4338d5e409e355af9f724c36764b6709c1",
@@ -44068,8 +44070,8 @@
       "source": "wordpress/agent-skills"
     },
     "work-unit-commits": {
-      "bundleHash": "27d40d4647f2c7b034422fcf347f34493e227ca1954424793cbe128718ec41c4",
-      "commitSha": "0000000000000000000000000000000000000000",
+      "bundleHash": "d3db8721dc9bb3584687a9ffc7ab7db0345be78d9e165453a89bd80a91480f69",
+      "commitSha": "b0fe284b9758159f392ad305645359ab6b4f3df2",
       "files": [
         "SKILL.md"
       ],
@@ -44088,10 +44090,10 @@
         "summary": "review skipped (--no-review)"
       },
       "sha256": {
-        "SKILL.md": "9b4e9914d612ea11c86747d3fcd4e42bc7ef5cc5e6ab9179c3de7148b015c4ac"
+        "SKILL.md": "f4aef73aaece708ea6fa76a1662cf1122474bfc1d4c98c005129fc81bd6e0c6c"
       },
-      "skillPath": "Gabox301/SkillIndex/work-unit-commits",
-      "source": "Gabox301/SkillIndex"
+      "skillPath": "Gentleman-Programming/gentle-ai/work-unit-commits",
+      "source": "Gentleman-Programming/gentle-ai"
     },
     "workers-best-practices": {
       "bundleHash": "9661260d852b07de738dd870fc92606b2a44c091b0e5c0df785ae097c26dc382",
@@ -44650,6 +44652,900 @@
       },
       "skillPath": "zanwei/design-dna/design-dna",
       "source": "zanwei/design-dna"
+    },
+    "ask-matt": {
+      "bundleHash": "3685e7605d1cb887f99a54af8bbd375ba8b48496fa9ee7b936a2fb2689d5f4f7",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "PHASE-BOUNDARIES.md",
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "PHASE-BOUNDARIES.md": "a8aa20158609ef39e2b308b6ba0660c91066838d07a867202e63a7744a88a3ed",
+        "SKILL.md": "b25d86fb36b1d294eeead5d7db529f86135f9671f2afcd607579a63bb2213769",
+        "agents/openai.yaml": "bdffbc5a0a99ed1b6ef3253d251d755fd18162b9845972e380007f844b09b05c"
+      },
+      "skillPath": "mattpocock/skills/ask-matt",
+      "source": "mattpocock/skills"
+    },
+    "claude-handoff": {
+      "bundleHash": "ebf080ee990cfe6df3ef49fe958aaad8ca4b7a1f81eeb6628a398a9c6b0c7a7e",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "6738e8b7c7899ea0038fb7a5c859ca1b90c7b1eb40123dcdbe94c51b5b119f12",
+        "agents/openai.yaml": "2308a672978864633286fb9f0792b08657e501426b3f7883fc418d5d2eac5eb0"
+      },
+      "skillPath": "mattpocock/skills/claude-handoff",
+      "source": "mattpocock/skills"
+    },
+    "code-review": {
+      "bundleHash": "ad3fee749a5531788b734268a5242866fe6a9de532a37ca70820dc70e152c9f7",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "47f4e52c21694def9c7c11cbfbf891ca35eac7a93e395797515be3c8a409ae50",
+        "agents/openai.yaml": "8229ca854e11dc8e6aef2131ee03f31fb1561cf905fab9ccc325180cf3331352"
+      },
+      "skillPath": "mattpocock/skills/code-review",
+      "source": "mattpocock/skills"
+    },
+    "codebase-design": {
+      "bundleHash": "9f339bea418cc3ca778ba6a04f3198a761484edf7124782925efa84733d17ad7",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "DEEPENING.md",
+        "DESIGN-IT-TWICE.md",
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "DEEPENING.md": "f3dd099ce99289bd213914d8ee3e2429b78309c3957ca4583f7659551b1d53c1",
+        "DESIGN-IT-TWICE.md": "8e740bf98446dbd4dfdc132ac4346d9a7eedaf93de6a495889171cf7f99f16bd",
+        "SKILL.md": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2",
+        "agents/openai.yaml": "edebc9e4fcfe102114012575eaa9600b9b5fd08c311664f389c36e7bc717740f"
+      },
+      "skillPath": "mattpocock/skills/codebase-design",
+      "source": "mattpocock/skills"
+    },
+    "diagnosing-bugs": {
+      "bundleHash": "19281b3faba6036ac94d75f6b5a344cc3683b3d6f0728c9ae7ac40c571f96804",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "scripts/hitl-loop.template.sh"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84",
+        "agents/openai.yaml": "3e430dbe4334a87597488c060cb3dc3786bb00c9182877d6f5ec41f62490e90b",
+        "scripts/hitl-loop.template.sh": "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503"
+      },
+      "skillPath": "mattpocock/skills/diagnosing-bugs",
+      "source": "mattpocock/skills"
+    },
+    "domain-modeling": {
+      "bundleHash": "332162fd958dd0b58a554eac5f54ad22bc99340df645abb14ef06ffb6511c71d",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "ADR-FORMAT.md",
+        "CONTEXT-FORMAT.md",
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "ADR-FORMAT.md": "944c92aa790e8fbdc9199640b170979abb8a34ba8d0fe18c2a01a63bce140ca0",
+        "CONTEXT-FORMAT.md": "17ab16ce783e4d2801ee52fd9acdf550cbf44de65ae76797a93943bbedf22a13",
+        "SKILL.md": "327a2b50620e2fd70abc6893cd6965e76b20f8d0adb0dc2c8d5eb3845efb643e",
+        "agents/openai.yaml": "f6bf2aa996c6e6f53fdd0708e18a0d16a56aed8322cca59fedbe3c0d2c75f06b"
+      },
+      "skillPath": "mattpocock/skills/domain-modeling",
+      "source": "mattpocock/skills"
+    },
+    "git-guardrails-claude-code": {
+      "bundleHash": "d63986492b630c71011c8a95aacef52308a0e9e3ba879cffeb22f2f327738aa7",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "scripts/block-dangerous-git.sh"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "69b291d655626a01602b998a1836fcb93c058ede68dfafddfd71e87f17074764",
+        "agents/openai.yaml": "d53cd783fc0ac208dec9a4c267989284384785aab6422dccdaed42f9e40243ec",
+        "scripts/block-dangerous-git.sh": "234922b83c0a1737ee7300806c21ac0f389b07aaeb65c2d71ccedafbc5e1ea4b"
+      },
+      "skillPath": "mattpocock/skills/git-guardrails-claude-code",
+      "source": "mattpocock/skills"
+    },
+    "handoff": {
+      "bundleHash": "4db7d25dd9b1f1ffe280ad4677b01127093e9baa6b0d39442f23b0ca6d776c80",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "7c62de979fdc7ac32fb5ddb2146156c917f80ee070d30fadc9d40343c4b6ed25",
+        "agents/openai.yaml": "5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28"
+      },
+      "skillPath": "mattpocock/skills/handoff",
+      "source": "mattpocock/skills"
+    },
+    "implement": {
+      "bundleHash": "ad6961b6a3d3c121687f6e1ae8ca88a06a9793b5a267437e9a6e3ce97baf2b9e",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "6d3fd9e83b8f36e5213854779db49b256a457a7ebb4a503e53fa7dcff696adc3",
+        "agents/openai.yaml": "8970a8596ade0c28ab427f41a4ea242d6bdf6186c59ebf55e1238dbecaab79dc"
+      },
+      "skillPath": "mattpocock/skills/implement",
+      "source": "mattpocock/skills"
+    },
+    "implement-spec": {
+      "bundleHash": "ab7dfc34eba7228d9dacc0af2734a2ee9eb4934516f044b9600cb1f0c4181d3d",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "f703b5f41df9c2202e19540d203e0d5fc32613572a838a070136cc22e712b129",
+        "agents/openai.yaml": "d457ae78ff282b8798380b0c2e393c9798bc2bf5ee7dfe9ca31607714c6cd7d3"
+      },
+      "skillPath": "mattpocock/skills/implement-spec",
+      "source": "mattpocock/skills"
+    },
+    "loop-me": {
+      "bundleHash": "bad4875102d5681d77380a2354bdf4af5edf0a0b932f6ec1a3e33a1096541685",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "e44d1cc3e760fb86ac42964c2a5f1fcac511715db50fb375f3f7be814de1eaa7",
+        "agents/openai.yaml": "b66fa10079957051be6a812f45e55b67ac394b71d5ba88349962b4c9205802c3"
+      },
+      "skillPath": "mattpocock/skills/loop-me",
+      "source": "mattpocock/skills"
+    },
+    "migrate-to-shoehorn": {
+      "bundleHash": "c280508dae915aabd743a81417ae44ed00d0430530612afcf83689f7ea0f4eee",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "de4da4c11d924fac79c924b2ee3d2db4a5cb98386eb490a599119463d036ae72",
+        "agents/openai.yaml": "395c2db852e66a199f1cd07f7ed92d66cb6f0787460c5475926f1a5e778b699d"
+      },
+      "skillPath": "mattpocock/skills/migrate-to-shoehorn",
+      "source": "mattpocock/skills"
+    },
+    "prototype": {
+      "bundleHash": "d648711c9150168529fa40d6164663959ccbbff945a4b51e40ca55b9b4c8d364",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "LOGIC.md",
+        "SKILL.md",
+        "UI.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "LOGIC.md": "f61c7d249e786a79ef289018901c348271e1798dd0b0bc5607b5c6f4d4a01ab9",
+        "SKILL.md": "714de632d116bb73f65cdb5a882db15b9369a6713b9a47c0fad827848f0bfbe3",
+        "UI.md": "723211e878acbc7b6ff09755263f3295cde724ba902ff0064da41eed51d45ad3",
+        "agents/openai.yaml": "5af65e43ab41a350436697b81e27b7f848d36782043b73c322bb2c9fa9cc55dc"
+      },
+      "skillPath": "mattpocock/skills/prototype",
+      "source": "mattpocock/skills"
+    },
+    "research": {
+      "bundleHash": "4901b4aa7395f225dcd2573ae43a8102248784c8372a76d0978724b4f406cfe5",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4",
+        "agents/openai.yaml": "9b4c470d63221c1f68f22df70b83e2f12401b317babe0d1b7b5f24a974474d0d"
+      },
+      "skillPath": "mattpocock/skills/research",
+      "source": "mattpocock/skills"
+    },
+    "resolving-merge-conflicts": {
+      "bundleHash": "362d2417807722f4f97df174c6d0ce82c8335255626e99580c7befd5b7562982",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "9d8114f8ef0b31f535a265fc05c364bd8cf2e2895a830040e06c22acb11f54b0",
+        "agents/openai.yaml": "a1f4f96838f2ed6282eb28abbbf99029cb8fadce552baf53da90a025b8bffddf"
+      },
+      "skillPath": "mattpocock/skills/resolving-merge-conflicts",
+      "source": "mattpocock/skills"
+    },
+    "retro": {
+      "bundleHash": "06ee3ab479b77102ddd6215dedae9ac31172b904cbd060dcafc039e013491d14",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "264f3330f1e2382af89610ed048ba0ed6d08883eb69f596a8f1df3f1e1a4c6a1",
+        "agents/openai.yaml": "cb6fb9d7e6b4be5975f41f6def1dd00a1255bad5d9b02696b124c924a8b8745c"
+      },
+      "skillPath": "mattpocock/skills/retro",
+      "source": "mattpocock/skills"
+    },
+    "scaffold-exercises": {
+      "bundleHash": "9fde772057be758e3933dba774387a70df8cb1179a13d280c95219a3daf10b86",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "75f5c9d771606fb9762f16522efc954df11c324f87148d8ff069bce166257de9",
+        "agents/openai.yaml": "525b33913340bea7947ad2de17f2a7c5fb94be543345fe80ae753b9a44ba601d"
+      },
+      "skillPath": "mattpocock/skills/scaffold-exercises",
+      "source": "mattpocock/skills"
+    },
+    "setup-pre-commit": {
+      "bundleHash": "ee9dc9efbb2c3e954c4fcf99ab881e8d30bcd3c651251f299caebfa0890d1751",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "c9819d7f1e3b198064edc1faa3154224ed67395e9f07f5d3cea4b67cf0a11a98",
+        "agents/openai.yaml": "acf41db398c5c43afe504008bb7d615a97b6498b0f1f6c5b2395254c0bfb57d1"
+      },
+      "skillPath": "mattpocock/skills/setup-pre-commit",
+      "source": "mattpocock/skills"
+    },
+    "setup-ts-deep-modules": {
+      "bundleHash": "174eb118b664d6a245dd24b5b3a11ba97d9cff2fcd17fca4d92beb5c4ac9554e",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "dependency-cruiser.config.cjs"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "29acca66ac99d4532e2a6f0370d8125d7cba1e87c9ac66573203c75189d3e6c7",
+        "agents/openai.yaml": "159f680217d50747702620c05fd65734a152185b3219a8ca5ee4630878a354fa",
+        "dependency-cruiser.config.cjs": "3c4973bec69f73b2117654abf9e666a7c28665b213be20e6d39869e29842428e"
+      },
+      "skillPath": "mattpocock/skills/setup-ts-deep-modules",
+      "source": "mattpocock/skills"
+    },
+    "to-questionnaire": {
+      "bundleHash": "bd385e3870d07f994944fb0e215b167884e350f7d402cb082ce332217994f866",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "b5eb929842ee0e93d867c5e906d183d350f2f2d149eaeaa86967d94d8eda1d3b",
+        "agents/openai.yaml": "9e8a06c38c8842eea8d4922cb9d1ead8e3ace647bab259b943c994a1b4742bc2"
+      },
+      "skillPath": "mattpocock/skills/to-questionnaire",
+      "source": "mattpocock/skills"
+    },
+    "to-spec": {
+      "bundleHash": "335956a6cf92a83479f3e1f835979b86ea970f4114c7d8316d2cda64a8f32fb3",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "43ad9cf318e5e7d3d1fa360253a37021796dc87a0c2e595ad262661a10f85088",
+        "agents/openai.yaml": "1c5b4d1e3d8e52287ef19cc2742fdbbfae1914ac75d33af3e4c8174f08cc55bb"
+      },
+      "skillPath": "mattpocock/skills/to-spec",
+      "source": "mattpocock/skills"
+    },
+    "to-tickets": {
+      "bundleHash": "005dab60e7552f79ff17e173c99e2cb0cc9e8f269726b85d759be614a6e2384d",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "5c9fba69845c2519b9b35b9af42ae5142c21f8ca15ac2123dc2722002c8058ae",
+        "agents/openai.yaml": "21bc6215fffcd7614e9f772bb1760e87cc5fc7dcc707e7d282bc9414267a6090"
+      },
+      "skillPath": "mattpocock/skills/to-tickets",
+      "source": "mattpocock/skills"
+    },
+    "triage": {
+      "bundleHash": "96259fbd638f8154d171ffdf50094817e9dcafca5a0e81688f049f2420c8989d",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "AGENT-BRIEF.md",
+        "OUT-OF-SCOPE.md",
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "AGENT-BRIEF.md": "7f5f87fed3033df1b06e083c480f3e847b1fbb0647746b8a4c6a50f9f26ef44f",
+        "OUT-OF-SCOPE.md": "1fbf9b432130c6380aa65813b55553cfda150309b27c595e183f8e335b8a190d",
+        "SKILL.md": "623a2ed692bdc77d2090e2a3dea3b627dd722ad3bbaca0be83aada75292c8fc4",
+        "agents/openai.yaml": "2e683717720cf456d165d0bb1a68bb600d0b6a8ccb61841c172e50d26f95351c"
+      },
+      "skillPath": "mattpocock/skills/triage",
+      "source": "mattpocock/skills"
+    },
+    "wait-what": {
+      "bundleHash": "615598316a63b65fc941355fb530012de3a0108d456fd7b990e01a3845d5635e",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "e3f44e3ccbc0e7b62f20ba70b295fc9c9f4aa3f96c77168faee1c71bacbf4215",
+        "agents/openai.yaml": "b41faadf741d51e4ea184148b2d1854d93f947aaf754c7844f70a00f04194999"
+      },
+      "skillPath": "mattpocock/skills/wait-what",
+      "source": "mattpocock/skills"
+    },
+    "wayfinder": {
+      "bundleHash": "89437327fda90d5c7f9379dc7e82ab2a183462422bd342ae6654d3c2e12c5f59",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "fee6e1d0c50f0e736b4ef8a599060c959afae904c9a97d82c97f049fcc3aa0f1",
+        "agents/openai.yaml": "88bc81a11a6d52ac67aeaa76b8b619e387020d47c5133a4dd4927fd15c4ad073"
+      },
+      "skillPath": "mattpocock/skills/wayfinder",
+      "source": "mattpocock/skills"
+    },
+    "wizard": {
+      "bundleHash": "bbe763b758f7a4227241a9461559f6669f128471894fb6e2e75332c8a770d789",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "template.sh"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "bdf31d48211ea559878f95a4f344aeabf8d85897488ba564382bab0b000daac1",
+        "agents/openai.yaml": "98f44d682d58e262f160dc59a8befc365e0aa65820dd0261864af26aa8e59d83",
+        "template.sh": "33cbe9dfb1d0e9185b60248a52aabed14bc64785a00cac695e302e739dd6c153"
+      },
+      "skillPath": "mattpocock/skills/wizard",
+      "source": "mattpocock/skills"
+    },
+    "writing-beats": {
+      "bundleHash": "fb52957e2dd534083968d7d5d91b41ac5ee2736df03cc4ef1e3618d5a3a81b59",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "a96abafa2372eede8267d770138b322d6125da8adaa7ccf0a5e08e4ee13ee71e",
+        "agents/openai.yaml": "ddaef01da61d8e3c5f482c4403033c20cf5823f08a1dbf1d4c871670831d01e2"
+      },
+      "skillPath": "mattpocock/skills/writing-beats",
+      "source": "mattpocock/skills"
+    },
+    "writing-for-agents": {
+      "bundleHash": "28baa051daa22fd93b4cd18050887aba8c5f2439d7e2539ab4fa44d0ed5bb43b",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL-MECHANICS.md",
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL-MECHANICS.md": "c768e6307c7c10728c401c213f2c4ba71c542127eeb7ad2956aabd15a0fa0059",
+        "SKILL.md": "551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a",
+        "agents/openai.yaml": "eacb24b2a618cfb81dacb0416f4fdd75ddf3a8060f8ddb99aae1b1e301907e4b"
+      },
+      "skillPath": "mattpocock/skills/writing-for-agents",
+      "source": "mattpocock/skills"
+    },
+    "writing-fragments": {
+      "bundleHash": "d1168e990e05afe432d4529f13601b1d0265891aee2b5f7cabf41363a4805340",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "298b0edd23df229183630de592ed8aa4289233560f2040691f6eb77caeaad4ea",
+        "agents/openai.yaml": "81167f25ee8ea1bb4b4958f12b6702ea972ad31b05e03ec91e39fa4bae0c2641"
+      },
+      "skillPath": "mattpocock/skills/writing-fragments",
+      "source": "mattpocock/skills"
+    },
+    "writing-shape": {
+      "bundleHash": "75ca70756b18797d90b165dbe405721c13d0a260a4198b44bc5d64453c90b51d",
+      "commitSha": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ],
+      "review": {
+        "flags": [],
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:38:05.787Z",
+        "status": "approved",
+        "summary": "review skipped (auditor removed)"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-09-10T23:38:05.787Z",
+        "findings": [],
+        "status": "ok",
+        "summary": "review skipped (auditor removed)"
+      },
+      "sha256": {
+        "SKILL.md": "f5e6c57bdd85178ace4a260c92f46da6b64ddee18215b461d875739c68976f72",
+        "agents/openai.yaml": "56de45430e23104ff178415f5ecf7821d51a9cfabd8814b1607ebf39da2ef5cd"
+      },
+      "skillPath": "mattpocock/skills/writing-shape",
+      "source": "mattpocock/skills"
+    },
+    "convert-documents-to-markdown": {
+      "source": "firecrawl/anydoc",
+      "skillPath": "firecrawl/anydoc/convert-documents-to-markdown",
+      "commitSha": "261fc257d17c3eab0f673be31c408fd9fdc2171a",
+      "files": [
+        "SKILL.md"
+      ],
+      "sha256": {
+        "SKILL.md": "04cc0f3587ec792c83e4af942f88594205f360cddd540a3d869e28c58292bc6a"
+      },
+      "bundleHash": "43e4d3d51308d3e2ef38ce5b7b022acbaf69b7ac5aae81d7144281adfc64f94f",
+      "review": {
+        "status": "approved",
+        "flags": [],
+        "summary": "review skipped (auditor removed)",
+        "model": "gpt-5.4",
+        "promptVersion": "1.0.0",
+        "reviewedAt": "2026-09-10T23:57:42.832Z"
+      },
+      "securityCheck": {
+        "status": "ok",
+        "findings": [],
+        "summary": "review skipped (auditor removed)",
+        "checkedAt": "2026-09-10T23:57:42.832Z"
+      }
     }
   },
   "version": 1

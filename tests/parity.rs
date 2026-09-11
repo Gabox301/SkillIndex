@@ -468,9 +468,12 @@ fn parity_installer_encode_spaces() {
 #[test]
 fn parity_registry_base_urls_default() {
     let urls: Vec<String> = get_registry_raw_base_urls(None);
-    assert_eq!(urls.len(), 2);
-    assert!(urls[0].contains("/v"));
-    assert!(urls[1].ends_with("/main/skills-registry"));
+    assert_eq!(urls.len(), 4);
+    assert!(urls[0].starts_with("https://cdn.jsdelivr.net/gh/"));
+    assert!(urls[0].contains("@v"));
+    assert!(urls[1].contains("/v"));
+    assert!(urls[2].ends_with("@main/skills-registry"));
+    assert!(urls[3].ends_with("/main/skills-registry"));
 }
 
 #[test]

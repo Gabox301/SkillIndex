@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# GITHUB_TOKEN / secrets.GITHUB_TOKEN es automático: GitHub lo genera
+# en cada corrida, no hay que crearlo en Settings. Solo necesita lectura
+# (cuota autenticada para el sync) y muere al terminar el job.
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-22.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Tests
+        run: cargo test --manifest-path Cargo.toml
+      - name: Validate registry
+        run: cargo run --bin validate-registry
+      - name: Sync dry-run (detecta drift con upstreams)
+        run: cargo run --bin sync-skills -- --dry-run
+
+  node:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bun run check
+      - name: Lint
+        run: bun run lint
+      - name: Build
+        run: bun run build

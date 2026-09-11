@@ -96,6 +96,14 @@ Si `claude-code` es autodetectado o se pasa con `-a`, `skillindex` escribe un ar
 | `-v`, `--verbose` | Muestra traza de instalación y detalles de errores                                       |
 | `-h`, `--help`    | Muestra la ayuda                                                                         |
 
+### Variables de entorno
+
+| Variable                              | Descripción                                                                                                                   |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN` / `GH_TOKEN`           | Token para GitHub: sube la cuota en `raw.githubusercontent.com`, tarballs y `git` del sync. Nunca se envía a jsDelivr ni a otros hosts. |
+| `SKILLINDEX_REGISTRY_BASE_URL`        | Override de la URL base del registry (por defecto jsDelivr → GitHub raw).                                                     |
+| `SKILLINDEX_CACHE_DIR`                | Directorio de caché de skills descargadas.                                                                                    |
+
 ## Agentes soportados
 
 Detecta automáticamente los agentes configurados **en tu proyecto** (`<project>/.claude`, `.cursor`, `.opencode`, etc.) y te permite elegir dónde instalar:

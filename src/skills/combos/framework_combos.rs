@@ -183,4 +183,13 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         requires: &["rails", "sidekiq"],
         skills: &[],
     },
+    ComboSkill {
+        id: "nextjs-vercel",
+        name: "Next.js + Vercel",
+        requires: &["nextjs"],
+        skills: &[
+            "Gabox301/SkillIndex/vercel-react-best-practices",
+            "Gabox301/SkillIndex/web-design-guidelines",
+        ],
+    },
 ];

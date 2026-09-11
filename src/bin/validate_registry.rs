@@ -2,17 +2,9 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
 
-use skillindex::infra::hash::sha256_buffer;
+use skillindex::infra::hash::{normalize_line_endings, sha256_buffer};
 use skillindex::registry::parse_skill_path;
 use skillindex::skills::{COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP};
-
-fn normalize_line_endings(data: &[u8]) -> Vec<u8> {
-    let s: std::borrow::Cow<'_, str> = String::from_utf8_lossy(data);
-    if !s.contains('\r') {
-        return data.to_vec();
-    }
-    s.replace("\r\n", "\n").replace('\r', "\n").into_bytes()
-}
 
 fn main() -> anyhow::Result<()> {
     let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));

@@ -1,25 +1,34 @@
-pub mod agent_workflows;
+pub mod anydoc;
 pub mod archify;
 pub mod book_to_skill;
+pub mod copywriting;
 pub mod design_dna;
+pub mod find_skills;
+pub mod gentleman_programming;
+pub mod graphify;
 pub mod matt_pocock;
-pub mod sdd_workflow;
 pub mod taste_skill;
 
-pub use agent_workflows::AGENT_WORKFLOWS;
+pub use anydoc::ANYDOC;
 pub use archify::ARCHIFY;
 pub use book_to_skill::BOOK_TO_SKILL;
+pub use copywriting::COPYWRITING;
 pub use design_dna::DESIGN_DNA;
+pub use find_skills::FIND_SKILLS;
+pub use gentleman_programming::GENTLEMAN_PROGRAMMING;
+pub use graphify::GRAPHIFY;
 pub use matt_pocock::MATTPOCOCK_SKILLS;
-pub use sdd_workflow::SDD_WORKFLOW;
 pub use taste_skill::TASTE_SKILL;
 
 pub const DOMAINS: &[crate::skills::types::Technology] = &[
-    AGENT_WORKFLOWS,
+    ANYDOC,
     ARCHIFY,
     BOOK_TO_SKILL,
+    COPYWRITING,
     DESIGN_DNA,
+    FIND_SKILLS,
+    GENTLEMAN_PROGRAMMING,
+    GRAPHIFY,
     MATTPOCOCK_SKILLS,
-    SDD_WORKFLOW,
     TASTE_SKILL,
 ];

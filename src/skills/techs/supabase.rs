@@ -11,5 +11,8 @@ pub const SUPABASE_TECH: Technology = Technology {
         gems: &[],
         config_file_content: &[],
     },
-    skills: &["supabase/agent-skills/supabase-postgres-best-practices"],
+    skills: &[
+        "supabase/agent-skills/supabase-postgres-best-practices",
+        "Gabox301/SkillIndex/supabase",
+    ],
 };

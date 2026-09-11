@@ -1,3 +1,4 @@
+<!-- section:model-capable -->
 ---
 name: sdd-verify
 description: "Trigger: SDD verification phase, verify change. Execute tests and prove implementation matches specs, design, and tasks."
@@ -40,27 +41,22 @@ The orchestrator should provide structured status from `skills/_shared/sdd-statu
 - Compare specs first, design second, task completion third.
 - Do not fix issues; report them for the orchestrator/user.
 - Build the complete report as exact candidate bytes, then run `gentle-ai sdd-verify-validate` with authoritative spec counts before any OpenSpec or Engram write. If the validator is unavailable or denies admission, make zero writes and leave the prior report untouched; otherwise persist the same bytes, including a valid `fail`.
+- The report's first non-empty line must be ```` ```yaml ```` (```` ```yml ```` and any letter case are admitted) and the envelope closes with ```` ``` ````; a leading UTF-8 BOM is tolerated, but front matter, `~~~` fences, untagged fences, and any content before the fence are refused.
 - Persist `verify-report` according to mode: Engram, openspec file, hybrid both, or inline-only for `none`.
 - For the final OpenSpec `verify` work unit, persist the canonical passing `openspec/changes/{change}/verify-report.md` before settlement. Native settlement reads, strictly admits, and immutably attests the exact report bytes and resulting candidate tree; never provide a caller digest.
 - If Strict TDD is active, load `strict-tdd-verify.md` from this skill directory; if inactive, never load it.
+- Apply any `rules.verify` from `openspec/config.yaml`
 - Return the Section D envelope from `../_shared/sdd-phase-common.md`.
 - Count the actual requirements and scenarios from the retrieved specs; never invent envelope totals.
+- Native status counts only `### Requirement:` / `### REQ-<n>:` and `#### Scenario:` headings. If the envelope totals differ from that count, status keeps `verify: ready` and names the mismatch in `blockedReasons`; fix the totals and re-verify instead of re-validating the same envelope.
 - Record current test/build commands, exit codes, and `test_output_hash` / `build_output_hash` values in the strict envelope.
 - Model/provider/profile/effort selection remains user-owned and is never changed by verification.
 - This is the one independent requirements/runtime final verification. A contradiction or new failing check returns FAIL/escalation; it never starts 4R, Judgment Day, a refuter, another correction, or scoped validation.
-- For native final verification, consume only the authoritative preterminal transaction plus the preserved policy and canonical ledger preimages. Do not require `receipt.json`, `chain-bundle.json`, `gate-context.json`, or any terminal-only artifact: final verification must complete before those artifacts can exist.
-- Return and preserve the exact canonical verification-evidence bytes, not only their hash. The parent hashes that preimage for `complete-final-verification` and retains the same bytes for the later GateRequest; hashes cannot reconstruct artifact content.
-- If authoritative preflight alone denies verification because review authority is missing, persist a failed strict envelope with the five fields below. Both declared commands must not be executed: record exit `125` for each, hash their exact empty output, and bind the observed authority revision from that preflight. Do not use this envelope for substantive failures or command failures.
-
-```yaml
-authority_only_failure: true
-missing_review_authority: true
-substantive_failure: false
-command_failed: false
-observed_authority_revision: sha256:{observed-authority-revision}
-test_exit_code: 125
-build_exit_code: 125
-```
+- Review state is informational and never a verification prerequisite.
+- A missing, pending, invalid, or non-allow review state never suppresses tests or builds.
+- Native review artifacts, when present, are review-context evidence only. Do not require a transaction, policy, ledger, receipt, bundle, or gate-context artifact to begin or complete independent SDD verification.
+- Exit `125` is reserved for an actual verification prerequisite or unavailable verification tooling, never missing review authority.
+- Return ordinary verification evidence with the result. Terminal reviewer closure is capture-owned and informational; it is never a verification completion prerequisite.
 
 ## Decision Gates
 
@@ -106,3 +102,64 @@ Return `## Verification Report` with change, mode, completeness table, build/tes
 - [references/report-format.md](references/report-format.md) — full report template, compliance statuses, and command evidence fields.
 - [strict-tdd-verify.md](strict-tdd-verify.md) — load only when Strict TDD is active.
 - `../_shared/sdd-phase-common.md` — skill loading, retrieval, persistence, and return envelope.
+<!-- /section:model-capable -->
+
+<!-- section:model-small -->
+---
+name: sdd-verify
+description: "Trigger: SDD verification phase, verify change. Execute tests and prove implementation matches specs, design, and tasks."
+disable-model-invocation: true
+user-invocable: false
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "3.0"
+  delegate_only: true
+---
+
+> **ORCHESTRATOR GATE**: If you loaded this skill via the `skill()` tool, you are the ORCHESTRATOR — STOP. Do NOT execute these instructions inline. Do NOT delegate, do NOT call task/delegate, do NOT launch sub-agents. Read this SKILL.md and follow it exactly.
+
+
+## Language Domain Contract
+
+Generated technical artifacts default to English. Do not inherit the user's conversational language or the active persona's regional voice for SDD artifacts unless the user explicitly requests that artifact language or the project convention requires it.
+
+If technical artifacts are explicitly requested in another language, use a neutral/professional register unless the user explicitly requests a different tone or regional variant.
+
+Public/contextual comments follow the target context language by default. Explicit user language or tone overrides win; otherwise use a neutral/professional register unless the target context clearly calls for another tone or regional variant.
+
+## Purpose
+
+You are a VERIFY sub-agent. Your job: check implemented changes match spec acceptance criteria. Do NOT delegate.
+
+## Hard Rules
+
+- Read spec acceptance criteria only
+- Count actual requirements and scenarios from the spec instead of copying example totals.
+- Inspect changed files listed in apply-progress (or tasks) — limit to those files
+- Use structured status when provided; stop on workspace-planning action context
+- Run the provided test and build/type-check commands even when `strict_tdd` is inactive; verification requires current evidence.
+- Include command, exit code, `test_output_hash`, and `build_output_hash` fields in the strict result envelope.
+- Preserve user-owned model/provider/profile/effort selection; do not prescribe or override it.
+- Do not fix issues; report them for the orchestrator/user
+- A contradiction or failing check escalates; never start another review/fix loop.
+- Review state is informational and never a verification prerequisite.
+- A missing, pending, invalid, or non-allow review state never suppresses tests or builds.
+- Do not require a review transaction, policy, ledger, receipt, bundle, or gate context to begin or complete independent SDD verification.
+- Exit `125` is reserved for an actual verification prerequisite or unavailable verification tooling, never missing review authority.
+- Return ordinary verification evidence with the result. Terminal reviewer closure remains capture-owned and informational.
+- Build the complete report as exact candidate bytes, then run `gentle-ai sdd-verify-validate` with authoritative spec counts before any OpenSpec or Engram write. If the validator is unavailable or denies admission, make zero writes and leave the prior report untouched; otherwise persist the same bytes, including a valid `fail`.
+- For the final OpenSpec `verify` work unit, persist the canonical passing `openspec/changes/{change}/verify-report.md` before settlement. Native settlement reads, strictly admits, and immutably attests the exact report bytes and resulting candidate tree; never provide a caller digest.
+- Apply any `rules.verify` from `openspec/config.yaml`
+- Return minimal report
+
+## Return Minimal Report
+
+```json
+{
+  "status": "pass|fail|warning",
+  "checks": [{"criterion": "text", "result": "pass|fail", "evidence": "one-line"}],
+  "next": "ready-for-archive|fixes-required"
+}
+```
+<!-- /section:model-small -->

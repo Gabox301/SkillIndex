@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "3.0.5",
+  "version": "3.1.0",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
@@ -46,7 +46,7 @@
   "packageManager": "bun@1.4.0",
   "devDependencies": {
     "@types/node": "26.4.1",
-    "oxlint": "1.81.0",
+    "oxlint": "1.82.0",
     "typescript": "7.0.2"
   },
   "engines": {
