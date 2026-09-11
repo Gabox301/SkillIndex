@@ -598,6 +598,17 @@ fn parity_fallback_node_via_env() {
         return;
     }
     let is_ts: bool = index.extension().and_then(|e: &std::ffi::OsStr| e.to_str()) == Some("ts");
+    let runtime: &str = if is_ts { "bun" } else { "node" };
+    // Entorno sin el runtime (ej. contribuidor solo-Rust): skip avisando,
+    // no es fallo del código. En CI el runtime existe y el test corre.
+    if std::process::Command::new(runtime)
+        .arg("--version")
+        .output()
+        .is_err()
+    {
+        println!("skipping node-fallback parity: {runtime} not installed");
+        return;
+    }
     let mut cmd: std::process::Command = if is_ts {
         let mut c: std::process::Command = std::process::Command::new("bun");
         c.arg(index.clone());
