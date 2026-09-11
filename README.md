@@ -87,22 +87,23 @@ Si `claude-code` es autodetectado o se pasa con `-a`, `skillindex` escribe un ar
 
 ## Opciones
 
-| Flag              | Descripción                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| `-y`, `--yes`     | Omite la confirmación (instala en todos los agentes detectados)                          |
-| `--dry-run`       | Muestra las skills detectadas sin instalar nada                                          |
-| `--clear-cache`   | Limpia la caché de skills descargadas                                                    |
-| `-a`, `--agent`   | Instala solo para IDEs específicos (ej. `cursor`, `claude-code`, `opencode`, `kiro-cli`) |
-| `-v`, `--verbose` | Muestra traza de instalación y detalles de errores                                       |
-| `-h`, `--help`    | Muestra la ayuda                                                                         |
+| Flag              | Descripción                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| `-y`, `--yes`     | Omite la confirmación (instala en todos los agentes detectados)                                               |
+| `--dry-run`       | Muestra las skills detectadas sin instalar nada                                                               |
+| `--clear-cache`   | Limpia la caché de skills descargadas                                                                         |
+| `-a`, `--agent`   | Instala solo para IDEs específicos (ej. `cursor`, `claude-code`, `opencode`, `kiro-cli`)                      |
+| `-d`, `--domain`  | Instala un set completo por id (ej. `--domain gentleman-programming`; repetible, se combina con lo detectado) |
+| `-v`, `--verbose` | Muestra traza de instalación y detalles de errores                                                            |
+| `-h`, `--help`    | Muestra la ayuda                                                                                              |
 
 ### Variables de entorno
 
-| Variable                              | Descripción                                                                                                                   |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN` / `GH_TOKEN`           | Token para GitHub: sube la cuota en `raw.githubusercontent.com`, tarballs y `git` del sync. Nunca se envía a jsDelivr ni a otros hosts. |
-| `SKILLINDEX_REGISTRY_BASE_URL`        | Override de la URL base del registry (por defecto jsDelivr → GitHub raw).                                                     |
-| `SKILLINDEX_CACHE_DIR`                | Directorio de caché de skills descargadas.                                                                                    |
+| Variable                       | Descripción                                                                                                                             |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN` / `GH_TOKEN`    | Token para GitHub: sube la cuota en `raw.githubusercontent.com`, tarballs y `git` del sync. Nunca se envía a jsDelivr ni a otros hosts. |
+| `SKILLINDEX_REGISTRY_BASE_URL` | Override de la URL base del registry (por defecto jsDelivr → GitHub raw).                                                               |
+| `SKILLINDEX_CACHE_DIR`         | Directorio de caché de skills descargadas.                                                                                              |
 
 ## Agentes soportados
 

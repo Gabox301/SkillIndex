@@ -26,6 +26,11 @@ pub struct Args {
     #[arg(short = 'a', long = "agent", value_name = "AGENT", num_args = 1..)]
     pub agent: Vec<String>,
 
+    /// Instalar un set completo por id de tecnología/dominio
+    /// (ej. gentleman-programming). Se combina con lo detectado.
+    #[arg(short = 'd', long = "domain", value_name = "DOMAIN", num_args = 1..)]
+    pub domain: Vec<String>,
+
     /// Mostrar traza de instalación y detalles de error
     #[arg(short = 'v', long = "verbose")]
     pub verbose: bool,
@@ -132,6 +137,20 @@ mod tests {
     fn no_agents_empty_vec() {
         let args: Args = parse(["skillindex"]);
         assert!(args.agent.is_empty());
+    }
+
+    #[test]
+    fn domain_long_multiple_and_short() {
+        let a: Args = parse(["skillindex", "--domain", "gentleman-programming", "anydoc"]);
+        assert_eq!(a.domain, vec!["gentleman-programming", "anydoc"]);
+        let b: Args = parse(["skillindex", "-d", "anydoc"]);
+        assert_eq!(b.domain, vec!["anydoc"]);
+    }
+
+    #[test]
+    fn domain_defaults_empty() {
+        let a: Args = parse(["skillindex"]);
+        assert!(a.domain.is_empty());
     }
 
     #[test]

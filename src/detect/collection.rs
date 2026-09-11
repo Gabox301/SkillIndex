@@ -70,6 +70,37 @@ pub fn collect_skills(
     skills
 }
 
+/// Resuelve `--domain` a skills: trae el SET COMPLETO de cada tecnología
+/// sin pasar por detección. Falla con el primer id desconocido (con
+/// sugerencias) para no instalar un set a medias en silencio.
+pub fn collect_domain_skills(
+    ids: &[String],
+    installed_names: Option<&HashSet<String>>,
+) -> Result<Vec<SkillEntry>, String> {
+    use crate::display::DisplayTechnology;
+    use crate::skills::{find_technology, suggest_technologies};
+
+    let mut techs: Vec<DisplayTechnology> = Vec::new();
+    for id in ids {
+        match find_technology(id) {
+            Some(t) => techs.push(DisplayTechnology {
+                id: t.id.to_string(),
+                name: t.name.to_string(),
+                skills: t.skills.iter().map(|s: &&str| s.to_string()).collect(),
+            }),
+            None => {
+                let mut msg: String = format!("domain desconocido: {id}");
+                let suggestions: Vec<String> = suggest_technologies(id);
+                if !suggestions.is_empty() {
+                    msg.push_str(&format!(". ¿Quisiste decir: {}?", suggestions.join(", ")));
+                }
+                return Err(msg);
+            }
+        }
+    }
+    Ok(collect_skills(&techs, false, &[], installed_names))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -94,5 +125,41 @@ mod tests {
     fn collect_skills_frontend_bonus() {
         let skills: Vec<SkillEntry> = collect_skills(&[], true, &[], None);
         assert!(skills.iter().any(|s| s.skill.contains("frontend-design")));
+    }
+
+    #[test]
+    fn collect_domain_skills_full_set() {
+        let skills: Vec<SkillEntry> =
+            collect_domain_skills(&["gentleman-programming".to_string()], None)
+                .expect("known domain");
+        assert_eq!(skills.len(), 24);
+        assert!(
+            skills
+                .iter()
+                .all(|s| s.sources == vec!["Gentleman Programming".to_string()])
+        );
+    }
+
+    #[test]
+    fn collect_domain_skills_case_insensitive_and_union() {
+        let skills: Vec<SkillEntry> = collect_domain_skills(
+            &["Gentleman-Programming".to_string(), "anydoc".to_string()],
+            None,
+        )
+        .expect("known domains");
+        assert_eq!(skills.len(), 25);
+    }
+
+    #[test]
+    fn collect_domain_skills_unknown_suggests() {
+        let err: String =
+            collect_domain_skills(&["gentleman".to_string()], None).unwrap_err();
+        assert!(err.contains("gentleman-programming"), "got: {err}");
+    }
+
+    #[test]
+    fn collect_domain_skills_empty() {
+        let skills: Vec<SkillEntry> = collect_domain_skills(&[], None).expect("empty ok");
+        assert!(skills.is_empty());
     }
 }

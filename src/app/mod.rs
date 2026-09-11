@@ -12,7 +12,8 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use skillindex::args::Args;
 use skillindex::detect::{
-    collect_skills, detect_agents, detect_technologies, get_installed_skill_names, partition_combos,
+    collect_domain_skills, collect_skills, detect_agents, detect_technologies,
+    get_installed_skill_names, partition_combos,
 };
 use skillindex::display::{
     DisplayCombo, DisplayTechnology, print_detected, print_security_checks, print_skills_list,
@@ -33,6 +34,14 @@ pub async fn run() {
     handle_sigint();
 
     let args: Args = Args::parse();
+
+    // Fail fast en --domain inválido, antes de escanear o preguntar nada.
+    if !args.domain.is_empty()
+        && let Err(e) = collect_domain_skills(&args.domain, None)
+    {
+        eprintln!("   ✘ {e}");
+        std::process::exit(1);
+    }
 
     if args.clear_cache {
         let (cache_dir, removed) = clear_skillindex_cache();
@@ -159,7 +168,11 @@ pub async fn run() {
         log("");
     }
 
-    if detect_result.detected.is_empty() && !detect_result.is_frontend && final_combos.is_empty() {
+    if detect_result.detected.is_empty()
+        && !detect_result.is_frontend
+        && final_combos.is_empty()
+        && args.domain.is_empty()
+    {
         log(&skillindex::ui::yellow(
             "   ⚠ No se detectaron tecnologías compatibles.",
         ));
@@ -176,12 +189,34 @@ pub async fn run() {
     // 4. Skills — con o sin seguridad según el check
     let installed_names: std::collections::HashSet<String> =
         get_installed_skill_names(&project_dir);
-    let skills: Vec<skillindex::installer::SkillEntry> = collect_skills(
+    let mut skills: Vec<skillindex::installer::SkillEntry> = collect_skills(
         &detect_result.detected,
         detect_result.is_frontend,
         &final_combos,
         Some(&installed_names),
     );
+
+    // 4b. Sets --domain: se unen a lo detectado (dedupe por path).
+    // Ya validados arriba, este collect no puede fallar.
+    if !args.domain.is_empty() {
+        let domain_skills: Vec<skillindex::installer::SkillEntry> =
+            collect_domain_skills(&args.domain, Some(&installed_names)).unwrap_or_default();
+        let mut seen: std::collections::HashSet<String> =
+            skills.iter().map(|s| s.skill.clone()).collect();
+        let mut added: usize = 0;
+        for s in domain_skills {
+            if seen.insert(s.skill.clone()) {
+                added += 1;
+                skills.push(s);
+            }
+        }
+        log(&dim(&format!(
+            "   ↳ Sets --domain [{}]: {} skills nuevas en la lista",
+            args.domain.join(", "),
+            added
+        )));
+        log("");
+    }
 
     if skills.is_empty() {
         log(&skillindex::ui::yellow(

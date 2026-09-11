@@ -21,6 +21,28 @@ pub static SKILLS: LazyLock<Vec<Technology>> = LazyLock::new(|| {
 });
 pub static SKILLS_MAP: LazyLock<Vec<Technology>> = LazyLock::new(|| SKILLS.clone());
 
+/// Busca una tecnología/dominio por id (insensible a mayúsculas).
+/// Base del flag `--domain`: trae el set completo sin pasar por detección.
+pub fn find_technology(id: &str) -> Option<Technology> {
+    SKILLS_MAP
+        .iter()
+        .find(|t: &&Technology| t.id.eq_ignore_ascii_case(id))
+        .cloned()
+}
+
+/// Sugerencias ante un id desconocido (subcadena en id o nombre, máx 5).
+pub fn suggest_technologies(query: &str) -> Vec<String> {
+    let q: String = query.to_lowercase();
+    SKILLS_MAP
+        .iter()
+        .filter(|t: &&Technology| {
+            t.id.to_lowercase().contains(&q) || t.name.to_lowercase().contains(&q)
+        })
+        .take(5)
+        .map(|t: &Technology| t.id.to_string())
+        .collect()
+}
+
 pub static COMBO_SKILLS_MAP: LazyLock<Vec<ComboSkill>> = LazyLock::new(|| {
     let mut v: Vec<ComboSkill> = Vec::new();
     v.extend_from_slice(combos::FRAMEWORK_COMBOS);
