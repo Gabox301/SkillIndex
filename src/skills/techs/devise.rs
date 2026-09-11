@@ -11,5 +11,5 @@ pub const DEVISE_TECH: Technology = Technology {
         gems: &["devise"],
         config_file_content: &[],
     },
-    skills: &["igmarin/rails-agent-skills/rails-security-review"],
+    skills: &["Gabox301/SkillIndex/rails-security-review"],
 };

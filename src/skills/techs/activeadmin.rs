@@ -11,5 +11,5 @@ pub const ACTIVEADMIN_TECH: Technology = Technology {
         gems: &["activeadmin"],
         config_file_content: &[],
     },
-    skills: &["igmarin/rails-agent-skills/rails-stack-conventions"],
+    skills: &["Gabox301/SkillIndex/rails-stack-conventions"],
 };

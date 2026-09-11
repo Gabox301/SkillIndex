@@ -11,5 +11,5 @@ pub const POSTGRES_RUBY_TECH: Technology = Technology {
         gems: &["pg"],
         config_file_content: &[],
     },
-    skills: &["igmarin/rails-agent-skills/rails-migration-safety"],
+    skills: &["Gabox301/SkillIndex/rails-migration-safety"],
 };

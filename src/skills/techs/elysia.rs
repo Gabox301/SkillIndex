@@ -11,5 +11,5 @@ pub const ELYSIA_TECH: Technology = Technology {
         gems: &[],
         config_file_content: &[],
     },
-    skills: &["elysiajs/skills/elysiajs"],
+    skills: &["Gabox301/SkillIndex/elysiajs"],
 };

@@ -40,32 +40,32 @@ struct ManifestReview {
     flags: Vec<String>,
     summary: String,
     model: String,
-    #[serde(rename = "prompt_version")]
+    #[serde(rename = "promptVersion", alias = "prompt_version")]
     prompt_version: String,
-    #[serde(rename = "reviewed_at")]
+    #[serde(rename = "reviewedAt", alias = "reviewed_at")]
     reviewed_at: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ManifestEntry {
     source: String,
-    #[serde(rename = "skill_path")]
+    #[serde(rename = "skillPath", alias = "skill_path")]
     skill_path: String,
-    #[serde(rename = "commit_sha")]
+    #[serde(rename = "commitSha", alias = "commit_sha")]
     commit_sha: String,
     files: Vec<String>,
     sha256: HashMap<String, String>,
-    #[serde(rename = "bundle_hash")]
+    #[serde(rename = "bundleHash", alias = "bundle_hash")]
     bundle_hash: String,
     review: ManifestReview,
-    #[serde(rename = "security_check")]
+    #[serde(rename = "securityCheck", alias = "security_check")]
     security_check: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Manifest {
     version: u64,
-    #[serde(rename = "generated_at")]
+    #[serde(rename = "generatedAt", alias = "generated_at")]
     generated_at: String,
     reviewer: Reviewer,
     skills: HashMap<String, ManifestEntry>,
@@ -74,7 +74,7 @@ struct Manifest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Reviewer {
     model: String,
-    #[serde(rename = "prompt_version")]
+    #[serde(rename = "promptVersion", alias = "prompt_version")]
     prompt_version: String,
 }
 
@@ -301,15 +301,10 @@ async fn main() -> anyhow::Result<()> {
     let manifest_str: String = fs::read_to_string(&manifest_path).unwrap_or_else(|_| {
         r#"{"version":1,"generated_at":"","reviewer":{"model":"gpt-5.4","prompt_version":"1.0.0"},"skills":{}}"#.to_string()
     });
-    let mut manifest: Manifest = serde_json::from_str(&manifest_str).unwrap_or(Manifest {
-        version: 1,
-        generated_at: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-        reviewer: Reviewer {
-            model: "gpt-5.4".to_string(),
-            prompt_version: "1.0.0".to_string(),
-        },
-        skills: HashMap::new(),
-    });
+    let mut manifest: Manifest =
+        serde_json::from_str(&manifest_str).map_err(|e: serde_json::Error| {
+            anyhow::anyhow!("index.json inválido ({}): {}", manifest_path.display(), e)
+        })?;
 
     let mut total_skills: i32 = 0;
     let mut total_approved: i32 = 0;
@@ -371,12 +366,18 @@ async fn main() -> anyhow::Result<()> {
             Ok(resp) if resp.status().is_success() => {
                 let bytes = resp.bytes().await?;
                 fs::write(&tarball_path, &bytes)?;
-                // Extract tarball
                 let tar_gz: fs::File = fs::File::open(&tarball_path)?;
                 let gz: flate2::read::GzDecoder<fs::File> = flate2::read::GzDecoder::new(tar_gz);
                 let mut archive: tar::Archive<flate2::read::GzDecoder<fs::File>> =
                     tar::Archive::new(gz);
-                archive.unpack(tmp_path)?;
+                for entry in archive.entries()? {
+                    let mut entry: tar::Entry<flate2::read::GzDecoder<fs::File>> = entry?;
+                    if entry.header().entry_type().is_symlink() {
+                        eprintln!("  … salteando symlink {}", entry.path()?.display());
+                        continue;
+                    }
+                    entry.unpack_in(tmp_path)?;
+                }
                 // Find extracted root
                 let mut extracted_root: Option<PathBuf> = None;
                 for entry in fs::read_dir(tmp_path)? {
@@ -394,7 +395,7 @@ async fn main() -> anyhow::Result<()> {
                 } else {
                     // Fallback to git clone
                     let repo_dir: PathBuf = tmp_path.join("repo");
-                    let status = git_cmd()
+                    let status: std::process::ExitStatus = git_cmd()
                         .args([
                             "clone",
                             "--depth",

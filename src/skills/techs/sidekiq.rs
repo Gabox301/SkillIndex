@@ -11,5 +11,5 @@ pub const SIDEKIQ_TECH: Technology = Technology {
         gems: &["sidekiq"],
         config_file_content: &[],
     },
-    skills: &["igmarin/rails-agent-skills/rails-background-jobs"],
+    skills: &["Gabox301/SkillIndex/rails-background-jobs"],
 };

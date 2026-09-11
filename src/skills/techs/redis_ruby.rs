@@ -11,5 +11,5 @@ pub const REDIS_RUBY_TECH: Technology = Technology {
         gems: &["redis", "sidekiq", "resque", "redis-rails"],
         config_file_content: &[],
     },
-    skills: &["redis/agent-skills/redis-development"],
+    skills: &["Gabox301/SkillIndex/redis-development"],
 };

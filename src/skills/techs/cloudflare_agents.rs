@@ -13,6 +13,6 @@ pub const CLOUDFLARE_AGENTS_TECH: Technology = Technology {
     },
     skills: &[
         "cloudflare/skills/agents-sdk",
-        "cloudflare/skills/sandbox-sdk",
+        "Gabox301/SkillIndex/sandbox-sdk",
     ],
 };

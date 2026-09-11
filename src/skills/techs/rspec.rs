@@ -12,8 +12,8 @@ pub const RSPEC_TECH: Technology = Technology {
         config_file_content: &[],
     },
     skills: &[
-        "igmarin/rails-agent-skills/rspec-best-practices",
-        "igmarin/rails-agent-skills/rspec-service-testing",
+        "Gabox301/SkillIndex/rspec-best-practices",
+        "Gabox301/SkillIndex/rspec-service-testing",
         "lucianghinda/superpowers-ruby/test-driven-development",
     ],
 };

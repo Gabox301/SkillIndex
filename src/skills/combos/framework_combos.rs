@@ -5,7 +5,7 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         id: "expo-tailwind",
         name: "Expo + Tailwind CSS",
         requires: &["expo", "tailwind"],
-        skills: &["expo/skills/expo-tailwind-setup"],
+        skills: &["Gabox301/SkillIndex/expo-tailwind-setup"],
     },
     ComboSkill {
         id: "react-hook-form-zod",
@@ -24,7 +24,7 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         name: "React Native + Expo",
         requires: &["react-native", "expo"],
         skills: &[
-            "expo/skills/building-native-ui",
+            "Gabox301/SkillIndex/building-native-ui",
             "sleekdotdesign/agent-skills/design-mobile-apps",
         ],
     },
@@ -34,7 +34,7 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         requires: &["nextjs", "vercel-ai"],
         skills: &[
             "vercel/ai/use-ai-sdk",
-            "vercel-labs/next-skills/next-best-practices",
+            "Gabox301/SkillIndex/next-best-practices",
         ],
     },
     ComboSkill {
@@ -110,7 +110,7 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         id: "expo-clerk",
         name: "Expo + Clerk",
         requires: &["expo", "clerk"],
-        skills: &["clerk/skills/clerk-expo-patterns"],
+        skills: &["Gabox301/SkillIndex/clerk-expo-patterns"],
     },
     ComboSkill {
         id: "react-react-three-fiber",
@@ -173,8 +173,8 @@ pub const FRAMEWORK_COMBOS: &[ComboSkill] = &[
         name: "Ruby on Rails + RSpec",
         requires: &["rails", "rspec"],
         skills: &[
-            "igmarin/rails-agent-skills/rails-tdd-slices",
-            "igmarin/rails-agent-skills/rails-bug-triage",
+            "Gabox301/SkillIndex/rails-tdd-slices",
+            "Gabox301/SkillIndex/rails-bug-triage",
         ],
     },
     ComboSkill {

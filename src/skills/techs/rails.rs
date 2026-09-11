@@ -14,10 +14,10 @@ pub const RAILS_TECH: Technology = Technology {
     skills: &[
         "sergiodxa/agent-skills/ruby-on-rails-best-practices",
         "lucianghinda/superpowers-ruby/rails-guides",
-        "igmarin/rails-agent-skills/rails-stack-conventions",
-        "igmarin/rails-agent-skills/rails-code-review",
-        "igmarin/rails-agent-skills/rails-migration-safety",
-        "igmarin/rails-agent-skills/rails-security-review",
+        "Gabox301/SkillIndex/rails-stack-conventions",
+        "Gabox301/SkillIndex/rails-code-review",
+        "Gabox301/SkillIndex/rails-migration-safety",
+        "Gabox301/SkillIndex/rails-security-review",
         "ombulabs/claude-code_rails-upgrade-skill/rails-upgrade",
     ],
 };

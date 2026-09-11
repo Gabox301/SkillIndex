@@ -12,8 +12,8 @@ pub const NEXTJS_TECH: Technology = Technology {
         config_file_content: &[],
     },
     skills: &[
-        "vercel-labs/next-skills/next-best-practices",
-        "vercel-labs/next-skills/next-cache-components",
-        "vercel-labs/next-skills/next-upgrade",
+        "Gabox301/SkillIndex/next-best-practices",
+        "Gabox301/SkillIndex/next-cache-components",
+        "Gabox301/SkillIndex/next-upgrade",
     ],
 };

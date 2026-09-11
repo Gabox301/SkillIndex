@@ -12,8 +12,8 @@ pub const DENO_TECH: Technology = Technology {
         config_file_content: &[],
     },
     skills: &[
-        "denoland/skills/deno-expert",
-        "denoland/skills/deno-guidance",
+        "Gabox301/SkillIndex/deno-expert",
+        "Gabox301/SkillIndex/deno-guidance",
         "denoland/skills/deno-frontend",
         "denoland/skills/deno-deploy",
         "denoland/skills/deno-sandbox",

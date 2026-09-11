@@ -11,5 +11,5 @@ pub const HONO_TECH: Technology = Technology {
         gems: &[],
         config_file_content: &[],
     },
-    skills: &["yusukebe/hono-skill/hono"],
+    skills: &["Gabox301/SkillIndex/hono"],
 };

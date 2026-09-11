@@ -11,5 +11,5 @@ pub const REMOTION_TECH: Technology = Technology {
         gems: &[],
         config_file_content: &[],
     },
-    skills: &["remotion-dev/skills/remotion"],
+    skills: &["Gabox301/SkillIndex/remotion"],
 };
