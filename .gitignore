@@ -38,4 +38,4 @@ scripts/sync-skills.report.json
 .vscode
 openspec
 sdd
-docs
+/docs
