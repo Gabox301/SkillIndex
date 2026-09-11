@@ -46,7 +46,7 @@ pub async fn install_skill_with_client(
     };
     let Some(registry) = registry else {
         return fail(
-            "índice de skills-registry no encontrado. Ejecuta 'pnpm sync:skills' en el paquete skillindex."
+            "índice de skills-registry no encontrado ni empaquetado. Reinstala skillindex con la última versión (cargo install skillindex --force o npx skillindex@latest)."
                 .to_string(),
         );
     };

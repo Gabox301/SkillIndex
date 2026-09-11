@@ -78,8 +78,27 @@ pub fn get_registry_dir() -> PathBuf {
     c1
 }
 
+/// Índice compilado dentro del binario (~2MB): fallback cuando no hay
+/// `skills-registry/index.json` junto al binario ni en el cwd. Es lo que
+/// salva a instalaciones `cargo install` (el crate excluye el registry)
+/// y a cualquier cwd sin checkout del repo. Los archivos de cada skill
+/// siguen viniendo del CDN + caché; esto solo fija el ÍNDICE.
+const EMBEDDED_INDEX_JSON: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/skills-registry/index.json"
+));
+
+pub fn load_embedded_registry() -> Option<Registry> {
+    serde_json::from_str(EMBEDDED_INDEX_JSON).ok()
+}
+
 pub fn load_registry() -> Option<Registry> {
-    load_registry_from_dir(&get_registry_dir())
+    // 1) índice junto al binario / cwd / checkout (npm lo trae en el paquete)
+    if let Some(reg) = load_registry_from_dir(&get_registry_dir()) {
+        return Some(reg);
+    }
+    // 2) índice compilado (único camino en installs `cargo install`)
+    load_embedded_registry()
 }
 
 pub fn load_registry_from_dir(dir: &Path) -> Option<Registry> {
@@ -351,6 +370,14 @@ mod tests {
         let check: InstallSecurityCheck = security_check_for_entry("my-skill", &entry);
         assert_eq!(check.status, "ok");
         assert!(check.summary.contains("no encontró"));
+    }
+
+    #[test]
+    fn load_embedded_registry_parses() {
+        let reg: Registry = super::load_embedded_registry().expect("embedded index parses");
+        assert!(reg.skills.len() >= 1000, "got {} skills", reg.skills.len());
+        assert!(reg.skills.contains_key("tdd"));
+        assert!(reg.skills.contains_key("book-to-skill"));
     }
 
     #[test]
