@@ -20,7 +20,10 @@
 > **Construido en Rust 🦀** — binario nativo, rápido y sin runtime. Escaneo 100% local, detección sin red.
 
 ```bash
-npx skillindex        # vía Node (sin instalar)
+npx skillindex          # npm (sin instalar)
+pnpm dlx skillindex     # pnpm (sin instalar)
+yarn dlx skillindex     # yarn (sin instalar)
+bunx skillindex         # bun (sin instalar)
 # o
 cargo install skillindex  # vía Rust
 skillindex            # binario nativo
@@ -30,13 +33,16 @@ skillindex            # binario nativo
 
 ## Instalación
 
-### Opción 1 — npx (sin instalar, requiere Node.js)
+### Opción 1 — sin instalar (npm, pnpm, yarn o bun)
 
 ```bash
-npx skillindex
+npx skillindex        # npm (requiere Node.js)
+pnpm dlx skillindex   # pnpm
+yarn dlx skillindex   # yarn
+bunx skillindex       # bun
 ```
 
-Ideal para probar sin instalar nada. Usa el wrapper de npm que descarga el binario Rust apropiado para tu plataforma.
+Ideal para probar sin instalar nada. El wrapper descarga el binario Rust apropiado para tu plataforma desde GitHub Releases. Para instalación global: `npm i -g skillindex`, `pnpm add -g skillindex`, `yarn global add skillindex` o `bun add -g skillindex`.
 
 ### Opción 2 — Cargo (binario nativo Rust)
 
@@ -53,10 +59,13 @@ cargo binstall skillindex  # alternativa aún más rápida si usas cargo-binstal
 
 ## Inicio rápido
 
-Ejecútalo en la raíz de tu proyecto (con `npx` o `skillindex` si lo instalaste con Cargo):
+Ejecútalo en la raíz de tu proyecto (con `npx`/`pnpm dlx`/`yarn dlx`/`bunx`, o `skillindex` si lo instalaste global o con Cargo):
 
 ```bash
 npx skillindex
+pnpm dlx skillindex
+yarn dlx skillindex
+bunx skillindex
 # o
 skillindex
 ```
@@ -73,12 +82,18 @@ Listo. Hará:
 
 ```bash
 npx skillindex -y
+pnpm dlx skillindex -y
+yarn dlx skillindex -y
+bunx skillindex -y
 ```
 
 ### Vista previa sin instalar
 
 ```bash
 npx skillindex --dry-run
+pnpm dlx skillindex --dry-run
+yarn dlx skillindex --dry-run
+bunx skillindex --dry-run
 ```
 
 ### Resumen para Claude Code
@@ -244,7 +259,8 @@ Todo el escaneo y detección se ejecuta **100% en local y en Rust**, sin peticio
 
 ## Requisitos
 
-- **Vía npx:** Node.js >= 22.0.0
+- **Vía npx / pnpm dlx / yarn dlx:** Node.js >= 22.0.0
+- **Vía bunx:** Bun (sin Node.js)
 - **Vía Cargo:** Rust >= 1.98.1 (`rustup` recomendado) — `cargo install skillindex`
 - Si instalas el binario con Cargo, no necesitas Node.js en absoluto
 

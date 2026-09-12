@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
@@ -27,7 +27,6 @@
     "index.mjs",
     "index.ts",
     "dist/",
-    "bin/",
     "skills-registry/index.json"
   ],
   "type": "module",
