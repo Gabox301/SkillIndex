@@ -1,6 +1,6 @@
 {
   "name": "skillindex",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Detecta automáticamente tu stack tecnológico e instala las mejores skills de agentes IA para tu proyecto.",
   "keywords": [
     "agent",
@@ -39,6 +39,7 @@
     "validate": "cargo run --bin validate-registry",
     "regenerate": "cargo run --bin regenerate-index",
     "prepublish": "bun run check && bun run lint && cargo test --manifest-path Cargo.toml && bun run build && cargo run --bin validate-registry",
+    "prepack": "bun run build",
     "sync": "cargo run --bin sync-skills --",
     "fendo": "cargo run --bin fendo"
   },
