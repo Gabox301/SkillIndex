@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use super::helpers::get_package_version;
 use super::types::{InstallSecurityCheck, Registry, RegistryEntry, VerifyResult};
-use crate::infra::hash::{normalize_registry_rel_path, sha256_file};
+use crate::infra::hash::{join_registry_rel, normalize_registry_rel_path, sha256_file};
 
 pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String> {
     if let Some(url) = registry_base_url {
@@ -120,14 +120,19 @@ pub fn verify_registry_entry(
         };
     }
     for rel in &entry.files {
-        let normalized: String = normalize_registry_rel_path(rel);
-        let abs: PathBuf = {
-            let mut p: PathBuf = skill_dir.clone();
-            for part in normalized.split('/') {
-                p = p.join(part);
+        // Fail closed before touching the filesystem: a rel with `..`, an
+        // absolute path, an empty/dot segment or a NUL byte is rejected here,
+        // naming the offending rel in the reason.
+        let abs: PathBuf = match join_registry_rel(&skill_dir, rel) {
+            Ok(p) => p,
+            Err(e) => {
+                return VerifyResult {
+                    ok: false,
+                    reason: Some(e.to_string()),
+                };
             }
-            p
         };
+        let normalized: String = normalize_registry_rel_path(rel);
         if !abs.exists() {
             return VerifyResult {
                 ok: false,
@@ -232,11 +237,7 @@ mod tests {
 
     fn write_skill_files(dir: &Path, skill_name: &str, files: &[(&str, &str)]) {
         for (rel, content) in files {
-            let normalized: String = normalize_registry_rel_path(rel);
-            let mut p: PathBuf = dir.join(skill_name);
-            for part in normalized.split('/') {
-                p = p.join(part);
-            }
+            let p: PathBuf = join_registry_rel(&dir.join(skill_name), rel).unwrap();
             if let Some(parent) = p.parent() {
                 fs::create_dir_all(parent).unwrap();
             }
@@ -330,6 +331,58 @@ mod tests {
         write_skill_files(&reg_dir, "win-skill", &[("references/notes.md", "notes")]);
         let result: VerifyResult = verify_registry_entry("win-skill", &entry, &reg_dir);
         assert!(result.ok, "should normalize backslash: {:?}", result.reason);
+    }
+
+    #[test]
+    fn verify_registry_entry_rejects_traversal_rel() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "# hi")]);
+        entry.files = vec!["../../etc/passwd".to_string()];
+        entry
+            .sha256
+            .insert("../../etc/passwd".to_string(), "0".repeat(64));
+        write_skill_files(&reg_dir, "evil-skill", &[("SKILL.md", "# hi")]);
+        let result: VerifyResult = verify_registry_entry("evil-skill", &entry, &reg_dir);
+        assert!(!result.ok, "traversal rel must fail closed");
+        let reason: String = result.reason.unwrap();
+        assert!(
+            reason.contains("../../etc/passwd"),
+            "reason must name the offending rel: {reason}"
+        );
+    }
+
+    #[test]
+    fn verify_registry_entry_rejects_absolute_rel() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "# hi")]);
+        entry.files = vec!["/etc/passwd".to_string()];
+        entry
+            .sha256
+            .insert("/etc/passwd".to_string(), "0".repeat(64));
+        write_skill_files(&reg_dir, "evil-skill", &[("SKILL.md", "# hi")]);
+        let result: VerifyResult = verify_registry_entry("evil-skill", &entry, &reg_dir);
+        assert!(!result.ok, "absolute rel must fail closed");
+        let reason: String = result.reason.unwrap();
+        assert!(
+            reason.contains("/etc/passwd"),
+            "reason must name the offending rel: {reason}"
+        );
+    }
+
+    #[test]
+    fn verify_registry_entry_nested_references_happy_path() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let files: Vec<(&str, &str)> = vec![("SKILL.md", "# hi"), ("references/notes.md", "notes")];
+        let entry: RegistryEntry = sample_entry(files.clone());
+        write_skill_files(&reg_dir, "nested-skill", &files);
+        let result: VerifyResult = verify_registry_entry("nested-skill", &entry, &reg_dir);
+        assert!(result.ok, "expected ok, got {:?}", result.reason);
     }
 
     #[test]
