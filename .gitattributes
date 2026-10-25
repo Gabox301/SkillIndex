@@ -1,6 +1,16 @@
 # Ensure registry files use LF line endings (prevents hash mismatch on Windows checkout via core.autocrlf)
-packages/skillindex/skills-registry/** text eol=lf
-packages/skillindex/skills-registry/index.json text eol=lf
+skills-registry/** text eol=lf
+skills-registry/index.json text eol=lf
+
+# Binaries must never be line-normalized (normalization corrupts bytes and hashes)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
 
 # General: keep LF for code and registry (prevents Windows CRLF mismatches)
 *.ts text eol=lf
