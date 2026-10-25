@@ -17,8 +17,8 @@ fn main() {
 
     println!("fendo — GaboTech supply-chain check\n");
 
-    // Check package.json files
-    for rel in ["package.json", "packages/skillindex/package.json"] {
+    // Check the repo-root package.json (single-package layout after the Rust migration)
+    for rel in ["package.json"] {
         let path: PathBuf = root.join(rel);
         if !path.exists() {
             continue;
@@ -116,22 +116,10 @@ fn main() {
             found.push(f.to_string());
         }
     }
-    let pkg_candidates: [&str; 3] = ["pnpm-lock.yaml", "bun.lock", "bun.lockb"];
-    let mut pkg_found: Vec<String> = Vec::new();
-    for f in pkg_candidates {
-        if root.join("packages/skillindex").join(f).exists() {
-            pkg_found.push(f.to_string());
-        }
-        // Also check at root's packages if it still exists, otherwise at root
-        if root.join(f).exists() && !found.contains(&f.to_string()) {
-            // already counted
-        }
-    }
-    if found.is_empty() && pkg_found.is_empty() {
+    if found.is_empty() {
         fail("No lockfile found (bun.lock / pnpm-lock.yaml) — commit it");
     } else {
-        let all_found: Vec<String> = [found.clone(), pkg_found.clone()].concat();
-        ok(&format!("Lockfile present: {}", all_found.join(", ")));
+        ok(&format!("Lockfile present: {}", found.join(", ")));
     }
 
     // Check .gitignore doesn't ignore lockfile
