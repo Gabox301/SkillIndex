@@ -42761,6 +42761,68 @@
         "summary": "review skipped (auditor removed)",
         "checkedAt": "2026-09-10T23:57:42.832Z"
       }
+    },
+    "landing-page-design": {
+      "bundleHash": "0b85af1a9a3b275e657d63c6dc1fb51e56568aa75f240a9f3b87b02b4d57f0b4",
+      "commitSha": "0000000000000000000000000000000000000000",
+      "files": [
+        "SKILL.md"
+      ],
+      "review": {
+        "flags": [],
+        "model": "local-import",
+        "promptVersion": "n/a",
+        "reviewedAt": "2026-10-25T01:06:15.000Z",
+        "status": "unreviewed",
+        "summary": "Pinned by hash, not audited: no content audit ran"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-10-25T01:06:15.000Z",
+        "findings": [],
+        "status": "warning",
+        "summary": "Pinned by hash, not audited: no content audit ran"
+      },
+      "sha256": {
+        "SKILL.md": "3aae79f3d33ea293491fe6251f9fee56ee0cbb7aa66d41b3f29cfc662e4bbdd6"
+      },
+      "skillPath": "Gabox301/SkillIndex/landing-page-design",
+      "source": "Gabox301/SkillIndex"
+    },
+    "scroll-world": {
+      "bundleHash": "178c7bca0c0a4a4109d1d36899eb42006b5b7015ce67aa18b324232ce4aa2503",
+      "commitSha": "0000000000000000000000000000000000000000",
+      "files": [
+        "SKILL.md",
+        "references/index-template.html",
+        "references/knockout.py",
+        "references/pipeline.md",
+        "references/prompts.md",
+        "references/scrub-engine.js"
+      ],
+      "review": {
+        "flags": [],
+        "model": "local-import",
+        "promptVersion": "n/a",
+        "reviewedAt": "2026-10-25T01:06:15.000Z",
+        "status": "unreviewed",
+        "summary": "Pinned by hash, not audited: no content audit ran"
+      },
+      "securityCheck": {
+        "checkedAt": "2026-10-25T01:06:15.000Z",
+        "findings": [],
+        "status": "warning",
+        "summary": "Pinned by hash, not audited: no content audit ran"
+      },
+      "sha256": {
+        "SKILL.md": "e56fe396c1fa258278289cfa9cbf17253519f11f4856535f7709dd2368e3e65e",
+        "references/index-template.html": "b59814abbe21bff1f39321eb53f9c9cd8ddf9d6a16fc861558647bf30213e3c0",
+        "references/knockout.py": "c06bfc916592ba4f3dfd3e37070b20529298707ca3f94c9dcc51d508222e7792",
+        "references/pipeline.md": "447d642733b527c149c52d303ff9ec3d697ed667e12ea137a2ce40d64d1db304",
+        "references/prompts.md": "fca079691f7f3b470edb81f620e4143877d267afe0fcd3ea51af81b0c108f377",
+        "references/scrub-engine.js": "630bb1ab6101e5ed54eb1a24ab0be3f29e3744a95e156835b89541ea7c04752b"
+      },
+      "skillPath": "Gabox301/SkillIndex/scroll-world",
+      "source": "Gabox301/SkillIndex"
     }
   },
   "version": 1
