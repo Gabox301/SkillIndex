@@ -35,9 +35,13 @@ pub struct RegistryEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Review {
+    /// Review outcome. `approved` means a real content review ran; `flagged`
+    /// means it found issues; `unreviewed` means the entry is pinned by hash
+    /// but nobody audited it, so it must never be read as approval.
     pub status: String,
     pub flags: Vec<String>,
     pub summary: String,
+    /// Provenance of whatever produced the entry, not proof of an audit.
     pub model: String,
     #[serde(rename = "promptVersion")]
     pub prompt_version: String,

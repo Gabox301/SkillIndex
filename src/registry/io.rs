@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use super::helpers::get_package_version;
 use super::types::{InstallSecurityCheck, Registry, RegistryEntry, VerifyResult};
-use crate::infra::hash::{normalize_registry_rel_path, sha256_file};
+use crate::infra::hash::{join_registry_rel, normalize_registry_rel_path, sha256_file};
 
 pub fn get_registry_raw_base_urls(registry_base_url: Option<&str>) -> Vec<String> {
     if let Some(url) = registry_base_url {
@@ -120,14 +120,19 @@ pub fn verify_registry_entry(
         };
     }
     for rel in &entry.files {
-        let normalized: String = normalize_registry_rel_path(rel);
-        let abs: PathBuf = {
-            let mut p: PathBuf = skill_dir.clone();
-            for part in normalized.split('/') {
-                p = p.join(part);
+        // Fail closed before touching the filesystem: a rel with `..`, an
+        // absolute path, an empty/dot segment or a NUL byte is rejected here,
+        // naming the offending rel in the reason.
+        let abs: PathBuf = match join_registry_rel(&skill_dir, rel) {
+            Ok(p) => p,
+            Err(e) => {
+                return VerifyResult {
+                    ok: false,
+                    reason: Some(e.to_string()),
+                };
             }
-            p
         };
+        let normalized: String = normalize_registry_rel_path(rel);
         if !abs.exists() {
             return VerifyResult {
                 ok: false,
@@ -166,6 +171,10 @@ pub fn verify_registry_entry(
     }
 }
 
+/// Review status written by sync: the entry is pinned by hash but no content
+/// audit ran. It must never read as `approved`.
+pub const REVIEW_STATUS_UNREVIEWED: &str = "unreviewed";
+
 pub fn security_check_for_entry(skill_name: &str, entry: &RegistryEntry) -> InstallSecurityCheck {
     if let Some(sc) = &entry.security_check {
         return InstallSecurityCheck {
@@ -175,17 +184,27 @@ pub fn security_check_for_entry(skill_name: &str, entry: &RegistryEntry) -> Inst
             findings: sc.findings.clone(),
         };
     }
-    let status: &str = if entry.review.status == "flagged" {
-        "warning"
-    } else {
-        "ok"
+    // `unreviewed` means the content is pinned by hash and nobody audited it,
+    // so it degrades to `warning` instead of claiming `ok`. `approved` with no
+    // findings stays `ok`.
+    let status: &str = match entry.review.status.as_str() {
+        "flagged" | REVIEW_STATUS_UNREVIEWED => "warning",
+        _ => "ok",
     };
     let summary: String = if !entry.review.summary.is_empty() {
         entry.review.summary.clone()
-    } else if entry.review.status == "flagged" {
-        "La revisión de sincronización encontró observaciones que deberías revisar.".to_string()
     } else {
-        "La revisión de sincronización no encontró problemas de seguridad.".to_string()
+        match entry.review.status.as_str() {
+            "flagged" => {
+                "La revisión de sincronización encontró observaciones que deberías revisar."
+                    .to_string()
+            }
+            REVIEW_STATUS_UNREVIEWED => {
+                "Fijado por hash, pero sin auditoría de contenido: revisá antes de confiar."
+                    .to_string()
+            }
+            _ => "La revisión de sincronización no encontró problemas de seguridad.".to_string(),
+        }
     };
     InstallSecurityCheck {
         name: skill_name.to_string(),
@@ -232,11 +251,7 @@ mod tests {
 
     fn write_skill_files(dir: &Path, skill_name: &str, files: &[(&str, &str)]) {
         for (rel, content) in files {
-            let normalized: String = normalize_registry_rel_path(rel);
-            let mut p: PathBuf = dir.join(skill_name);
-            for part in normalized.split('/') {
-                p = p.join(part);
-            }
+            let p: PathBuf = join_registry_rel(&dir.join(skill_name), rel).unwrap();
             if let Some(parent) = p.parent() {
                 fs::create_dir_all(parent).unwrap();
             }
@@ -333,6 +348,58 @@ mod tests {
     }
 
     #[test]
+    fn verify_registry_entry_rejects_traversal_rel() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "# hi")]);
+        entry.files = vec!["../../etc/passwd".to_string()];
+        entry
+            .sha256
+            .insert("../../etc/passwd".to_string(), "0".repeat(64));
+        write_skill_files(&reg_dir, "evil-skill", &[("SKILL.md", "# hi")]);
+        let result: VerifyResult = verify_registry_entry("evil-skill", &entry, &reg_dir);
+        assert!(!result.ok, "traversal rel must fail closed");
+        let reason: String = result.reason.unwrap();
+        assert!(
+            reason.contains("../../etc/passwd"),
+            "reason must name the offending rel: {reason}"
+        );
+    }
+
+    #[test]
+    fn verify_registry_entry_rejects_absolute_rel() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "# hi")]);
+        entry.files = vec!["/etc/passwd".to_string()];
+        entry
+            .sha256
+            .insert("/etc/passwd".to_string(), "0".repeat(64));
+        write_skill_files(&reg_dir, "evil-skill", &[("SKILL.md", "# hi")]);
+        let result: VerifyResult = verify_registry_entry("evil-skill", &entry, &reg_dir);
+        assert!(!result.ok, "absolute rel must fail closed");
+        let reason: String = result.reason.unwrap();
+        assert!(
+            reason.contains("/etc/passwd"),
+            "reason must name the offending rel: {reason}"
+        );
+    }
+
+    #[test]
+    fn verify_registry_entry_nested_references_happy_path() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let reg_dir: PathBuf = tmp.path().join("registry");
+        fs::create_dir_all(&reg_dir).unwrap();
+        let files: Vec<(&str, &str)> = vec![("SKILL.md", "# hi"), ("references/notes.md", "notes")];
+        let entry: RegistryEntry = sample_entry(files.clone());
+        write_skill_files(&reg_dir, "nested-skill", &files);
+        let result: VerifyResult = verify_registry_entry("nested-skill", &entry, &reg_dir);
+        assert!(result.ok, "expected ok, got {:?}", result.reason);
+    }
+
+    #[test]
     fn security_check_for_entry_uses_security_check() {
         let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "hi")]);
         entry.security_check = Some(crate::registry::types::SecurityCheck {
@@ -358,6 +425,37 @@ mod tests {
         assert_eq!(check.status, "warning");
         assert_eq!(check.summary, "Contains broad shell");
         assert_eq!(check.findings, vec!["broad shell"]);
+    }
+
+    #[test]
+    fn security_check_maps_unreviewed_to_warning() {
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "hi")]);
+        entry.review.status = REVIEW_STATUS_UNREVIEWED.to_string();
+        entry.review.flags = vec![];
+        entry.review.summary = "Pinned by hash, not audited: no content audit ran".to_string();
+        entry.security_check = None;
+        let check: InstallSecurityCheck = security_check_for_entry("my-skill", &entry);
+        assert_eq!(check.status, "warning");
+        assert!(check.summary.contains("Pinned by hash"));
+        assert!(!check.summary.contains("no encontró"));
+        assert!(check.findings.is_empty());
+    }
+
+    #[test]
+    fn security_check_unreviewed_without_summary_still_says_not_audited() {
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "hi")]);
+        entry.review.status = REVIEW_STATUS_UNREVIEWED.to_string();
+        entry.review.summary = String::new();
+        entry.review.flags = vec![];
+        entry.security_check = None;
+        let check: InstallSecurityCheck = security_check_for_entry("my-skill", &entry);
+        assert_eq!(check.status, "warning");
+        assert!(
+            check.summary.contains("sin auditoría"),
+            "fallback summary must deny the audit: {}",
+            check.summary
+        );
+        assert!(check.summary.contains("hash"));
     }
 
     #[test]

@@ -3,7 +3,8 @@ use std::path::{Path, PathBuf};
 
 use crate::infra::cache::get_cache_registry_dir;
 use crate::infra::hash::{
-    bundle_hash, is_disallowed_skill_file, normalize_registry_rel_path, sha256_buffer,
+    InvalidRegistryRelPath, bundle_hash, is_disallowed_skill_file, join_registry_rel,
+    normalize_registry_rel_path, sha256_buffer, validate_registry_rel_path,
 };
 use crate::registry::{
     RegistryEntry, get_registry_dir, get_registry_raw_base_urls, verify_registry_entry,
@@ -22,9 +23,9 @@ pub(crate) async fn materialize_skill_into(
     opts: &InstallOptions,
     client: &reqwest::Client,
 ) -> Result<(), String> {
-    let local_ok: bool = copy_registry_entry_from_local(skill_name, entry, dest_dir, opts);
+    let local_ok: bool = copy_registry_entry_from_local(skill_name, entry, dest_dir, opts)?;
     let cache_ok: bool = if !local_ok {
-        copy_registry_entry_from_cache(skill_name, entry, dest_dir)
+        copy_registry_entry_from_cache(skill_name, entry, dest_dir)?
     } else {
         false
     };
@@ -173,15 +174,22 @@ async fn download_registry_entry(
     opts: &InstallOptions,
     client: &reqwest::Client,
 ) -> Result<(), String> {
-    let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+    // Destination paths are validated for the whole entry before any download
+    // or filesystem write, so a single bad rel aborts the install untouched.
+    let mut planned: Vec<(String, PathBuf)> = Vec::with_capacity(entry.files.len());
     for rel in &entry.files {
-        let (buf, _url) = download_registry_file(skill_name, entry, rel, opts, client).await?;
-        files.push((normalize_registry_rel_path(rel), buf));
+        let dest: PathBuf = join_registry_rel(dest_dir, rel).map_err(|e| e.to_string())?;
+        planned.push((normalize_registry_rel_path(rel), dest));
+    }
+    let mut files: Vec<(String, PathBuf, Vec<u8>)> = Vec::with_capacity(planned.len());
+    for (rel, dest) in planned {
+        let (buf, _url) = download_registry_file(skill_name, entry, &rel, opts, client).await?;
+        files.push((rel, dest, buf));
     }
     // verify bundle hash: sorted "rel:sha256" join "\n"
     let entries_for_hash: Vec<(String, String)> = files
         .iter()
-        .map(|(rel, buf)| (rel.clone(), sha256_buffer(buf)))
+        .map(|(rel, _dest, buf)| (rel.clone(), sha256_buffer(buf)))
         .collect();
     let computed: String = bundle_hash(&entries_for_hash);
     if computed != entry.bundle_hash {
@@ -189,15 +197,23 @@ async fn download_registry_entry(
     }
     // rm and write
     let _ = fs::remove_dir_all(dest_dir);
-    for (rel, buf) in files {
-        let mut dest: PathBuf = dest_dir.to_path_buf();
-        for part in rel.split('/') {
-            dest = dest.join(part);
-        }
+    for (_rel, dest, buf) in files {
         if let Some(parent) = dest.parent() {
             fs::create_dir_all(parent).map_err(|e: std::io::Error| e.to_string())?;
         }
         fs::write(&dest, &buf).map_err(|e: std::io::Error| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// Fail closed unless every rel in `entry` is a safe relative path.
+///
+/// Verification, download writes, cache copies and local copies all go through
+/// this gate, so a registry entry can never make the installer read or write
+/// outside the skill directory.
+fn validate_entry_rel_paths(entry: &RegistryEntry) -> Result<(), String> {
+    for rel in &entry.files {
+        validate_registry_rel_path(rel).map_err(|e: InvalidRegistryRelPath| e.to_string())?;
     }
     Ok(())
 }
@@ -207,32 +223,38 @@ fn copy_registry_entry_from_local(
     entry: &RegistryEntry,
     dest_dir: &Path,
     opts: &InstallOptions,
-) -> bool {
+) -> Result<bool, String> {
+    // Local copy path: reject bad rels before reading the registry checkout.
+    validate_entry_rel_paths(entry)?;
     let registry_dir: PathBuf = opts.registry_dir.clone().unwrap_or_else(get_registry_dir);
     let verdict: crate::registry::VerifyResult =
         verify_registry_entry(skill_name, entry, &registry_dir);
     if !verdict.ok {
-        return false;
+        return Ok(false);
     }
     let _ = fs::remove_dir_all(dest_dir);
     let src: PathBuf = registry_dir.join(skill_name);
-    copy_dir(&src, dest_dir).is_ok()
+    // A failed copy is not a security failure: keep falling back to cache/download.
+    Ok(copy_dir(&src, dest_dir).is_ok())
 }
 
 fn copy_registry_entry_from_cache(
     skill_name: &str,
     entry: &RegistryEntry,
     dest_dir: &Path,
-) -> bool {
+) -> Result<bool, String> {
+    // Cache copy path: reject bad rels before reading the download cache.
+    validate_entry_rel_paths(entry)?;
     let cache_dir: PathBuf = get_cache_registry_dir(&entry.bundle_hash);
     let verdict: crate::registry::VerifyResult =
         verify_registry_entry(skill_name, entry, &cache_dir);
     if !verdict.ok {
-        return false;
+        return Ok(false);
     }
     let _ = fs::remove_dir_all(dest_dir);
     let src: PathBuf = cache_dir.join(skill_name);
-    copy_dir(&src, dest_dir).is_ok()
+    // A failed copy is not a security failure: keep falling back to download.
+    Ok(copy_dir(&src, dest_dir).is_ok())
 }
 
 async fn download_registry_entry_to_cache(
@@ -282,6 +304,76 @@ mod tests {
             },
             security_check: None,
         }
+    }
+
+    #[tokio::test]
+    async fn download_registry_entry_rejects_traversal_rel_before_writing() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let dest: PathBuf = tmp.path().join("skill");
+        let mut entry: RegistryEntry = make_entry("evil", vec![("SKILL.md", "# a")]);
+        entry.files = vec!["../escape.md".to_string()];
+        entry
+            .sha256
+            .insert("../escape.md".to_string(), "0".repeat(64));
+        let opts: InstallOptions = InstallOptions::default();
+        let client: reqwest::Client = reqwest::Client::new();
+        let err: String = download_registry_entry("evil", &entry, &dest, &opts, &client)
+            .await
+            .unwrap_err();
+        assert!(
+            err.contains("escape.md"),
+            "error must name the offending rel: {err}"
+        );
+        assert!(err.contains("segmento '..'"), "unexpected error: {err}");
+        // nothing was created, inside or outside the destination
+        assert!(!dest.exists());
+        assert!(!tmp.path().join("escape.md").exists());
+    }
+
+    #[tokio::test]
+    async fn download_registry_entry_rejects_absolute_rel_before_writing() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let dest: PathBuf = tmp.path().join("skill");
+        let mut entry: RegistryEntry = make_entry("evil", vec![("SKILL.md", "# a")]);
+        entry.files = vec!["/etc/passwd".to_string()];
+        entry
+            .sha256
+            .insert("/etc/passwd".to_string(), "0".repeat(64));
+        let opts: InstallOptions = InstallOptions::default();
+        let client: reqwest::Client = reqwest::Client::new();
+        let err: String = download_registry_entry("evil", &entry, &dest, &opts, &client)
+            .await
+            .unwrap_err();
+        assert!(
+            err.contains("/etc/passwd"),
+            "error must name the offending rel: {err}"
+        );
+        assert!(!dest.exists());
+    }
+
+    #[test]
+    fn copy_paths_reject_traversal_rel_before_copying() {
+        let tmp: tempfile::TempDir = tempdir().unwrap();
+        let dest: PathBuf = tmp.path().join("dest");
+        let mut entry: RegistryEntry = make_entry("evil", vec![("SKILL.md", "# a")]);
+        entry.files = vec!["..\\..\\escape.md".to_string()];
+        entry
+            .sha256
+            .insert("..\\..\\escape.md".to_string(), "0".repeat(64));
+        let opts: InstallOptions = InstallOptions::default();
+        let local_err: String =
+            copy_registry_entry_from_local("evil", &entry, &dest, &opts).unwrap_err();
+        assert!(
+            local_err.contains("escape.md"),
+            "local copy error must name the rel: {local_err}"
+        );
+        let cache_err: String = copy_registry_entry_from_cache("evil", &entry, &dest).unwrap_err();
+        assert!(
+            cache_err.contains("escape.md"),
+            "cache copy error must name the rel: {cache_err}"
+        );
+        assert!(!dest.exists());
+        assert!(!tmp.path().join("escape.md").exists());
     }
 
     #[test]

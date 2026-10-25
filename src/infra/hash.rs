@@ -1,6 +1,7 @@
 use sha2::{Digest, Sha256};
+use std::fmt;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Compute SHA-256 hex lowercase of a byte buffer — mirrors `sha256Buffer` in installer.ts
 pub fn sha256_buffer(buf: &[u8]) -> String {
@@ -19,6 +20,135 @@ pub fn sha256_file(path: &Path) -> std::io::Result<String> {
 /// Normalize a registry relative path: `\` → `/` — mirrors `normalizeRegistryRelPath`
 pub fn normalize_registry_rel_path(rel: &str) -> String {
     rel.replace('\\', "/")
+}
+
+/// Why a registry relative path was rejected.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegistryRelPathProblem {
+    /// The rel is empty.
+    Empty,
+    /// The rel contains a NUL byte.
+    NulByte,
+    /// The rel is absolute (`/x`, `//host/share`, `C:/x`, `C:x`).
+    Absolute,
+    /// A segment is empty (`a//b`, `a/`), i.e. the rel is not canonical.
+    EmptySegment,
+    /// A segment is `.`, which is redundant and hides intent.
+    DotSegment,
+    /// A segment is `..`, i.e. the rel escapes its base directory.
+    ParentSegment,
+}
+
+impl fmt::Display for RegistryRelPathProblem {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let msg: &str = match self {
+            RegistryRelPathProblem::Empty => "la ruta está vacía",
+            RegistryRelPathProblem::NulByte => "la ruta contiene un byte NUL",
+            RegistryRelPathProblem::Absolute => "no se permiten rutas absolutas",
+            RegistryRelPathProblem::EmptySegment => "la ruta contiene un segmento vacío",
+            RegistryRelPathProblem::DotSegment => "la ruta contiene un segmento '.'",
+            RegistryRelPathProblem::ParentSegment => "la ruta contiene un segmento '..'",
+        };
+        f.write_str(msg)
+    }
+}
+
+/// A registry relative path that failed [`validate_registry_rel_path`].
+///
+/// It always carries the offending rel verbatim, so every caller can fail
+/// closed with a message that names the exact path the registry asked for.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InvalidRegistryRelPath {
+    rel: String,
+    problem: RegistryRelPathProblem,
+}
+
+impl InvalidRegistryRelPath {
+    /// The offending rel exactly as it appeared in the registry.
+    pub fn rel(&self) -> &str {
+        &self.rel
+    }
+
+    /// The rule the rel violated.
+    pub fn problem(&self) -> RegistryRelPathProblem {
+        self.problem
+    }
+}
+
+impl fmt::Display for InvalidRegistryRelPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "ruta relativa del registro rechazada {:?}: {}",
+            self.rel, self.problem
+        )
+    }
+}
+
+impl std::error::Error for InvalidRegistryRelPath {}
+
+/// Validate and normalize a registry relative path.
+///
+/// This is the single gate for every place that joins a registry `rel` onto a
+/// directory (verify, download write, cache copy, local copy). It normalizes
+/// backslashes to `/` first, so Windows-style traversal (`..` + `\` + `..`) is
+/// rejected with exactly the same rules as `../../x`, and it never resolves a
+/// path: anything that is not a plain relative chain of real segments is
+/// rejected.
+///
+/// On success it returns the normalized rel (backslashes to `/`).
+pub fn validate_registry_rel_path(rel: &str) -> Result<String, InvalidRegistryRelPath> {
+    fn reject(
+        rel: &str,
+        problem: RegistryRelPathProblem,
+    ) -> Result<String, InvalidRegistryRelPath> {
+        Err(InvalidRegistryRelPath {
+            rel: rel.to_string(),
+            problem,
+        })
+    }
+
+    if rel.is_empty() {
+        return reject(rel, RegistryRelPathProblem::Empty);
+    }
+    if rel.contains('\0') {
+        return reject(rel, RegistryRelPathProblem::NulByte);
+    }
+    let normalized: String = normalize_registry_rel_path(rel);
+    // After normalization a leading `/` covers POSIX absolutes and Windows UNC
+    // share paths (double backslash + host + share), which become `//host/share`.
+    if normalized.starts_with('/') || has_drive_prefix(&normalized) {
+        return reject(rel, RegistryRelPathProblem::Absolute);
+    }
+    for segment in normalized.split('/') {
+        match segment {
+            "" => return reject(rel, RegistryRelPathProblem::EmptySegment),
+            "." => return reject(rel, RegistryRelPathProblem::DotSegment),
+            ".." => return reject(rel, RegistryRelPathProblem::ParentSegment),
+            _ => {}
+        }
+    }
+    Ok(normalized)
+}
+
+/// True for Windows drive prefixes (`C:`, `C:relative`) once the rel is normalized.
+fn has_drive_prefix(normalized: &str) -> bool {
+    let bytes: &[u8] = normalized.as_bytes();
+    bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':'
+}
+
+/// Join a validated registry `rel` onto `base`.
+///
+/// The join is traversal-proof because it only ever appends plain, non-empty
+/// segments: validation rejects absolutes, `..`, `.`, empty segments, NUL bytes
+/// and backslash tricks before a single component is pushed.
+pub fn join_registry_rel(base: &Path, rel: &str) -> Result<PathBuf, InvalidRegistryRelPath> {
+    let normalized: String = validate_registry_rel_path(rel)?;
+    let mut out: PathBuf = base.to_path_buf();
+    for segment in normalized.split('/') {
+        out.push(segment);
+    }
+    Ok(out)
 }
 
 /// Returns true if the relative path is a disallowed archive (`.zip` case-insensitive)
@@ -136,6 +266,161 @@ mod tests {
             "references/notes.md"
         );
         assert_eq!(normalize_registry_rel_path("SKILL.md"), "SKILL.md");
+    }
+
+    #[test]
+    fn validate_registry_rel_path_rejects_parent_segment() {
+        let err: InvalidRegistryRelPath =
+            validate_registry_rel_path("../../etc/passwd").unwrap_err();
+        assert_eq!(err.problem(), RegistryRelPathProblem::ParentSegment);
+        assert_eq!(err.rel(), "../../etc/passwd");
+        assert!(
+            err.to_string().contains("../../etc/passwd"),
+            "error must name the offending rel: {err}"
+        );
+        // traversal hidden behind a valid-looking prefix
+        assert_eq!(
+            validate_registry_rel_path("references/../SKILL.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::ParentSegment
+        );
+        assert_eq!(
+            validate_registry_rel_path("..").unwrap_err().problem(),
+            RegistryRelPathProblem::ParentSegment
+        );
+    }
+
+    #[test]
+    fn validate_registry_rel_path_rejects_absolute() {
+        for rel in [
+            "/etc/passwd",
+            "\\\\host\\share\\evil.md",
+            "C:/Windows/evil.md",
+            "c:relative\\evil.md",
+        ] {
+            let err: InvalidRegistryRelPath = validate_registry_rel_path(rel).unwrap_err();
+            assert_eq!(
+                err.problem(),
+                RegistryRelPathProblem::Absolute,
+                "rel {rel:?} should be rejected as absolute"
+            );
+            assert_eq!(err.rel(), rel);
+        }
+    }
+
+    #[test]
+    fn validate_registry_rel_path_rejects_empty_and_dot_segments() {
+        assert_eq!(
+            validate_registry_rel_path("").unwrap_err().problem(),
+            RegistryRelPathProblem::Empty
+        );
+        assert_eq!(
+            validate_registry_rel_path("references//notes.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::EmptySegment
+        );
+        assert_eq!(
+            validate_registry_rel_path("references/")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::EmptySegment
+        );
+        assert_eq!(
+            validate_registry_rel_path("./SKILL.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::DotSegment
+        );
+        assert_eq!(
+            validate_registry_rel_path("references/./notes.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::DotSegment
+        );
+    }
+
+    #[test]
+    fn validate_registry_rel_path_rejects_backslash_traversal() {
+        // Normalization runs first, so Windows-style traversal is caught too.
+        let err: InvalidRegistryRelPath =
+            validate_registry_rel_path("..\\..\\windows\\system32\\evil.md").unwrap_err();
+        assert_eq!(err.problem(), RegistryRelPathProblem::ParentSegment);
+        assert_eq!(err.rel(), "..\\..\\windows\\system32\\evil.md");
+        assert_eq!(
+            validate_registry_rel_path("references\\..\\..\\evil.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::ParentSegment
+        );
+        assert_eq!(
+            validate_registry_rel_path("references\\..\\notes.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::ParentSegment
+        );
+        assert_eq!(
+            validate_registry_rel_path(".\\SKILL.md")
+                .unwrap_err()
+                .problem(),
+            RegistryRelPathProblem::DotSegment
+        );
+    }
+
+    #[test]
+    fn validate_registry_rel_path_rejects_nul_byte() {
+        let err: InvalidRegistryRelPath = validate_registry_rel_path("SKILL.md\0.md").unwrap_err();
+        assert_eq!(err.problem(), RegistryRelPathProblem::NulByte);
+        assert!(err.rel().contains("SKILL.md"));
+    }
+
+    #[test]
+    fn validate_registry_rel_path_accepts_nested_references() {
+        assert_eq!(
+            validate_registry_rel_path("references/notes.md").unwrap(),
+            "references/notes.md"
+        );
+        // backslash normalization is preserved for legit paths
+        assert_eq!(
+            validate_registry_rel_path("references\\notes.md").unwrap(),
+            "references/notes.md"
+        );
+        assert_eq!(validate_registry_rel_path("SKILL.md").unwrap(), "SKILL.md");
+    }
+
+    #[test]
+    fn join_registry_rel_happy_path_nested_references() {
+        let dir: tempfile::TempDir = tempdir().unwrap();
+        let base: std::path::PathBuf = dir.path().join("my-skill");
+        fs::create_dir_all(&base).unwrap();
+        let dest: std::path::PathBuf = join_registry_rel(&base, "references\\notes.md").unwrap();
+        assert_eq!(dest, base.join("references").join("notes.md"));
+        fs::create_dir_all(dest.parent().unwrap()).unwrap();
+        fs::write(&dest, b"notes").unwrap();
+        assert_eq!(fs::read_to_string(&dest).unwrap(), "notes");
+        assert_eq!(
+            join_registry_rel(&base, "SKILL.md").unwrap(),
+            base.join("SKILL.md")
+        );
+    }
+
+    #[test]
+    fn join_registry_rel_never_escapes_base() {
+        let dir: tempfile::TempDir = tempdir().unwrap();
+        let base: std::path::PathBuf = dir.path().join("my-skill");
+        fs::create_dir_all(&base).unwrap();
+        for rel in [
+            "../escape.md",
+            "..\\escape.md",
+            "/tmp/escape.md",
+            "references/../escape.md",
+        ] {
+            let joined: Result<std::path::PathBuf, InvalidRegistryRelPath> =
+                join_registry_rel(&base, rel);
+            assert!(joined.is_err(), "rel {rel:?} must not join");
+        }
+        assert!(!dir.path().join("escape.md").exists());
     }
 
     #[test]

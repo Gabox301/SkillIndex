@@ -1,6 +1,6 @@
 [package]
 name = "skillindex"
-version = "3.2.2"
+version = "3.3.0"
 edition = "2024"
 default-run = "skillindex"
 rust-version = "1.98.1"
@@ -24,6 +24,7 @@ include = [
     "index.ts",
     "dist-workspace.toml",
     "README.md",
+    "CHANGELOG.md",
     "package.json",
     "tsconfig.build.json",
     "tsconfig.json",
