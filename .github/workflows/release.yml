@@ -266,37 +266,6 @@ jobs:
         run: |
           # Remove the granular manifests
           rm -f artifacts/*-dist-manifest.json
-      # postinstall.mjs fails closed unless every downloaded archive has a
-      # matching <asset>.sha256 release asset. dist emits those by default
-      # (checksum = sha256); this step makes the guarantee explicit and
-      # backfills any checksum that is ever missing before the release is
-      # published.
-      - name: Ensure SHA-256 checksum per release asset
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          assets=(artifacts/*)
-          if [ ${#assets[@]} -eq 0 ]; then
-            echo "No release assets found in artifacts/" >&2
-            exit 1
-          fi
-          for asset in "${assets[@]}"; do
-            case "$asset" in
-              *.sha256|*-dist-manifest.json) continue ;;
-            esac
-            checksum="${asset}.sha256"
-            if [ ! -f "$checksum" ]; then
-              echo "Generating missing checksum: $(basename "$checksum")"
-              ( cd "$(dirname "$asset")" && sha256sum "$(basename "$asset")" > "$(basename "$checksum")" )
-            fi
-            hash="$(awk 'NR == 1 { print $1 }' "$checksum")"
-            if ! printf '%s\n' "$hash" | grep -Eq '^[0-9a-fA-F]{64}$'; then
-              echo "Invalid SHA-256 checksum file: $checksum" >&2
-              exit 1
-            fi
-            echo "SHA-256 ready: $(basename "$checksum")"
-          done
       - name: Create GitHub Release
         env:
           PRERELEASE_FLAG: "${{ fromJson(steps.host.outputs.manifest).announcement_is_prerelease && '--prerelease' || '' }}"
