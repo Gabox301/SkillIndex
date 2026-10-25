@@ -78,6 +78,52 @@ struct Reviewer {
     prompt_version: String,
 }
 
+/// Review status written by sync: the entry is pinned by hash, but no content
+/// audit ran. `approved` is reserved for entries a real review inspected, so
+/// sync never writes it.
+const REVIEW_STATUS_UNREVIEWED: &str = "unreviewed";
+
+/// Provenance of the sync writer itself (model + prompt version), kept so a
+/// later audit can tell which producer pinned the entry.
+const SYNC_PROVENANCE_MODEL: &str = "gpt-5.4";
+const SYNC_PROVENANCE_PROMPT_VERSION: &str = "1.0.0";
+
+/// Honest summary for an entry nobody audited: it states that the content is
+/// pinned by hash and that no review inspected it.
+fn unreviewed_summary(no_review: bool) -> String {
+    if no_review {
+        "Pinned by hash, not audited: review skipped (--no-review)".to_string()
+    } else {
+        "Pinned by hash, not audited: no content audit ran".to_string()
+    }
+}
+
+/// Review record for a freshly synced entry. Status stays `unreviewed` on both
+/// the normal and the `--no-review` path; `model` and `prompt_version` are
+/// provenance, not an audit result.
+fn unreviewed_review(no_review: bool, pinned_at: &str) -> ManifestReview {
+    ManifestReview {
+        status: REVIEW_STATUS_UNREVIEWED.to_string(),
+        flags: vec![],
+        summary: unreviewed_summary(no_review),
+        model: SYNC_PROVENANCE_MODEL.to_string(),
+        prompt_version: SYNC_PROVENANCE_PROMPT_VERSION.to_string(),
+        reviewed_at: pinned_at.to_string(),
+    }
+}
+
+/// Security verdict for a freshly synced entry. No security check runs during
+/// sync, so it is a `warning` (never `ok`) with no findings: the wording says
+/// the content is pinned but unaudited.
+fn unreviewed_security_check(pinned_at: &str, no_review: bool) -> serde_json::Value {
+    serde_json::json!({
+        "status": "warning",
+        "findings": [],
+        "summary": unreviewed_summary(no_review),
+        "checkedAt": pinned_at
+    })
+}
+
 fn collect_all_skill_paths() -> Vec<String> {
     let mut out: HashSet<String> = HashSet::new();
     for tech in SKILLS_MAP.iter() {
@@ -307,7 +353,7 @@ async fn main() -> anyhow::Result<()> {
         })?;
 
     let mut total_skills: i32 = 0;
-    let mut total_approved: i32 = 0;
+    let mut total_unreviewed: i32 = 0;
     let mut total_unchanged: i32 = 0;
 
     for (repo, skills) in &by_repo {
@@ -479,11 +525,11 @@ async fn main() -> anyhow::Result<()> {
 
             if args.dry_run {
                 println!(
-                    "  ✔ {} — would write ({} files)",
+                    "  ✔ {} — would write ({} files, unreviewed)",
                     skill_name,
                     rel_files.len()
                 );
-                total_approved += 1;
+                total_unreviewed += 1;
                 continue;
             }
 
@@ -509,29 +555,17 @@ async fn main() -> anyhow::Result<()> {
                     files: rel_files.iter().map(|(rel, _)| rel.clone()).collect(),
                     sha256: sha_map,
                     bundle_hash: bundle_hash.clone(),
-                    review: ManifestReview {
-                        status: "approved".to_string(),
-                        flags: vec![],
-                        summary: if args.no_review {
-                            "review skipped (--no-review)".to_string()
-                        } else {
-                            "review skipped (auditor removed)".to_string()
-                        },
-                        model: "gpt-5.4".to_string(),
-                        prompt_version: "1.0.0".to_string(),
-                        reviewed_at: now.clone(),
-                    },
-                    security_check: serde_json::json!({
-                        "status": "ok",
-                        "findings": [],
-                        "summary": "The sync review did not find security issues.",
-                        "checkedAt": now
-                    }),
+                    review: unreviewed_review(args.no_review, &now),
+                    security_check: unreviewed_security_check(&now, args.no_review),
                 },
             );
 
-            println!("  ✔ {} — approved, {} file(s)", skill_name, rel_files.len());
-            total_approved += 1;
+            println!(
+                "  ✔ {} — unreviewed (pinned by hash), {} file(s)",
+                skill_name,
+                rel_files.len()
+            );
+            total_unreviewed += 1;
         }
     }
 
@@ -545,8 +579,70 @@ async fn main() -> anyhow::Result<()> {
     }
 
     println!(
-        "\nSummary: {} approved, {} unchanged, {} total",
-        total_approved, total_unchanged, total_skills
+        "\nSummary: {} unreviewed (pinned by hash), {} unchanged, {} total",
+        total_unreviewed, total_unchanged, total_skills
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sync_default_is_unreviewed_never_approved() {
+        for no_review in [false, true] {
+            let review: ManifestReview = unreviewed_review(no_review, "2026-01-01T00:00:00Z");
+            assert_eq!(review.status, "unreviewed");
+            assert_ne!(review.status, "approved");
+            assert!(review.flags.is_empty());
+            assert_eq!(review.reviewed_at, "2026-01-01T00:00:00Z");
+        }
+    }
+
+    #[test]
+    fn sync_default_summary_says_pinned_but_not_audited() {
+        for no_review in [false, true] {
+            let review: ManifestReview = unreviewed_review(no_review, "2026-01-01T00:00:00Z");
+            assert!(
+                review.summary.contains("Pinned by hash"),
+                "summary must state the pin: {}",
+                review.summary
+            );
+            assert!(
+                review.summary.contains("not audited"),
+                "summary must deny an audit: {}",
+                review.summary
+            );
+        }
+        assert!(unreviewed_summary(true).contains("--no-review"));
+    }
+
+    #[test]
+    fn sync_default_keeps_provenance() {
+        let review: ManifestReview = unreviewed_review(false, "2026-01-01T00:00:00Z");
+        assert_eq!(review.model, SYNC_PROVENANCE_MODEL);
+        assert_eq!(review.prompt_version, SYNC_PROVENANCE_PROMPT_VERSION);
+    }
+
+    #[test]
+    fn sync_default_security_check_is_warning_not_ok() {
+        let check: serde_json::Value = unreviewed_security_check("2026-01-01T00:00:00Z", false);
+        assert_eq!(check["status"], "warning");
+        assert_eq!(check["findings"], serde_json::json!([]));
+        let summary: &str = check["summary"].as_str().unwrap();
+        assert!(
+            summary.contains("Pinned by hash"),
+            "summary must state the pin: {check}"
+        );
+    }
+
+    #[test]
+    fn sync_default_round_trips_into_registry_entry() {
+        let review: ManifestReview = unreviewed_review(false, "2026-01-01T00:00:00Z");
+        let json: String = serde_json::to_string(&review).unwrap();
+        let parsed: skillindex::registry::Review = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.status, "unreviewed");
+        assert_eq!(parsed.model, SYNC_PROVENANCE_MODEL);
+    }
 }

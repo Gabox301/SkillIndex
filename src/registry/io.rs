@@ -171,6 +171,10 @@ pub fn verify_registry_entry(
     }
 }
 
+/// Review status written by sync: the entry is pinned by hash but no content
+/// audit ran. It must never read as `approved`.
+pub const REVIEW_STATUS_UNREVIEWED: &str = "unreviewed";
+
 pub fn security_check_for_entry(skill_name: &str, entry: &RegistryEntry) -> InstallSecurityCheck {
     if let Some(sc) = &entry.security_check {
         return InstallSecurityCheck {
@@ -180,17 +184,27 @@ pub fn security_check_for_entry(skill_name: &str, entry: &RegistryEntry) -> Inst
             findings: sc.findings.clone(),
         };
     }
-    let status: &str = if entry.review.status == "flagged" {
-        "warning"
-    } else {
-        "ok"
+    // `unreviewed` means the content is pinned by hash and nobody audited it,
+    // so it degrades to `warning` instead of claiming `ok`. `approved` with no
+    // findings stays `ok`.
+    let status: &str = match entry.review.status.as_str() {
+        "flagged" | REVIEW_STATUS_UNREVIEWED => "warning",
+        _ => "ok",
     };
     let summary: String = if !entry.review.summary.is_empty() {
         entry.review.summary.clone()
-    } else if entry.review.status == "flagged" {
-        "La revisión de sincronización encontró observaciones que deberías revisar.".to_string()
     } else {
-        "La revisión de sincronización no encontró problemas de seguridad.".to_string()
+        match entry.review.status.as_str() {
+            "flagged" => {
+                "La revisión de sincronización encontró observaciones que deberías revisar."
+                    .to_string()
+            }
+            REVIEW_STATUS_UNREVIEWED => {
+                "Fijado por hash, pero sin auditoría de contenido: revisá antes de confiar."
+                    .to_string()
+            }
+            _ => "La revisión de sincronización no encontró problemas de seguridad.".to_string(),
+        }
     };
     InstallSecurityCheck {
         name: skill_name.to_string(),
@@ -411,6 +425,37 @@ mod tests {
         assert_eq!(check.status, "warning");
         assert_eq!(check.summary, "Contains broad shell");
         assert_eq!(check.findings, vec!["broad shell"]);
+    }
+
+    #[test]
+    fn security_check_maps_unreviewed_to_warning() {
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "hi")]);
+        entry.review.status = REVIEW_STATUS_UNREVIEWED.to_string();
+        entry.review.flags = vec![];
+        entry.review.summary = "Pinned by hash, not audited: no content audit ran".to_string();
+        entry.security_check = None;
+        let check: InstallSecurityCheck = security_check_for_entry("my-skill", &entry);
+        assert_eq!(check.status, "warning");
+        assert!(check.summary.contains("Pinned by hash"));
+        assert!(!check.summary.contains("no encontró"));
+        assert!(check.findings.is_empty());
+    }
+
+    #[test]
+    fn security_check_unreviewed_without_summary_still_says_not_audited() {
+        let mut entry: RegistryEntry = sample_entry(vec![("SKILL.md", "hi")]);
+        entry.review.status = REVIEW_STATUS_UNREVIEWED.to_string();
+        entry.review.summary = String::new();
+        entry.review.flags = vec![];
+        entry.security_check = None;
+        let check: InstallSecurityCheck = security_check_for_entry("my-skill", &entry);
+        assert_eq!(check.status, "warning");
+        assert!(
+            check.summary.contains("sin auditoría"),
+            "fallback summary must deny the audit: {}",
+            check.summary
+        );
+        assert!(check.summary.contains("hash"));
     }
 
     #[test]

@@ -3,8 +3,18 @@ use std::fs;
 use std::path::PathBuf;
 
 use skillindex::infra::hash::{normalize_line_endings, sha256_buffer};
-use skillindex::registry::parse_skill_path;
+use skillindex::registry::{REVIEW_STATUS_UNREVIEWED, parse_skill_path};
 use skillindex::skills::{COMBO_SKILLS_MAP, FRONTEND_BONUS_SKILLS, SKILLS_MAP};
+
+/// Review statuses the registry is allowed to declare. `unreviewed` is valid:
+/// it means the entry is pinned by hash but no content audit ran, and it is what
+/// `sync-skills` writes today. Content integrity (files, sha256, bundleHash) is
+/// enforced for every status.
+const VALID_REVIEW_STATUSES: [&str; 3] = ["approved", REVIEW_STATUS_UNREVIEWED, "flagged"];
+
+fn is_valid_review_status(status: &str) -> bool {
+    VALID_REVIEW_STATUSES.contains(&status)
+}
 
 fn main() -> anyhow::Result<()> {
     let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
@@ -73,6 +83,19 @@ fn main() -> anyhow::Result<()> {
                 errors.push(format!(
                     "{}: registry skillPath is {}, expected {}",
                     skill_name, skill_path, full
+                ));
+            }
+            let review_status: &str = entry
+                .get("review")
+                .and_then(|review: &serde_json::Value| review.get("status"))
+                .and_then(|status: &serde_json::Value| status.as_str())
+                .unwrap_or("");
+            if !is_valid_review_status(review_status) {
+                errors.push(format!(
+                    "{}: review status {:?} is not one of {}",
+                    skill_name,
+                    review_status,
+                    VALID_REVIEW_STATUSES.join(", ")
                 ));
             }
             // Validate files
@@ -177,4 +200,27 @@ fn main() -> anyhow::Result<()> {
         if declared.len() == 1 { "" } else { "s" }
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unreviewed_is_a_valid_review_status() {
+        assert!(is_valid_review_status(REVIEW_STATUS_UNREVIEWED));
+    }
+
+    #[test]
+    fn approved_and_flagged_stay_valid() {
+        assert!(is_valid_review_status("approved"));
+        assert!(is_valid_review_status("flagged"));
+    }
+
+    #[test]
+    fn unknown_or_empty_review_status_is_rejected() {
+        assert!(!is_valid_review_status(""));
+        assert!(!is_valid_review_status("un-reviewed"));
+        assert!(!is_valid_review_status("APPROVED"));
+    }
 }
