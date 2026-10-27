@@ -13,11 +13,11 @@ permissions:
 
 jobs:
   rust:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -32,9 +32,9 @@ jobs:
         run: cargo run --bin sync-skills -- --dry-run
 
   node:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - name: Install
         run: bun install --frozen-lockfile
